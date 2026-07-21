@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc *)",
+      "Bash(npm run *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3002/ --max-time 5)",
+      "Bash(curl -sS -o /dev/null -w \"HTTP %{http_code}\\\\n\" --max-time 8 \"https://your-project.supabase.co/rest/v1/\")",
+      "Bash(find \"C:\\\\Users\\\\Hahmed\\\\Desktop\" -maxdepth 4 -iname \".env.local\" -not -path \"*/node_modules/*\" 2>/dev/null)",
+      "Bash(node -e \"console.log\\(require\\('@supabase/supabase-js/package.json'\\).version\\)\")",
+      "Bash(node \"C:\\\\Users\\\\Hahmed\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-Hahmed-Desktop-PRA-Project\\\\d5bc7b34-212c-4678-a98a-e06fb1968eb2\\\\scratchpad\\\\test-supabase-connection.js\")",
+      "Bash(npm install *)",
+      "Bash(npx supabase *)",
+      "Bash(node \"C:\\\\Users\\\\Hahmed\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-Hahmed-Desktop-PRA-Project\\\\d5bc7b34-212c-4678-a98a-e06fb1968eb2\\\\scratchpad\\\\verify-schema.js\")",
+      "Bash(node \"C:\\\\Users\\\\Hahmed\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-Hahmed-Desktop-PRA-Project\\\\d5bc7b34-212c-4678-a98a-e06fb1968eb2\\\\scratchpad\\\\temp-promote-qa.js\" promote qa.flow.test.2@gmail.com super_admin)",
+      "Bash(node \"C:\\\\Users\\\\Hahmed\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-Hahmed-Desktop-PRA-Project\\\\d5bc7b34-212c-4678-a98a-e06fb1968eb2\\\\scratchpad\\\\create-test-job.js\")",
+      "Bash(node \"C:\\\\Users\\\\Hahmed\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-Hahmed-Desktop-PRA-Project\\\\d5bc7b34-212c-4678-a98a-e06fb1968eb2\\\\scratchpad\\\\verify-all-rpcs.js\")",
+      "Bash(node \"C:\\\\Users\\\\Hahmed\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-Hahmed-Desktop-PRA-Project\\\\d5bc7b34-212c-4678-a98a-e06fb1968eb2\\\\scratchpad\\\\make-test-resume.js\")",
+      "Bash(node \"C:\\\\Users\\\\Hahmed\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-Hahmed-Desktop-PRA-Project\\\\d5bc7b34-212c-4678-a98a-e06fb1968eb2\\\\scratchpad\\\\test-storage-flow.js\")",
+      "Bash(npx playwright *)",
+      "Bash(PORT=3100 timeout 15 npm run dev)",
+      "Bash(netstat -ano)",
+      "Bash(node \"C:\\\\Users\\\\Hahmed\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-Hahmed-Desktop-PRA-Project\\\\d5bc7b34-212c-4678-a98a-e06fb1968eb2\\\\scratchpad\\\\check-ats-gap.js\")",
+      "Bash(node -e *)",
+      "Bash(node \"C:\\\\Users\\\\Hahmed\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-Hahmed-Desktop-PRA-Project\\\\d5bc7b34-212c-4678-a98a-e06fb1968eb2\\\\scratchpad\\\\test-fixture-standalone.js\")",
+      "Bash(node \"C:\\\\Users\\\\Hahmed\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-Hahmed-Desktop-PRA-Project\\\\d5bc7b34-212c-4678-a98a-e06fb1968eb2\\\\scratchpad\\\\test-disk-roundtrip.js\")",
+      "Bash(node \"C:\\\\Users\\\\Hahmed\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-Hahmed-Desktop-PRA-Project\\\\d5bc7b34-212c-4678-a98a-e06fb1968eb2\\\\scratchpad\\\\cleanup-test-resumes.js\")",
+      "Bash(node \"C:\\\\Users\\\\Hahmed\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-Hahmed-Desktop-PRA-Project\\\\d5bc7b34-212c-4678-a98a-e06fb1968eb2\\\\scratchpad\\\\check-application-row.js\")",
+      "Bash(node \"C:\\\\Users\\\\Hahmed\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-Hahmed-Desktop-PRA-Project\\\\d5bc7b34-212c-4678-a98a-e06fb1968eb2\\\\scratchpad\\\\check-application-as-candidate.js\")",
+      "Bash(node \"C:\\\\Users\\\\Hahmed\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-Hahmed-Desktop-PRA-Project\\\\d5bc7b34-212c-4678-a98a-e06fb1968eb2\\\\scratchpad\\\\verify-recruiter-app-query.js\")",
+      "Bash(awk -F: '{sum+=$2} END {print \"total login\\(\\) calls across suite:\", sum}')"
+    ]
+  }
+}
