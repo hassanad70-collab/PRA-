@@ -41,13 +41,24 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "npm run dev",
+    // Build + start (production mode) rather than `next dev`: dev mode
+    // compiles each route on demand the first time it's requested, which can
+    // take several seconds per route on a cold server. That latency is
+    // specific to dev mode — Vercel always serves precompiled routes — and
+    // was blowing past this suite's assertion timeouts on never-before-hit
+    // routes, producing failures that don't reflect any real app bug.
+    // Testing against a production build also matches what actually ships.
+    command: "npm run build && npm run start",
     url: baseURL,
     reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
+    timeout: 300_000,
     env: {
       PORT: String(PORT),
       NEXT_PUBLIC_SITE_URL: baseURL,
+      // Isolates this local test server from the production auth
+      // rate limits — see the E2E_TEST_MODE check in src/lib/rate-limit.ts.
+      // Never set for the deployed (Vercel) app.
+      E2E_TEST_MODE: "true",
     },
   },
 });

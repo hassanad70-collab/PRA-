@@ -80,36 +80,42 @@ const SYSTEM_PROMPT = `You are an expert resume parser used inside an enterprise
  * features. Returns minimal data if OpenAI is not available.
  */
 export async function parseResumeText(rawText: string): Promise<ParsedResumeData> {
-  const openai = getOpenAI();
+  const fallback: ParsedResumeData = {
+    summary: "Resume uploaded. Enable OpenAI API key to extract structured data.",
+    experience: [],
+    education: [],
+    skills: [],
+    certificates: [],
+    languages: [],
+    projects: [],
+    achievements: [],
+  };
 
+  const openai = getOpenAI();
   if (!openai) {
     console.warn("OpenAI API not configured. Returning empty resume data.");
-    return {
-      summary: "Resume uploaded. Enable OpenAI API key to extract structured data.",
-      experience: [],
-      education: [],
-      skills: [],
-      certificates: [],
-      languages: [],
-      projects: [],
-      achievements: [],
-    };
+    return fallback;
   }
 
-  const completion = await openai.beta.chat.completions.parse({
-    model: AI_MODELS.reasoning,
-    messages: [
-      { role: "system", content: SYSTEM_PROMPT },
-      { role: "user", content: `Resume text:\n\n${rawText.slice(0, 20000)}` },
-    ],
-    response_format: zodResponseFormat(resumeExtractionSchema, "resume_extraction"),
-    temperature: 0.1,
-  });
+  try {
+    const completion = await openai.beta.chat.completions.parse({
+      model: AI_MODELS.reasoning,
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: `Resume text:\n\n${rawText.slice(0, 20000)}` },
+      ],
+      response_format: zodResponseFormat(resumeExtractionSchema, "resume_extraction"),
+      temperature: 0.1,
+    });
 
-  const parsed = completion.choices[0].message.parsed;
-  if (!parsed) {
-    throw new Error("AI resume parsing returned no structured output.");
+    const parsed = completion.choices[0].message.parsed;
+    if (!parsed) throw new Error("AI resume parsing returned no structured output.");
+    return parsed as ParsedResumeData;
+  } catch (err) {
+    // A configured key doesn't guarantee a successful call (rate limits,
+    // quota, transient network errors, malformed output, etc.) — degrade to
+    // the same fallback as "not configured" instead of crashing the upload.
+    console.error("parseResumeText: OpenAI call failed", err);
+    return fallback;
   }
-
-  return parsed as ParsedResumeData;
 }

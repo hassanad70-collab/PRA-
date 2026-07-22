@@ -13,6 +13,12 @@ test.describe("Resume upload", () => {
     await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
 
     await page.goto("/candidate/resume");
+    // Wait for the client component to hydrate before driving the file input —
+    // setInputFiles() can fire the change event before React has attached its
+    // onChange listener, which silently drops the selection (no error, no
+    // request). A real user can't out-race hydration picking a file from an OS
+    // dialog, but Playwright's programmatic setInputFiles can.
+    await page.waitForLoadState("networkidle");
 
     const pdfPath = makeTestResumePdfFile(TEST_RESUME_LINES);
     const fileInput = page.locator('input[type="file"]');
@@ -33,6 +39,7 @@ test.describe("Resume upload", () => {
     await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
     await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
     await page.goto("/candidate/resume");
+    await page.waitForLoadState("networkidle");
 
     // Just over the app's 10MB limit, not so far over that it also trips
     // Next.js's own (much larger) server-action body size cap.

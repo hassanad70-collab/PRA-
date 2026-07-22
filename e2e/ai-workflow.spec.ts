@@ -28,6 +28,12 @@ async function uploadAndGetResumeId(page: import("@playwright/test").Page) {
   await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
   await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
   await page.goto("/candidate/resume");
+  // Wait for the client component to hydrate before driving the file input —
+  // setInputFiles() can fire the change event before React has attached its
+  // onChange listener, which silently drops the selection (no error, no
+  // request). A real user can't out-race hydration picking a file from an OS
+  // dialog, but Playwright's programmatic setInputFiles can.
+  await page.waitForLoadState("networkidle");
 
   const pdfPath = makeTestResumePdfFile(TEST_RESUME_LINES);
   await page.locator('input[type="file"]').setInputFiles(pdfPath);

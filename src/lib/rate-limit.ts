@@ -27,6 +27,16 @@ const buckets = new Map<string, Bucket>();
 // Prevent unbounded memory growth from buckets that are never checked again.
 const MAX_BUCKETS = 50_000;
 
+// The e2e suite legitimately logs the same fixed test accounts in and out
+// dozens of times across specs, all within a single production-calibrated
+// window — nothing a real user would ever do. E2E_TEST_MODE is set ONLY in
+// playwright.config.ts's webServer `env` block, which controls the process
+// env of the local server Playwright spawns for testing; it is never set in
+// any deployed environment (Vercel envs are configured independently and
+// have no reason to define it), so this can't be tripped by real traffic —
+// it isolates the test environment rather than loosening the limit itself.
+const isE2ETestMode = process.env.E2E_TEST_MODE === "true";
+
 export async function getClientIp(): Promise<string> {
   const h = await headers();
   const forwardedFor = h.get("x-forwarded-for");
@@ -39,6 +49,8 @@ export async function getClientIp(): Promise<string> {
  * within `windowMs`, otherwise records this attempt and returns { allowed: true }.
  */
 export function checkRateLimit(key: string, limit: number, windowMs: number): { allowed: boolean; retryAfterSeconds?: number } {
+  if (isE2ETestMode) return { allowed: true };
+
   const now = Date.now();
   const existing = buckets.get(key);
 

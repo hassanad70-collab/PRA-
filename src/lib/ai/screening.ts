@@ -34,38 +34,44 @@ export async function runAIScreening(
   parsed: ParsedResumeData,
   yearsOfExperience: number
 ): Promise<ScreeningResultAI> {
-  const openai = getOpenAI();
+  const fallback: ScreeningResultAI = {
+    overall_score: 50,
+    experience_score: 50,
+    skill_match_score: 50,
+    education_match_score: 50,
+    culture_fit_score: 50,
+    leadership_score: 50,
+    communication_score: 50,
+    technical_score: 50,
+    ai_summary: "Enable OpenAI API key to enable detailed AI screening.",
+    interview_recommendation: "neutral",
+  };
 
+  const openai = getOpenAI();
   if (!openai) {
     console.warn("OpenAI API not configured. Returning default screening scores.");
-    return {
-      overall_score: 50,
-      experience_score: 50,
-      skill_match_score: 50,
-      education_match_score: 50,
-      culture_fit_score: 50,
-      leadership_score: 50,
-      communication_score: 50,
-      technical_score: 50,
-      ai_summary: "Enable OpenAI API key to enable detailed AI screening.",
-      interview_recommendation: "neutral",
-    };
+    return fallback;
   }
 
-  const completion = await openai.beta.chat.completions.parse({
-    model: AI_MODELS.reasoning,
-    messages: [
-      { role: "system", content: SYSTEM_PROMPT },
-      {
-        role: "user",
-        content: `JOB:\n${buildJobText(job)}\n\nCANDIDATE:\n${buildCandidateText(parsed, yearsOfExperience)}`,
-      },
-    ],
-    response_format: zodResponseFormat(screeningSchema, "screening_result"),
-    temperature: 0.2,
-  });
+  try {
+    const completion = await openai.beta.chat.completions.parse({
+      model: AI_MODELS.reasoning,
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        {
+          role: "user",
+          content: `JOB:\n${buildJobText(job)}\n\nCANDIDATE:\n${buildCandidateText(parsed, yearsOfExperience)}`,
+        },
+      ],
+      response_format: zodResponseFormat(screeningSchema, "screening_result"),
+      temperature: 0.2,
+    });
 
-  const result = completion.choices[0].message.parsed;
-  if (!result) throw new Error("AI screening returned no structured output.");
-  return result;
+    const result = completion.choices[0].message.parsed;
+    if (!result) throw new Error("AI screening returned no structured output.");
+    return result;
+  } catch (err) {
+    console.error("runAIScreening: OpenAI call failed", err);
+    return fallback;
+  }
 }

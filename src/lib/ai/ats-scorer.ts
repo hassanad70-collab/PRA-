@@ -39,40 +39,46 @@ Be specific and critical in weaknesses/suggestions — avoid generic advice.`;
  * Returns default scores if OpenAI is not available.
  */
 export async function scoreResumeATS(rawText: string, parsed: ParsedResumeData): Promise<AtsScoreResult> {
-  const openai = getOpenAI();
+  const fallback: AtsScoreResult = {
+    overall_score: 50,
+    experience_score: 50,
+    skills_score: 50,
+    formatting_score: 50,
+    education_score: 50,
+    achievements_score: 50,
+    recruiter_readability_score: 50,
+    keyword_density: [],
+    weaknesses: ["Enable OpenAI API to get detailed resume analysis"],
+    suggestions: ["Add your OpenAI API key to .env.local to enable AI-powered resume scoring"],
+  };
 
+  const openai = getOpenAI();
   if (!openai) {
     console.warn("OpenAI API not configured. Returning default ATS scores.");
-    return {
-      overall_score: 50,
-      experience_score: 50,
-      skills_score: 50,
-      formatting_score: 50,
-      education_score: 50,
-      achievements_score: 50,
-      recruiter_readability_score: 50,
-      keyword_density: [],
-      weaknesses: ["Enable OpenAI API to get detailed resume analysis"],
-      suggestions: ["Add your OpenAI API key to .env.local to enable AI-powered resume scoring"],
-    };
+    return fallback;
   }
 
-  const completion = await openai.beta.chat.completions.parse({
-    model: AI_MODELS.reasoning,
-    messages: [
-      { role: "system", content: SYSTEM_PROMPT },
-      {
-        role: "user",
-        content: `Raw resume text:\n\n${rawText.slice(0, 18000)}\n\nStructured extraction (for reference):\n${JSON.stringify(
-          parsed
-        ).slice(0, 4000)}`,
-      },
-    ],
-    response_format: zodResponseFormat(atsScoreSchema, "ats_score"),
-    temperature: 0.2,
-  });
+  try {
+    const completion = await openai.beta.chat.completions.parse({
+      model: AI_MODELS.reasoning,
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        {
+          role: "user",
+          content: `Raw resume text:\n\n${rawText.slice(0, 18000)}\n\nStructured extraction (for reference):\n${JSON.stringify(
+            parsed
+          ).slice(0, 4000)}`,
+        },
+      ],
+      response_format: zodResponseFormat(atsScoreSchema, "ats_score"),
+      temperature: 0.2,
+    });
 
-  const result = completion.choices[0].message.parsed;
-  if (!result) throw new Error("AI ATS scoring returned no structured output.");
-  return result;
+    const result = completion.choices[0].message.parsed;
+    if (!result) throw new Error("AI ATS scoring returned no structured output.");
+    return result;
+  } catch (err) {
+    console.error("scoreResumeATS: OpenAI call failed", err);
+    return fallback;
+  }
 }

@@ -38,35 +38,41 @@ Never invent employers, titles, or dates that are not in the original data.`;
  * statement ideas. Returns placeholder content if OpenAI is not available.
  */
 export async function improveResume(parsed: ParsedResumeData): Promise<ResumeImprovementResult> {
-  const openai = getOpenAI();
+  const fallback: ResumeImprovementResult = {
+    improved_summary: "Enable OpenAI API key to get AI-powered resume improvements.",
+    improved_experience: (parsed.experience ?? []).map((exp) => ({
+      company_name: exp.company_name,
+      job_title: exp.job_title,
+      improved_bullets: ["Add OpenAI API key to enable resume rewriting suggestions"],
+    })),
+    suggested_missing_skills: [],
+    ats_keywords_to_add: [],
+    grammar_fixes: [],
+    generated_achievement_statements: [],
+  };
 
+  const openai = getOpenAI();
   if (!openai) {
     console.warn("OpenAI API not configured. Resume improvement unavailable.");
-    return {
-      improved_summary: "Enable OpenAI API key to get AI-powered resume improvements.",
-      improved_experience: (parsed.experience ?? []).map((exp) => ({
-        company_name: exp.company_name,
-        job_title: exp.job_title,
-        improved_bullets: ["Add OpenAI API key to enable resume rewriting suggestions"],
-      })),
-      suggested_missing_skills: [],
-      ats_keywords_to_add: [],
-      grammar_fixes: [],
-      generated_achievement_statements: [],
-    };
+    return fallback;
   }
 
-  const completion = await openai.beta.chat.completions.parse({
-    model: AI_MODELS.reasoning,
-    messages: [
-      { role: "system", content: SYSTEM_PROMPT },
-      { role: "user", content: `Candidate resume data:\n${JSON.stringify(parsed, null, 2).slice(0, 12000)}` },
-    ],
-    response_format: zodResponseFormat(improvementSchema, "resume_improvement"),
-    temperature: 0.4,
-  });
+  try {
+    const completion = await openai.beta.chat.completions.parse({
+      model: AI_MODELS.reasoning,
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: `Candidate resume data:\n${JSON.stringify(parsed, null, 2).slice(0, 12000)}` },
+      ],
+      response_format: zodResponseFormat(improvementSchema, "resume_improvement"),
+      temperature: 0.4,
+    });
 
-  const result = completion.choices[0].message.parsed;
-  if (!result) throw new Error("AI resume improvement returned no structured output.");
-  return result;
+    const result = completion.choices[0].message.parsed;
+    if (!result) throw new Error("AI resume improvement returned no structured output.");
+    return result;
+  } catch (err) {
+    console.error("improveResume: OpenAI call failed", err);
+    return fallback;
+  }
 }

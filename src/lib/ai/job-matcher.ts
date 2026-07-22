@@ -59,36 +59,42 @@ export async function analyzeJobMatch(
   parsed: ParsedResumeData,
   yearsOfExperience: number
 ): Promise<MatchAnalysisResult> {
-  const openai = getOpenAI();
+  const fallback: MatchAnalysisResult = {
+    match_score: 50,
+    strengths: ["Resume data successfully extracted"],
+    weaknesses: ["Enable OpenAI to get detailed match analysis"],
+    missing_skills: [],
+    recommended_skills: [],
+    match_reasons: ["Add OpenAI API key to enable AI-powered matching"],
+    interview_probability: 50,
+    ai_summary: "Add your OpenAI API key to enable detailed match analysis.",
+  };
 
+  const openai = getOpenAI();
   if (!openai) {
     console.warn("OpenAI API not configured. Returning default job match analysis.");
-    return {
-      match_score: 50,
-      strengths: ["Resume data successfully extracted"],
-      weaknesses: ["Enable OpenAI to get detailed match analysis"],
-      missing_skills: [],
-      recommended_skills: [],
-      match_reasons: ["Add OpenAI API key to enable AI-powered matching"],
-      interview_probability: 50,
-      ai_summary: "Add your OpenAI API key to enable detailed match analysis.",
-    };
+    return fallback;
   }
 
-  const completion = await openai.beta.chat.completions.parse({
-    model: AI_MODELS.reasoning,
-    messages: [
-      { role: "system", content: SYSTEM_PROMPT },
-      {
-        role: "user",
-        content: `JOB:\n${buildJobText(job)}\n\nCANDIDATE:\n${buildCandidateText(parsed, yearsOfExperience)}`,
-      },
-    ],
-    response_format: zodResponseFormat(matchAnalysisSchema, "match_analysis"),
-    temperature: 0.2,
-  });
+  try {
+    const completion = await openai.beta.chat.completions.parse({
+      model: AI_MODELS.reasoning,
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        {
+          role: "user",
+          content: `JOB:\n${buildJobText(job)}\n\nCANDIDATE:\n${buildCandidateText(parsed, yearsOfExperience)}`,
+        },
+      ],
+      response_format: zodResponseFormat(matchAnalysisSchema, "match_analysis"),
+      temperature: 0.2,
+    });
 
-  const result = completion.choices[0].message.parsed;
-  if (!result) throw new Error("AI job matching returned no structured output.");
-  return result;
+    const result = completion.choices[0].message.parsed;
+    if (!result) throw new Error("AI job matching returned no structured output.");
+    return result;
+  } catch (err) {
+    console.error("analyzeJobMatch: OpenAI call failed", err);
+    return fallback;
+  }
 }
