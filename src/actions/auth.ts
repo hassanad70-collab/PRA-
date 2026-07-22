@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { trackEvent } from "@/lib/analytics/track";
+import { readGuestSessionId } from "@/lib/guest/session";
 import { rateLimitByIp, rateLimitByIpAndTarget } from "@/lib/rate-limit";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -77,6 +79,11 @@ export async function registerCandidate(formData: FormData): Promise<ActionResul
   const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
   if (signInError) {
     return { success: false, error: "Account created, but automatic sign-in failed. Please sign in manually." };
+  }
+
+  const guestSessionId = await readGuestSessionId();
+  if (guestSessionId) {
+    await trackEvent("registration_from_guest_flow", { guestSessionId, userId: data.user.id });
   }
 
   revalidatePath("/", "layout");
