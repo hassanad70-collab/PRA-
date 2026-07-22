@@ -9,7 +9,7 @@ import { readGuestSessionId } from "@/lib/guest/session";
 import { getCurrentUser } from "@/lib/queries/candidate";
 
 export const metadata: Metadata = {
-  title: "Free AI Resume Checker — Instant ATS Score | PRA Talent Intelligence",
+  title: "Free AI Resume Checker — Instant ATS Score",
   description:
     "Get an instant, AI-powered ATS compatibility score for your resume. Free, no account required.",
 };

@@ -7,6 +7,15 @@ import { createAdminClient } from "@/lib/supabase/admin";
 // check below is primary, per the "don't rely only on IP" requirement.
 const IP_DAILY_CAP = 3;
 
+// Every local e2e run shares one dev-machine IP, so independent test runs
+// on the same day would otherwise exhaust this secondary cap and produce
+// false failures unrelated to the behavior being tested. Isolated to the
+// test environment only (E2E_TEST_MODE is set exclusively in
+// playwright.config.ts's webServer env — see src/lib/rate-limit.ts for the
+// same pattern); the session-gate check below stays fully active even in
+// test mode, since that's the actual behavior these tests verify.
+const isE2ETestMode = process.env.E2E_TEST_MODE === "true";
+
 export type GuestAllowanceResult =
   | { allowed: true }
   | { allowed: false; reason: "session_used" | "ip_capped" };
@@ -33,6 +42,10 @@ export async function checkGuestAllowance(
 
   if ((sessionCount ?? 0) > 0) {
     return { allowed: false, reason: "session_used" };
+  }
+
+  if (isE2ETestMode) {
+    return { allowed: true };
   }
 
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
