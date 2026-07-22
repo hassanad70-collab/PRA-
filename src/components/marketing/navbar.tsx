@@ -16,7 +16,10 @@ const NAV_LINKS = [
   { href: "#faq", label: "FAQ" },
 ];
 
-const ROUTE_LINKS = [{ href: "/jobs", label: "Browse Jobs" }];
+const ROUTE_LINKS = [
+  { href: "/ai-tools/ats-checker", label: "Free ATS Checker" },
+  { href: "/jobs", label: "Browse Jobs" },
+];
 
 export function Navbar() {
   const [open, setOpen] = React.useState(false);

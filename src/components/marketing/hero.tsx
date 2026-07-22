@@ -56,7 +56,7 @@ export function Hero() {
             </Link>
           </Button>
           <Button size="lg" variant="outline" asChild>
-            <Link href="#how-it-works">See how it works</Link>
+            <Link href="/ai-tools/ats-checker">Try the free ATS Checker</Link>
           </Button>
         </motion.div>
 

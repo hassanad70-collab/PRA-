@@ -3,6 +3,7 @@ import { Sparkles } from "lucide-react";
 
 const FOOTER_LINKS = {
   Product: [
+    { label: "Free ATS Checker", href: "/ai-tools/ats-checker" },
     { label: "Features", href: "#features" },
     { label: "How It Works", href: "#how-it-works" },
     { label: "AI Recruitment", href: "#ai" },
