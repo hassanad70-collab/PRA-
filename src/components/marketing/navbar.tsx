@@ -46,7 +46,7 @@ export function Navbar() {
           PRA Talent Intelligence
         </Link>
 
-        <nav className="hidden items-center gap-8 md:flex">
+        <nav className="hidden items-center gap-8 lg:flex">
           {ROUTE_LINKS.map((link) => (
             <Link
               key={link.href}
@@ -67,7 +67,7 @@ export function Navbar() {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-3 md:flex">
+        <div className="hidden items-center gap-3 lg:flex">
           <ThemeToggle />
           <Button variant="ghost" asChild>
             <Link href="/login">Sign in</Link>
@@ -77,7 +77,7 @@ export function Navbar() {
           </Button>
         </div>
 
-        <div className="flex items-center gap-2 md:hidden">
+        <div className="flex items-center gap-2 lg:hidden">
           <ThemeToggle />
           <Button variant="ghost" size="icon" onClick={() => setOpen((v) => !v)} aria-label="Toggle menu">
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -86,7 +86,7 @@ export function Navbar() {
       </div>
 
       {open && (
-        <div className="glass border-t border-border md:hidden">
+        <div className="glass border-t border-border lg:hidden">
           <div className="container flex flex-col gap-4 py-6">
             {ROUTE_LINKS.map((link) => (
               <Link key={link.href} href={link.href} className="text-sm font-medium" onClick={() => setOpen(false)}>

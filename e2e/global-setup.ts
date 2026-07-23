@@ -64,6 +64,23 @@ async function globalSetup() {
 
   const admin = getAdminClient();
 
+  // auth.spec.ts's registration test creates a fresh, uniquely-named
+  // throwaway account every run (e2e.register.<timestamp>@example.test) and
+  // never cleans it up. Across many runs these accumulate in the profiles
+  // table and eventually push fixed fixture accounts (e.g. this file's own
+  // TEST_USERS.candidate) off the default/first page of admin listings that
+  // sort newest-first -- same accumulation problem this file already
+  // guards against for resumes below, just for a different table.
+  const { data: staleRegistrations } = await admin
+    .from("profiles")
+    .select("id")
+    .like("email", "e2e.register.%@example.test");
+  if (staleRegistrations?.length) {
+    for (const { id } of staleRegistrations) {
+      await admin.auth.admin.deleteUser(id);
+    }
+  }
+
   const candidateId = await ensureUser(admin, TEST_USERS.candidate, "candidate");
   await admin.from("candidates").upsert({ id: candidateId }, { onConflict: "id" });
 
