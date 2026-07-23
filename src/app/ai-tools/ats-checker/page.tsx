@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import type { Metadata } from "next";
 
 import { Footer } from "@/components/marketing/footer";
 import { Navbar } from "@/components/marketing/navbar";
@@ -7,12 +6,18 @@ import { GuestAtsChecker } from "@/components/guest/guest-ats-checker";
 import { trackEvent } from "@/lib/analytics/track";
 import { readGuestSessionId } from "@/lib/guest/session";
 import { getCurrentUser } from "@/lib/queries/candidate";
+import { JsonLd } from "@/lib/seo/json-ld";
+import { buildMetadata } from "@/lib/seo/metadata";
+import { softwareApplicationSchema } from "@/lib/seo/schema";
 
-export const metadata: Metadata = {
+const PATH = "/ai-tools/ats-checker";
+
+export const metadata = buildMetadata({
   title: "Free AI Resume Checker — Instant ATS Score",
   description:
     "Get an instant, AI-powered ATS compatibility score for your resume. Free, no account required.",
-};
+  path: PATH,
+});
 
 export default async function AtsCheckerPage() {
   const user = await getCurrentUser();
@@ -23,6 +28,7 @@ export default async function AtsCheckerPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
+      <JsonLd data={softwareApplicationSchema(PATH)} />
       <Navbar />
       <main className="flex-1">
         <div className="container max-w-3xl py-16">

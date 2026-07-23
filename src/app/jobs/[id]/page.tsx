@@ -7,15 +7,19 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getJobById } from "@/lib/queries/jobs";
+import { JsonLd } from "@/lib/seo/json-ld";
+import { buildMetadata } from "@/lib/seo/metadata";
+import { jobPostingSchema } from "@/lib/seo/schema";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   const job = await getJobById(id);
   if (!job || job.status !== "published") return { title: "Job not found" };
-  return {
+  return buildMetadata({
     title: `${job.title} at ${job.company?.name ?? "PRA"}`,
     description: job.description.slice(0, 160),
-  };
+    path: `/jobs/${id}`,
+  });
 }
 
 export default async function PublicJobDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -25,6 +29,7 @@ export default async function PublicJobDetailPage({ params }: { params: Promise<
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-10">
+      <JsonLd data={jobPostingSchema(job, `/jobs/${id}`)} />
       <Card>
         <CardContent className="pt-6">
           <div className="flex flex-wrap items-start justify-between gap-4">

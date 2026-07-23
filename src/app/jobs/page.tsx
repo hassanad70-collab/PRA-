@@ -5,8 +5,13 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { getPublishedJobs } from "@/lib/queries/jobs";
+import { buildMetadata } from "@/lib/seo/metadata";
 
-export const metadata = { title: "Browse Jobs" };
+export const metadata = buildMetadata({
+  title: "Browse Jobs",
+  description: "Open roles across every company on PRA Talent Intelligence. Free to browse, no account required.",
+  path: "/jobs",
+});
 
 export default async function PublicJobsPage({
   searchParams,

@@ -1,5 +1,3 @@
-import type { Metadata } from "next";
-
 import { AICareerToolsSection } from "@/components/marketing/ai-career-tools-section";
 import { AIRecruitment } from "@/components/marketing/ai-recruitment";
 import { AtsCheckerTeaser } from "@/components/marketing/ats-checker-teaser";
@@ -15,12 +13,14 @@ import { Navbar } from "@/components/marketing/navbar";
 import { Testimonials } from "@/components/marketing/testimonials";
 import { TrustedCompanies } from "@/components/marketing/trusted-companies";
 import { getPublishedJobs } from "@/lib/queries/jobs";
+import { buildMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
+export const metadata = buildMetadata({
   title: "AI Career Platform — Free ATS Resume Checker & AI Recruitment",
   description:
     "PRA is an AI-powered career and talent platform. Check your resume's ATS score free, and hire smarter with AI screening, matching, and analytics.",
-};
+  path: "/",
+});
 
 // The Jobs/Companies preview sections make this page data-dependent; ISR
 // keeps it effectively cached rather than server-rendering on every request.

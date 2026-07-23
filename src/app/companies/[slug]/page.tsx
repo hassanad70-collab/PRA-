@@ -6,15 +6,19 @@ import { Globe, MapPin, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { getCompanyBySlug, getPublishedJobs } from "@/lib/queries/jobs";
+import { JsonLd } from "@/lib/seo/json-ld";
+import { buildMetadata } from "@/lib/seo/metadata";
+import { companyOrganizationSchema } from "@/lib/seo/schema";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const company = await getCompanyBySlug(slug);
   if (!company) return { title: "Company not found" };
-  return {
+  return buildMetadata({
     title: company.name,
     description: company.description?.slice(0, 160) ?? `Open roles at ${company.name} on PRA Talent Intelligence.`,
-  };
+    path: `/companies/${slug}`,
+  });
 }
 
 export default async function PublicCompanyProfilePage({ params }: { params: Promise<{ slug: string }> }) {
@@ -26,6 +30,7 @@ export default async function PublicCompanyProfilePage({ params }: { params: Pro
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-10">
+      <JsonLd data={companyOrganizationSchema(company, `/companies/${slug}`)} />
       <Card>
         <CardContent className="pt-6">
           <div className="flex items-center gap-4">
