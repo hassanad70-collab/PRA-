@@ -22,7 +22,14 @@ interface BuildMetadataOptions {
 }
 
 export function buildMetadata({ title, description, path, image, noIndex }: BuildMetadataOptions): Metadata {
-  const images = image ? [{ url: image.url, alt: image.alt ?? title }] : undefined;
+  // Deliberately omit the `images` key entirely (rather than setting it to
+  // `undefined`) when no explicit image is given. Next.js only falls back
+  // to the opengraph-image.tsx file-convention image when a page's
+  // metadata doesn't define openGraph.images/twitter.images at all --
+  // including the key with an undefined value still counts as "defined"
+  // and suppresses the automatic fallback.
+  const imagesField = image ? { images: [{ url: image.url, alt: image.alt ?? title }] } : {};
+  const twitterImagesField = image ? { images: [image.url] } : {};
 
   return {
     title,
@@ -34,13 +41,13 @@ export function buildMetadata({ title, description, path, image, noIndex }: Buil
       url: path,
       siteName: SITE_NAME,
       type: "website",
-      images,
+      ...imagesField,
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: images?.map((img) => img.url),
+      ...twitterImagesField,
     },
     ...(noIndex ? { robots: { index: false, follow: false } } : {}),
   };
