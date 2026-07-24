@@ -1,3 +1,4 @@
+import { createClient as createRawClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
@@ -9,40 +10,31 @@ import { createClient } from "@/lib/supabase/server";
 // identical query with a plain createClient succeeds locally.
 export async function GET() {
   const supabase = await createClient();
+  const raw = createRawClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 
-  const jobSingle = await supabase
+  const viaSsrClient = await supabase
     .from("jobs")
-    .select("*, company:companies(*)")
-    .eq("id", "174ed530-f4d3-45d0-a328-c4865d2349b4")
-    .single();
-
-  const jobArray = await supabase
-    .from("jobs")
-    .select("*, company:companies(*)")
+    .select("id, title")
     .eq("id", "174ed530-f4d3-45d0-a328-c4865d2349b4")
     .limit(1);
 
-  const jobMaybeSingle = await supabase
+  const viaRawClient = await raw
     .from("jobs")
-    .select("*, company:companies(*)")
+    .select("id, title")
     .eq("id", "174ed530-f4d3-45d0-a328-c4865d2349b4")
-    .maybeSingle();
+    .limit(1);
 
   return NextResponse.json({
-    jobSingle: {
-      data: jobSingle.data ? { id: jobSingle.data.id, title: jobSingle.data.title } : null,
-      errorMessage: jobSingle.error?.message?.slice(0, 100) ?? null,
-      status: jobSingle.status,
+    viaSsrClient: {
+      dataLength: viaSsrClient.data?.length ?? null,
+      errorMessage: viaSsrClient.error?.message?.slice(0, 150) ?? null,
+      status: viaSsrClient.status,
     },
-    jobArray: {
-      dataLength: jobArray.data?.length ?? null,
-      errorMessage: jobArray.error?.message?.slice(0, 100) ?? null,
-      status: jobArray.status,
-    },
-    jobMaybeSingle: {
-      data: jobMaybeSingle.data ? { id: jobMaybeSingle.data.id, title: jobMaybeSingle.data.title } : null,
-      errorMessage: jobMaybeSingle.error?.message?.slice(0, 100) ?? null,
-      status: jobMaybeSingle.status,
+    viaRawClient: {
+      dataLength: viaRawClient.data?.length ?? null,
+      data: viaRawClient.data,
+      errorMessage: viaRawClient.error?.message?.slice(0, 150) ?? null,
+      status: viaRawClient.status,
     },
   });
 }
