@@ -21,15 +21,19 @@ interface BuildMetadataOptions {
   noIndex?: boolean;
 }
 
+// Explicit fallback rather than relying on Next.js's opengraph-image.tsx
+// file-convention cascade: confirmed via production testing that the
+// convention only produces a fallback image for the exact root ("/")
+// segment, not for nested static or dynamic routes -- so every other
+// public page would otherwise have no og:image/twitter:image at all.
+// Referencing the same generated route explicitly here guarantees every
+// page gets it, regardless of that inheritance behavior.
+const DEFAULT_OG_IMAGE = { url: "/opengraph-image", alt: "PRA Talent Intelligence — AI Career Platform" };
+
 export function buildMetadata({ title, description, path, image, noIndex }: BuildMetadataOptions): Metadata {
-  // Deliberately omit the `images` key entirely (rather than setting it to
-  // `undefined`) when no explicit image is given. Next.js only falls back
-  // to the opengraph-image.tsx file-convention image when a page's
-  // metadata doesn't define openGraph.images/twitter.images at all --
-  // including the key with an undefined value still counts as "defined"
-  // and suppresses the automatic fallback.
-  const imagesField = image ? { images: [{ url: image.url, alt: image.alt ?? title }] } : {};
-  const twitterImagesField = image ? { images: [image.url] } : {};
+  const resolvedImage = image ?? DEFAULT_OG_IMAGE;
+  const imagesField = { images: [{ url: resolvedImage.url, alt: resolvedImage.alt ?? title }] };
+  const twitterImagesField = { images: [resolvedImage.url] };
 
   return {
     title,
