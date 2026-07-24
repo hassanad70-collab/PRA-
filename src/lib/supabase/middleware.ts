@@ -1,6 +1,7 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+import { defaultLocale, locales } from "@/i18n/routing";
 import { getRequiredEnv } from "@/lib/env";
 import type { UserRole } from "@/types/database";
 
@@ -15,6 +16,17 @@ const ROLE_HOME: Record<UserRole, string> = {
   hr_manager: "/recruiter/dashboard",
   super_admin: "/admin",
 };
+
+// Dashboard routes (/candidate, /recruiter, /admin) are deliberately kept
+// outside the [locale] tree, so a redirect to login from one of them has no
+// locale segment to preserve. Falls back to the user's persisted preference
+// (the same NEXT_LOCALE cookie next-intl's own middleware sets) so the login
+// page they land on matches the language they were already using, and only
+// falls back further to the default locale if they have no preference yet.
+function resolveRedirectLocale(request: NextRequest): string {
+  const cookieLocale = request.cookies.get("NEXT_LOCALE")?.value;
+  return cookieLocale && (locales as readonly string[]).includes(cookieLocale) ? cookieLocale : defaultLocale;
+}
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -48,15 +60,23 @@ export async function updateSession(request: NextRequest) {
   const isRecruiterRoute = pathname.startsWith("/recruiter");
   const isAdminRoute = pathname.startsWith("/admin");
   const isProtectedRoute = isCandidateRoute || isRecruiterRoute || isAdminRoute;
+
+  // Login/register/forgot-password now live under the locale-prefixed
+  // [locale] tree ("/en/login", "/ar/login"), unlike the dashboard routes
+  // above, which are deliberately kept unprefixed. Strip a leading
+  // "/en"/"/ar" segment before comparing so this check keeps working
+  // regardless of which locale the user is on.
+  const localeMatch = pathname.match(/^\/(en|ar)(\/.*)?$/);
+  const pathWithoutLocale = localeMatch ? (localeMatch[2] ?? "/") : pathname;
   // "/reset-password" is deliberately excluded: a user completing a password
   // reset has a real session (via the /auth/callback code exchange) but must
   // still be allowed to reach this page instead of being bounced to their
   // dashboard by the isAuthRoute check below.
-  const isAuthRoute = ["/login", "/register", "/forgot-password"].includes(pathname);
+  const isAuthRoute = ["/login", "/register", "/forgot-password"].includes(pathWithoutLocale);
 
   if (isProtectedRoute && !user) {
     const url = request.nextUrl.clone();
-    url.pathname = "/login";
+    url.pathname = `/${resolveRedirectLocale(request)}/login`;
     url.searchParams.set("redirect", pathname);
     return NextResponse.redirect(url);
   }
@@ -78,7 +98,7 @@ export async function updateSession(request: NextRequest) {
       // not just at login.
       await supabase.auth.signOut();
       const url = request.nextUrl.clone();
-      url.pathname = "/login";
+      url.pathname = `/${resolveRedirectLocale(request)}/login`;
       url.searchParams.set("redirect", pathname);
       return NextResponse.redirect(url);
     }

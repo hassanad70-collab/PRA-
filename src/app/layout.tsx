@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
 
 import { ThemeProvider } from "@/components/shared/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { localeDirections, type AppLocale } from "@/i18n/routing";
 import { JsonLd } from "@/lib/seo/json-ld";
 import { SITE_NAME } from "@/lib/seo/metadata";
 import { organizationAndWebsiteSchema } from "@/lib/seo/schema";
@@ -35,19 +38,28 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // Resolves to the negotiated locale for routes under src/app/[locale]/,
+  // and to the default locale ("en") for routes outside it (admin/candidate/
+  // recruiter/auth callback aren't part of the locale tree and keep their
+  // current English-only, ltr behavior unchanged).
+  const locale = (await getLocale()) as AppLocale;
+  const messages = await getMessages();
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} dir={localeDirections[locale]} suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
         {organizationAndWebsiteSchema().map((schema) => (
           <JsonLd key={schema["@type"] as string} data={schema} />
         ))}
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <TooltipProvider delayDuration={150}>
-            {children}
-            <Toaster position="top-right" richColors closeButton />
-          </TooltipProvider>
-        </ThemeProvider>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+            <TooltipProvider delayDuration={150}>
+              {children}
+              <Toaster position="top-right" richColors closeButton />
+            </TooltipProvider>
+          </ThemeProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

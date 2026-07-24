@@ -1,29 +1,33 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Menu, Sparkles, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { LanguageSwitcher } from "@/components/shared/language-switcher";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
+import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
-const NAV_LINKS = [
-  { href: "#features", label: "Features" },
-  { href: "#how-it-works", label: "How It Works" },
-  { href: "#ai", label: "AI Recruitment" },
-  { href: "#testimonials", label: "Testimonials" },
-  { href: "#faq", label: "FAQ" },
-];
-
-const ROUTE_LINKS = [
-  { href: "/ai-tools/ats-checker", label: "Free ATS Checker" },
-  { href: "/jobs", label: "Browse Jobs" },
-];
-
 export function Navbar() {
+  const t = useTranslations("Common");
+  const tNav = useTranslations("Nav");
   const [open, setOpen] = React.useState(false);
   const [scrolled, setScrolled] = React.useState(false);
+
+  const NAV_LINKS = [
+    { href: "#features", label: t("features") },
+    { href: "#how-it-works", label: t("howItWorks") },
+    { href: "#ai", label: t("aiRecruitment") },
+    { href: "#testimonials", label: t("testimonials") },
+    { href: "#faq", label: t("faq") },
+  ];
+
+  const ROUTE_LINKS = [
+    { href: "/ai-tools/ats-checker", label: t("atsChecker") },
+    { href: "/jobs", label: t("browseJobs") },
+  ];
 
   React.useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -43,7 +47,7 @@ export function Navbar() {
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-600 to-fuchsia-600 text-white">
             <Sparkles className="h-4 w-4" />
           </div>
-          PRA Talent Intelligence
+          {t("brand")}
         </Link>
 
         <nav className="hidden items-center gap-8 lg:flex">
@@ -68,18 +72,20 @@ export function Navbar() {
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
+          <LanguageSwitcher />
           <ThemeToggle />
           <Button variant="ghost" asChild>
-            <Link href="/login">Sign in</Link>
+            <Link href="/login">{t("signIn")}</Link>
           </Button>
           <Button variant="gradient" asChild>
-            <Link href="/register">Get started free</Link>
+            <Link href="/register">{t("getStartedFree")}</Link>
           </Button>
         </div>
 
         <div className="flex items-center gap-2 lg:hidden">
+          <LanguageSwitcher />
           <ThemeToggle />
-          <Button variant="ghost" size="icon" onClick={() => setOpen((v) => !v)} aria-label="Toggle menu">
+          <Button variant="ghost" size="icon" onClick={() => setOpen((v) => !v)} aria-label={tNav("toggleMenu")}>
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
         </div>
@@ -100,10 +106,10 @@ export function Navbar() {
             ))}
             <div className="flex flex-col gap-2 pt-2">
               <Button variant="outline" asChild>
-                <Link href="/login">Sign in</Link>
+                <Link href="/login">{t("signIn")}</Link>
               </Button>
               <Button variant="gradient" asChild>
-                <Link href="/register">Get started free</Link>
+                <Link href="/register">{t("getStartedFree")}</Link>
               </Button>
             </div>
           </div>

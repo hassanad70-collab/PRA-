@@ -1,44 +1,27 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { Star } from "lucide-react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { initials } from "@/lib/utils";
 
-const TESTIMONIALS = [
-  {
-    name: "Amelia Ross",
-    role: "VP of People, Northwind",
-    quote:
-      "We went from a two-week screening backlog to same-day shortlists. The AI match scores are shockingly accurate.",
-  },
-  {
-    name: "David Okafor",
-    role: "Head of Talent, Cascade Digital",
-    quote:
-      "The ATS scoring alone paid for the platform — candidates fix their resumes and apply-quality went way up.",
-  },
-  {
-    name: "Priya Nair",
-    role: "Recruiting Lead, Vertex Labs",
-    quote:
-      "PRA's screening engine gives our recruiters a ranked, explained shortlist in minutes instead of days.",
-  },
-];
-
 export function Testimonials() {
+  const t = useTranslations("Home.Testimonials");
+  const items = t.raw("items") as { name: string; role: string; quote: string }[];
+
   return (
     <section id="testimonials" className="border-y border-border bg-secondary/30 py-24">
       <div className="container">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Loved by talent teams</h2>
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">{t("title")}</h2>
         </div>
         <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-3">
-          {TESTIMONIALS.map((t, i) => (
+          {items.map((item, i) => (
             <motion.div
-              key={t.name}
+              key={item.name}
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -51,14 +34,14 @@ export function Testimonials() {
                       <Star key={idx} className="h-4 w-4 fill-current" />
                     ))}
                   </div>
-                  <p className="mt-4 text-sm text-muted-foreground">&ldquo;{t.quote}&rdquo;</p>
+                  <p className="mt-4 text-sm text-muted-foreground">&ldquo;{item.quote}&rdquo;</p>
                   <div className="mt-6 flex items-center gap-3">
                     <Avatar>
-                      <AvatarFallback>{initials(t.name)}</AvatarFallback>
+                      <AvatarFallback>{initials(item.name)}</AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="text-sm font-medium">{t.name}</p>
-                      <p className="text-xs text-muted-foreground">{t.role}</p>
+                      <p className="text-sm font-medium">{item.name}</p>
+                      <p className="text-xs text-muted-foreground">{item.role}</p>
                     </div>
                   </div>
                 </CardContent>

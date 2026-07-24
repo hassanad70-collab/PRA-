@@ -1,0 +1,303 @@
+{
+  "Metadata": {
+    "home": {
+      "title": "AI Career Platform — Free ATS Resume Checker & AI Recruitment",
+      "description": "PRA is an AI-powered career and talent platform. Check your resume's ATS score free, and hire smarter with AI screening, matching, and analytics."
+    },
+    "jobs": {
+      "title": "Browse Jobs",
+      "description": "Open roles across every company on PRA Talent Intelligence. Free to browse, no account required."
+    },
+    "atsChecker": {
+      "title": "Free AI Resume Checker — Instant ATS Score",
+      "description": "Get an instant, AI-powered ATS compatibility score for your resume. Free, no account required."
+    },
+    "login": { "title": "Sign In", "description": "Sign in to your PRA Talent Intelligence account." },
+    "register": { "title": "Create Account", "description": "Create your free PRA Talent Intelligence account." },
+    "forgotPassword": { "title": "Forgot Password", "description": "Reset your PRA Talent Intelligence account password." },
+    "resetPassword": { "title": "Reset Password", "description": "Set a new password for your PRA Talent Intelligence account." }
+  },
+  "Common": {
+    "brand": "PRA Talent Intelligence",
+    "atsChecker": "Free ATS Checker",
+    "browseJobs": "Browse Jobs",
+    "features": "Features",
+    "howItWorks": "How It Works",
+    "aiRecruitment": "AI Recruitment",
+    "testimonials": "Testimonials",
+    "faq": "FAQ",
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "getStartedFree": "Get started free",
+    "createFreeAccount": "Create your free account",
+    "orContinueWith": "Or continue with",
+    "google": "Google",
+    "linkedin": "LinkedIn",
+    "backToSignIn": "Back to sign in",
+    "somethingWentWrong": "Something went wrong",
+    "remote": "Remote",
+    "browseAllJobs": "Browse all jobs",
+    "employmentType": {
+      "full_time": "Full time",
+      "part_time": "Part time",
+      "contract": "Contract",
+      "internship": "Internship",
+      "temporary": "Temporary"
+    },
+    "experienceLevel": {
+      "entry": "Entry level",
+      "junior": "Junior",
+      "mid": "Mid level",
+      "senior": "Senior",
+      "lead": "Lead",
+      "manager": "Manager",
+      "director": "Director",
+      "executive": "Executive"
+    },
+    "toggleLanguage": "Change language"
+  },
+  "Nav": {
+    "toggleMenu": "Toggle menu"
+  },
+  "Footer": {
+    "tagline": "Enterprise AI recruitment and talent intelligence for modern hiring teams.",
+    "productTitle": "Product",
+    "companyTitle": "Company",
+    "legalTitle": "Legal",
+    "pricing": "Pricing",
+    "about": "About",
+    "careers": "Careers",
+    "blog": "Blog",
+    "contact": "Contact",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "security": "Security",
+    "copyright": "© {year} PRA Talent Intelligence Platform. All rights reserved."
+  },
+  "Home": {
+    "Hero": {
+      "eyebrow": "AI-powered recruitment, reimagined",
+      "title": "Hire smarter with an <highlight>AI Talent Intelligence</highlight> platform",
+      "subtitle": "PRA screens, ranks, and matches every candidate automatically — cutting manual recruitment work by more than 80%. One platform for your ATS, resume intelligence, and hiring analytics.",
+      "startHiring": "Start hiring free",
+      "tryAtsChecker": "Try the free ATS Checker",
+      "stats": [
+        { "value": "80%+", "label": "less manual work" },
+        { "value": "<48h", "label": "avg. time to shortlist" },
+        { "value": "1M+", "label": "resumes parsed" },
+        { "value": "99.9%", "label": "platform uptime" }
+      ]
+    },
+    "Trusted": {
+      "title": "Trusted by fast-growing hiring teams"
+    },
+    "AtsTeaser": {
+      "yourResume": "Your resume",
+      "instantScore": "Instant ATS Score",
+      "freeNoAccount": "Free — no account required",
+      "atsLabel": "ATS",
+      "breakdown": [
+        { "key": "experience", "value": 90 },
+        { "key": "skills", "value": 85 },
+        { "key": "formatting", "value": 92 },
+        { "key": "education", "value": 80 }
+      ],
+      "title": "Free AI Resume Checker — see your <highlight>ATS score</highlight> in seconds",
+      "subtitle": "Upload your resume and get a complete, AI-powered ATS compatibility analysis instantly — no account, no credit card, no waiting.",
+      "points": [
+        "Complete ATS compatibility score — no hidden or gated sections",
+        "Experience, skills, formatting, and education breakdowns",
+        "Concrete weaknesses and suggestions you can act on immediately",
+        "Free, instant, and no account required for your first check"
+      ],
+      "checkMyResume": "Check my resume free"
+    },
+    "AiTools": {
+      "eyebrow": "Your AI career toolkit",
+      "title": "One platform for your whole career journey",
+      "subtitle": "The ATS Checker is live today — more AI-powered career tools are on the way.",
+      "comingSoon": "Coming soon",
+      "comingSoonDialogTitle": "{tool} — Coming soon",
+      "comingSoonDialogBody": "{description} We're building this next as part of PRA's AI career toolkit. In the meantime, try the free ATS Resume Checker — it's live today.",
+      "tools": [
+        { "key": "ats_checker", "label": "ATS Resume Checker", "description": "Get an instant, AI-powered ATS compatibility score for your resume — free, no account required." },
+        { "key": "resume_builder", "label": "AI Resume Builder", "description": "Build a professional, ATS-optimized resume from scratch with AI guidance." },
+        { "key": "cover_letter_generator", "label": "Cover Letter Generator", "description": "Generate a tailored cover letter for any job in seconds." },
+        { "key": "interview_prep", "label": "Interview Preparation", "description": "Practice with AI-generated interview questions tailored to your target role." },
+        { "key": "career_advisor", "label": "AI Career Advisor", "description": "Get personalized guidance on your next career move, skill gaps, and growth path." }
+      ]
+    },
+    "Features": {
+      "title": "Everything your talent team needs, in one platform",
+      "subtitle": "Replace your ATS, resume screener, and analytics stack with a single AI-native recruitment intelligence system.",
+      "items": [
+        { "title": "AI Resume Parser", "description": "Extracts experience, education, skills, and achievements from any resume in seconds." },
+        { "title": "AI Job Matching", "description": "Every candidate is automatically matched against every open role with a live match score." },
+        { "title": "ATS Scoring", "description": "Instant, transparent ATS scores with formatting, keyword, and readability breakdowns." },
+        { "title": "AI Screening Engine", "description": "Automated candidate evaluation across experience, skills, culture fit, and communication." },
+        { "title": "Candidate Ranking", "description": "Rank entire applicant pools instantly using a weighted, explainable AI scoring model." },
+        { "title": "AI Interview Assistant", "description": "Generate technical, behavioral, and situational interview questions from any job description." },
+        { "title": "Talent Pool & CRM", "description": "Save, tag, and nurture candidates in a searchable talent community for future roles." },
+        { "title": "Fraud & Duplicate Detection", "description": "Flag inconsistent resumes and duplicate candidate profiles before they reach your pipeline." },
+        { "title": "Recruitment Copilot", "description": "An AI assistant across the platform — from job descriptions to offer letters." }
+      ]
+    },
+    "HowItWorks": {
+      "title": "How it works",
+      "subtitle": "From upload to hire, powered by AI at every step.",
+      "steps": [
+        { "title": "Upload your resume", "description": "Candidates upload a CV once. Our AI parser extracts every detail automatically." },
+        { "title": "AI builds your profile", "description": "Experience, education, skills, and achievements populate the profile instantly." },
+        { "title": "Get matched to jobs", "description": "Every active role is scored against the candidate with strengths and gaps explained." },
+        { "title": "Recruiters screen with AI", "description": "Recruiters see ranked, AI-scored candidates the moment they apply — no manual review needed." }
+      ]
+    },
+    "JobsPreview": {
+      "title": "Open roles right now",
+      "subtitle": "A sample of what's hiring on PRA today."
+    },
+    "CompaniesPreview": {
+      "title": "Companies hiring on PRA",
+      "subtitle": "Explore the teams building with PRA today."
+    },
+    "AiRecruitment": {
+      "title": "AI that reads resumes like your best recruiter",
+      "subtitle": "Every resume is scored, explained, and matched — so your team spends time interviewing, not screening.",
+      "points": [
+        "Overall ATS score with experience, skills, formatting, and education breakdowns",
+        "AI-generated match score and interview probability for every job",
+        "Strengths, weaknesses, and missing skills surfaced automatically",
+        "One-click resume rewriting: summary, bullet points, and keyword optimization"
+      ],
+      "candidateLabel": "Candidate",
+      "sampleName": "Sarah Chen",
+      "sampleRole": "Senior Product Designer",
+      "matchNote": "strong fit for Senior Product Designer, exceeds required experience.",
+      "matchPercent": "{percent}% match"
+    },
+    "Testimonials": {
+      "title": "Loved by talent teams",
+      "items": [
+        { "name": "Amelia Ross", "role": "VP of People, Northwind", "quote": "We went from a two-week screening backlog to same-day shortlists. The AI match scores are shockingly accurate." },
+        { "name": "David Okafor", "role": "Head of Talent, Cascade Digital", "quote": "The ATS scoring alone paid for the platform — candidates fix their resumes and apply-quality went way up." },
+        { "name": "Priya Nair", "role": "Recruiting Lead, Vertex Labs", "quote": "PRA's screening engine gives our recruiters a ranked, explained shortlist in minutes instead of days." }
+      ]
+    },
+    "Faq": {
+      "title": "Frequently asked questions",
+      "items": [
+        { "q": "How does the AI resume parser work?", "a": "When a candidate uploads a CV, we extract raw text and send it to an AI model that identifies structured fields — contact info, experience, education, skills, certifications, and more — then populates the candidate profile automatically." },
+        { "q": "How is the ATS score calculated?", "a": "Each resume is scored across experience, skills, formatting, education, and achievements, plus keyword density and recruiter readability. Scores are generated by an AI model and are fully explainable with specific suggestions." },
+        { "q": "How does AI job matching work?", "a": "We generate vector embeddings for every resume and job description, then combine semantic similarity search (pgvector) with an AI reasoning pass to produce a match score, strengths, missing skills, and interview probability." },
+        { "q": "Is my data secure?", "a": "Yes. PRA uses role-based access control, row-level security on every table, encrypted storage, and full audit logging. Only authorized recruiters at your company can see your candidates' data." },
+        { "q": "Can I use PRA without AI features?", "a": "Yes — every AI feature is additive. You can run the platform as a traditional ATS and enable AI screening, matching, and scoring whenever you're ready." }
+      ]
+    },
+    "Cta": {
+      "title": "Ready to cut recruitment work by 80%?",
+      "subtitle": "Join hiring teams using PRA to screen, rank, and match candidates automatically."
+    }
+  },
+  "Jobs": {
+    "title": "Browse Jobs",
+    "subtitlePrefix": "Open roles across every company on PRA.",
+    "createAccount": "Create an account",
+    "subtitleSuffix": "to get AI-matched recommendations and one-click apply.",
+    "searchPlaceholder": "Search job titles…",
+    "locationPlaceholder": "Location",
+    "noResults": "No jobs match your search right now."
+  },
+  "JobDetail": {
+    "signInToApply": "Sign in to apply",
+    "aboutRole": "About this role",
+    "responsibilities": "Responsibilities",
+    "requirements": "Requirements",
+    "requiredSkills": "Required skills",
+    "benefits": "Benefits",
+    "backToAllJobs": "← Back to all jobs"
+  },
+  "Company": {
+    "employees": "{count} employees",
+    "website": "Website",
+    "openRolesAt": "Open roles at {name}",
+    "noOpenRoles": "No open roles right now — check back soon."
+  },
+  "AtsChecker": {
+    "title": "Free AI Resume Checker",
+    "subtitle": "Get an instant, AI-powered ATS compatibility score — no account required. Your first analysis is completely free.",
+    "dropzoneIdle": "Drag & drop your resume here",
+    "dropzoneAnalyzing": "Analyzing your resume…",
+    "dropzoneHint": "PDF or Word, up to 10MB · No account required",
+    "browseFiles": "Browse files",
+    "analyzeFailed": "Failed to analyze resume.",
+    "scanUsedFallback": "You've used your free scan.",
+    "scanUsedTitle": "Free scan used",
+    "createAccountTitle": "Create a free account to save this analysis",
+    "createAccountSubtitle": "Unlock unlimited ATS scans, AI resume improvement, job matching, and more.",
+    "resultsTitle": "Your ATS Score",
+    "overallLabel": "Overall",
+    "subScores": {
+      "experience": "Experience",
+      "skills": "Skills",
+      "formatting": "Formatting",
+      "education": "Education",
+      "achievements": "Achievements",
+      "recruiterReadability": "Recruiter readability"
+    },
+    "weaknesses": "Weaknesses",
+    "suggestions": "Suggestions",
+    "topKeywords": "Top keywords detected"
+  },
+  "Auth": {
+    "Layout": {
+      "quote": "\"PRA cut our time-to-hire in half. AI screening surfaces the right candidates instantly instead of us reading hundreds of resumes.\"",
+      "quoteAttribution": "Head of Talent Acquisition"
+    },
+    "Login": {
+      "title": "Welcome back",
+      "subtitle": "Sign in to your account to continue",
+      "oauthFailed": "Social sign-in failed. Please try again.",
+      "email": "Email",
+      "password": "Password",
+      "forgotPassword": "Forgot password?",
+      "submit": "Sign in",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up"
+    },
+    "Register": {
+      "title": "Create your account",
+      "subtitle": "Start hiring smarter or find your next role",
+      "candidateTab": "I'm a candidate",
+      "recruiterTab": "I'm hiring",
+      "fullName": "Full name",
+      "email": "Email",
+      "workEmail": "Work email",
+      "password": "Password",
+      "confirmPassword": "Confirm password",
+      "companyName": "Company name",
+      "jobTitle": "Your job title",
+      "createCandidateAccount": "Create candidate account",
+      "createRecruiterAccount": "Create recruiter account",
+      "alreadyHaveAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "genericError": "Please check the form for errors"
+    },
+    "ForgotPassword": {
+      "title": "Forgot password",
+      "subtitle": "Enter your email and we'll send you a reset link",
+      "email": "Email",
+      "submit": "Send reset link",
+      "sentTitle": "Check your inbox",
+      "sentBody": "If an account exists for that email, we've sent a password reset link.",
+      "backToSignIn": "Back to sign in"
+    },
+    "ResetPassword": {
+      "title": "Set a new password",
+      "subtitle": "Choose a strong password for your account",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm password",
+      "submit": "Update password",
+      "successToast": "Password updated. Please sign in again."
+    }
+  }
+}

@@ -1,10 +1,12 @@
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { ArrowRight, MapPin } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Link } from "@/i18n/navigation";
 import type { getPublishedJobs } from "@/lib/queries/jobs";
+import type { EmploymentType } from "@/types/database";
 
 const PREVIEW_COUNT = 4;
 
@@ -13,6 +15,9 @@ const PREVIEW_COUNT = 4;
  * /jobs — same query result, just sliced to a preview. No new query logic.
  */
 export function JobsPreviewSection({ jobs }: { jobs: Awaited<ReturnType<typeof getPublishedJobs>> }) {
+  const t = useTranslations("Home.JobsPreview");
+  const tCommon = useTranslations("Common");
+
   if (jobs.length === 0) return null;
 
   return (
@@ -20,12 +25,12 @@ export function JobsPreviewSection({ jobs }: { jobs: Awaited<ReturnType<typeof g
       <div className="container">
         <div className="flex items-end justify-between gap-4">
           <div>
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Open roles right now</h2>
-            <p className="mt-2 text-muted-foreground">A sample of what&rsquo;s hiring on PRA today.</p>
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">{t("title")}</h2>
+            <p className="mt-2 text-muted-foreground">{t("subtitle")}</p>
           </div>
           <Button variant="outline" asChild className="hidden sm:inline-flex">
             <Link href="/jobs">
-              Browse all jobs <ArrowRight className="h-4 w-4" />
+              {tCommon("browseAllJobs")} <ArrowRight className="h-4 w-4 rtl:rotate-180" />
             </Link>
           </Button>
         </div>
@@ -39,10 +44,10 @@ export function JobsPreviewSection({ jobs }: { jobs: Awaited<ReturnType<typeof g
                   <p className="mt-1 text-sm text-muted-foreground">{job.company?.name}</p>
                   <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                     <span className="flex items-center gap-1">
-                      <MapPin className="h-3 w-3" /> {job.location ?? "Remote"}
+                      <MapPin className="h-3 w-3" /> {job.location ?? tCommon("remote")}
                     </span>
                     <Badge variant="outline" className="capitalize">
-                      {job.employment_type.replace("_", " ")}
+                      {tCommon(`employmentType.${job.employment_type as EmploymentType}`)}
                     </Badge>
                   </div>
                 </CardContent>
@@ -53,7 +58,7 @@ export function JobsPreviewSection({ jobs }: { jobs: Awaited<ReturnType<typeof g
 
         <Button variant="outline" asChild className="mt-8 w-full sm:hidden">
           <Link href="/jobs">
-            Browse all jobs <ArrowRight className="h-4 w-4" />
+            {tCommon("browseAllJobs")} <ArrowRight className="h-4 w-4 rtl:rotate-180" />
           </Link>
         </Button>
       </div>

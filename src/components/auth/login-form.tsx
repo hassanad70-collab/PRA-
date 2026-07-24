@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import { useSearchParams } from "next/navigation";
-import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
@@ -12,9 +12,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { login, signInWithOAuth } from "@/actions/auth";
+import { Link } from "@/i18n/navigation";
 import { loginSchema, type LoginInput } from "@/lib/validations/auth";
 
 export function LoginForm() {
+  const t = useTranslations("Auth.Login");
+  const tCommon = useTranslations("Common");
   const searchParams = useSearchParams();
   const [isPending, startTransition] = React.useTransition();
 
@@ -34,7 +37,7 @@ export function LoginForm() {
     startTransition(async () => {
       const result = await login(formData);
       if (result && !result.success) {
-        toast.error(result.error ?? "Something went wrong");
+        toast.error(result.error ?? tCommon("somethingWentWrong"));
       }
     });
   };
@@ -44,27 +47,25 @@ export function LoginForm() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Sign in to your account to continue</p>
+        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
       </div>
 
       {error === "oauth_failed" && (
-        <p className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          Social sign-in failed. Please try again.
-        </p>
+        <p className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">{t("oauthFailed")}</p>
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">{t("email")}</Label>
           <Input id="email" type="email" placeholder="you@company.com" {...register("email")} />
           {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
         </div>
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">{t("password")}</Label>
             <Link href="/forgot-password" className="text-xs text-primary hover:underline">
-              Forgot password?
+              {t("forgotPassword")}
             </Link>
           </div>
           <Input id="password" type="password" placeholder="••••••••" {...register("password")} />
@@ -72,7 +73,7 @@ export function LoginForm() {
         </div>
         <Button type="submit" variant="gradient" className="w-full" size="lg" disabled={isPending}>
           {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-          Sign in
+          {t("submit")}
         </Button>
       </form>
 
@@ -81,23 +82,23 @@ export function LoginForm() {
           <span className="w-full border-t border-border" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+          <span className="bg-background px-2 text-muted-foreground">{tCommon("orContinueWith")}</span>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <Button variant="outline" onClick={() => startTransition(() => signInWithOAuth("google"))} disabled={isPending}>
-          Google
+          {tCommon("google")}
         </Button>
         <Button variant="outline" onClick={() => startTransition(() => signInWithOAuth("linkedin_oidc"))} disabled={isPending}>
-          LinkedIn
+          {tCommon("linkedin")}
         </Button>
       </div>
 
       <p className="text-center text-sm text-muted-foreground">
-        Don&apos;t have an account?{" "}
+        {t("noAccount")}{" "}
         <Link href="/register" className="font-medium text-primary hover:underline">
-          Sign up
+          {t("signUp")}
         </Link>
       </p>
     </div>

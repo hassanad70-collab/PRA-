@@ -1,8 +1,8 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { Sparkles } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Link } from "@/i18n/navigation";
 import { AI_TOOLS, type AIToolListing } from "@/lib/marketing/ai-tools";
 import { cn } from "@/lib/utils";
 
@@ -26,6 +27,9 @@ import { cn } from "@/lib/utils";
  * remember.
  */
 export function AICareerToolsSection() {
+  const t = useTranslations("Home.AiTools");
+  const toolsList = t.raw("tools") as { key: string; label: string; description: string }[];
+  const tools = Object.fromEntries(toolsList.map(({ key, ...rest }) => [key, rest]));
   const [comingSoonTool, setComingSoonTool] = React.useState<AIToolListing | null>(null);
 
   return (
@@ -34,20 +38,17 @@ export function AICareerToolsSection() {
         <div className="mx-auto max-w-2xl text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-1.5 text-sm font-medium">
             <Sparkles className="h-3.5 w-3.5 text-primary" />
-            Your AI career toolkit
+            {t("eyebrow")}
           </div>
-          <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
-            One platform for your whole career journey
-          </h2>
-          <p className="mt-4 text-muted-foreground">
-            The ATS Checker is live today — more AI-powered career tools are on the way.
-          </p>
+          <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">{t("title")}</h2>
+          <p className="mt-4 text-muted-foreground">{t("subtitle")}</p>
         </div>
 
         <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {AI_TOOLS.map((tool, i) => {
             const Icon = tool.icon;
             const isLive = tool.status === "live";
+            const { label, description } = tools[tool.key];
 
             const cardInner = (
               <CardContent className="p-6">
@@ -62,14 +63,14 @@ export function AICareerToolsSection() {
                   <Icon className="h-5 w-5" />
                 </div>
                 <div className="mt-4 flex items-center gap-2">
-                  <h3 className="font-semibold">{tool.label}</h3>
+                  <h3 className="font-semibold">{label}</h3>
                   {!isLive && (
                     <Badge variant="secondary" className="shrink-0">
-                      Coming soon
+                      {t("comingSoon")}
                     </Badge>
                   )}
                 </div>
-                <p className="mt-1.5 text-sm text-muted-foreground">{tool.description}</p>
+                <p className="mt-1.5 text-sm text-muted-foreground">{description}</p>
               </CardContent>
             );
 
@@ -100,7 +101,7 @@ export function AICareerToolsSection() {
                 <button
                   type="button"
                   onClick={() => setComingSoonTool(tool)}
-                  className="group block h-full w-full text-left"
+                  className="group block h-full w-full text-start"
                   aria-haspopup="dialog"
                 >
                   <Card className="h-full opacity-75 transition-opacity hover:opacity-100">{cardInner}</Card>
@@ -114,10 +115,12 @@ export function AICareerToolsSection() {
       <Dialog open={!!comingSoonTool} onOpenChange={(open) => !open && setComingSoonTool(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{comingSoonTool?.label} — Coming soon</DialogTitle>
+            <DialogTitle>
+              {comingSoonTool && t("comingSoonDialogTitle", { tool: tools[comingSoonTool.key].label })}
+            </DialogTitle>
             <DialogDescription>
-              {comingSoonTool?.description} We&rsquo;re building this next as part of PRA&rsquo;s AI career
-              toolkit. In the meantime, try the free ATS Resume Checker — it&rsquo;s live today.
+              {comingSoonTool &&
+                t("comingSoonDialogBody", { description: tools[comingSoonTool.key].description })}
             </DialogDescription>
           </DialogHeader>
         </DialogContent>

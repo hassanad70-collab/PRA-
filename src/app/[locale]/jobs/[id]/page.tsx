@@ -1,24 +1,32 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { Briefcase, MapPin } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Link } from "@/i18n/navigation";
+import type { AppLocale } from "@/i18n/routing";
 import { getJobById } from "@/lib/queries/jobs";
 import { JsonLd } from "@/lib/seo/json-ld";
 import { buildMetadata } from "@/lib/seo/metadata";
 import { jobPostingSchema } from "@/lib/seo/schema";
+import type { EmploymentType, ExperienceLevel } from "@/types/database";
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
-  const { id } = await params;
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string; locale: string }>;
+}): Promise<Metadata> {
+  const { id, locale } = await params;
   const job = await getJobById(id);
   if (!job || job.status !== "published") return { title: "Job not found" };
   return buildMetadata({
     title: `${job.title} at ${job.company?.name ?? "PRA"}`,
     description: job.description.slice(0, 160),
     path: `/jobs/${id}`,
+    locale: locale as AppLocale,
   });
 }
 
@@ -26,6 +34,9 @@ export default async function PublicJobDetailPage({ params }: { params: Promise<
   const { id } = await params;
   const job = await getJobById(id);
   if (!job || job.status !== "published") notFound();
+
+  const t = await getTranslations("JobDetail");
+  const tCommon = await getTranslations("Common");
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-10">
@@ -40,13 +51,13 @@ export default async function PublicJobDetailPage({ params }: { params: Promise<
               </Link>
               <div className="mt-3 flex flex-wrap gap-2 text-sm">
                 <Badge variant="outline">
-                  <MapPin className="mr-1 h-3 w-3" /> {job.location ?? "Remote"}
+                  <MapPin className="me-1 h-3 w-3" /> {job.location ?? tCommon("remote")}
                 </Badge>
                 <Badge variant="outline" className="capitalize">
-                  {job.employment_type.replace("_", " ")}
+                  {tCommon(`employmentType.${job.employment_type as EmploymentType}`)}
                 </Badge>
                 <Badge variant="outline" className="capitalize">
-                  <Briefcase className="mr-1 h-3 w-3" /> {job.experience_level}
+                  <Briefcase className="me-1 h-3 w-3" /> {tCommon(`experienceLevel.${job.experience_level as ExperienceLevel}`)}
                 </Badge>
                 {job.salary_min && (
                   <Badge variant="outline">
@@ -57,7 +68,7 @@ export default async function PublicJobDetailPage({ params }: { params: Promise<
               </div>
             </div>
             <Button variant="gradient" size="lg" asChild>
-              <Link href={`/login?redirect=/candidate/jobs/${job.id}`}>Sign in to apply</Link>
+              <Link href={`/login?redirect=/candidate/jobs/${job.id}`}>{t("signInToApply")}</Link>
             </Button>
           </div>
         </CardContent>
@@ -66,13 +77,13 @@ export default async function PublicJobDetailPage({ params }: { params: Promise<
       <Card>
         <CardContent className="prose prose-sm max-w-none space-y-6 pt-6 dark:prose-invert">
           <div>
-            <h3 className="mb-2 text-base font-semibold">About this role</h3>
+            <h3 className="mb-2 text-base font-semibold">{t("aboutRole")}</h3>
             <p className="whitespace-pre-line text-sm text-muted-foreground">{job.description}</p>
           </div>
 
           {!!job.responsibilities?.length && (
             <div>
-              <h3 className="mb-2 text-base font-semibold">Responsibilities</h3>
+              <h3 className="mb-2 text-base font-semibold">{t("responsibilities")}</h3>
               <ul className="space-y-1.5 text-sm text-muted-foreground">
                 {job.responsibilities.map((r: string) => (
                   <li key={r} className="flex gap-2">
@@ -85,7 +96,7 @@ export default async function PublicJobDetailPage({ params }: { params: Promise<
 
           {!!job.requirements?.length && (
             <div>
-              <h3 className="mb-2 text-base font-semibold">Requirements</h3>
+              <h3 className="mb-2 text-base font-semibold">{t("requirements")}</h3>
               <ul className="space-y-1.5 text-sm text-muted-foreground">
                 {job.requirements.map((r: string) => (
                   <li key={r} className="flex gap-2">
@@ -97,7 +108,7 @@ export default async function PublicJobDetailPage({ params }: { params: Promise<
           )}
 
           <div>
-            <h3 className="mb-2 text-base font-semibold">Required skills</h3>
+            <h3 className="mb-2 text-base font-semibold">{t("requiredSkills")}</h3>
             <div className="flex flex-wrap gap-2">
               {job.required_skills.map((s: string) => (
                 <Badge key={s} variant="secondary">
@@ -109,7 +120,7 @@ export default async function PublicJobDetailPage({ params }: { params: Promise<
 
           {!!job.benefits?.length && (
             <div>
-              <h3 className="mb-2 text-base font-semibold">Benefits</h3>
+              <h3 className="mb-2 text-base font-semibold">{t("benefits")}</h3>
               <ul className="space-y-1.5 text-sm text-muted-foreground">
                 {job.benefits.map((b: string) => (
                   <li key={b} className="flex gap-2">
@@ -124,7 +135,7 @@ export default async function PublicJobDetailPage({ params }: { params: Promise<
 
       <div className="text-center">
         <Link href="/jobs" className="text-sm text-muted-foreground hover:underline">
-          ← Back to all jobs
+          {t("backToAllJobs")}
         </Link>
       </div>
     </div>

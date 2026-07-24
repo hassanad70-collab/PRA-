@@ -1,23 +1,31 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { Globe, MapPin, Users } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { Link } from "@/i18n/navigation";
+import type { AppLocale } from "@/i18n/routing";
 import { getCompanyBySlug, getPublishedJobs } from "@/lib/queries/jobs";
 import { JsonLd } from "@/lib/seo/json-ld";
 import { buildMetadata } from "@/lib/seo/metadata";
 import { companyOrganizationSchema } from "@/lib/seo/schema";
+import type { EmploymentType } from "@/types/database";
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-  const { slug } = await params;
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string; locale: string }>;
+}): Promise<Metadata> {
+  const { slug, locale } = await params;
   const company = await getCompanyBySlug(slug);
   if (!company) return { title: "Company not found" };
   return buildMetadata({
     title: company.name,
     description: company.description?.slice(0, 160) ?? `Open roles at ${company.name} on PRA Talent Intelligence.`,
     path: `/companies/${slug}`,
+    locale: locale as AppLocale,
   });
 }
 
@@ -27,6 +35,8 @@ export default async function PublicCompanyProfilePage({ params }: { params: Pro
   if (!company) notFound();
 
   const jobs = await getPublishedJobs({ companyId: company.id });
+  const t = await getTranslations("Company");
+  const tCommon = await getTranslations("Common");
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-10">
@@ -53,7 +63,7 @@ export default async function PublicCompanyProfilePage({ params }: { params: Pro
                 )}
                 {company.company_size && (
                   <span className="flex items-center gap-1">
-                    <Users className="h-3.5 w-3.5" /> {company.company_size} employees
+                    <Users className="h-3.5 w-3.5" /> {t("employees", { count: company.company_size })}
                   </span>
                 )}
                 {company.website && (
@@ -63,7 +73,7 @@ export default async function PublicCompanyProfilePage({ params }: { params: Pro
                     rel="noopener noreferrer"
                     className="flex items-center gap-1 text-primary hover:underline"
                   >
-                    <Globe className="h-3.5 w-3.5" /> Website
+                    <Globe className="h-3.5 w-3.5" /> {t("website")}
                   </a>
                 )}
               </div>
@@ -74,10 +84,10 @@ export default async function PublicCompanyProfilePage({ params }: { params: Pro
       </Card>
 
       <div>
-        <h2 className="mb-3 text-lg font-semibold">Open roles at {company.name}</h2>
+        <h2 className="mb-3 text-lg font-semibold">{t("openRolesAt", { name: company.name })}</h2>
         <div className="space-y-3">
           {jobs.length === 0 && (
-            <p className="py-8 text-center text-sm text-muted-foreground">No open roles right now — check back soon.</p>
+            <p className="py-8 text-center text-sm text-muted-foreground">{t("noOpenRoles")}</p>
           )}
           {jobs.map((job) => (
             <Card key={job.id} className="transition-shadow hover:shadow-md">
@@ -85,9 +95,9 @@ export default async function PublicCompanyProfilePage({ params }: { params: Pro
                 <Link href={`/jobs/${job.id}`}>
                   <h3 className="font-semibold">{job.title}</h3>
                   <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                    <span>{job.location ?? "Remote"}</span>
+                    <span>{job.location ?? tCommon("remote")}</span>
                     <Badge variant="outline" className="capitalize">
-                      {job.employment_type.replace("_", " ")}
+                      {tCommon(`employmentType.${job.employment_type as EmploymentType}`)}
                     </Badge>
                   </div>
                 </Link>

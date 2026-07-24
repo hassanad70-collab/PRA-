@@ -1,6 +1,7 @@
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import { Card } from "@/components/ui/card";
+import { Link } from "@/i18n/navigation";
 import type { getPublishedJobs } from "@/lib/queries/jobs";
 
 /**
@@ -13,6 +14,7 @@ import type { getPublishedJobs } from "@/lib/queries/jobs";
  * dead link this phase is meant to prevent.
  */
 export function CompaniesPreviewSection({ jobs }: { jobs: Awaited<ReturnType<typeof getPublishedJobs>> }) {
+  const t = useTranslations("Home.CompaniesPreview");
   const seen = new Set<string>();
   const companies = jobs
     .map((job) => job.company)
@@ -29,8 +31,8 @@ export function CompaniesPreviewSection({ jobs }: { jobs: Awaited<ReturnType<typ
     <section className="border-y border-border bg-secondary/30 py-24">
       <div className="container">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Companies hiring on PRA</h2>
-          <p className="mt-4 text-muted-foreground">Explore the teams building with PRA today.</p>
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">{t("title")}</h2>
+          <p className="mt-4 text-muted-foreground">{t("subtitle")}</p>
         </div>
 
         <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">

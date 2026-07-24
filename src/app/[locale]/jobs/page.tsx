@@ -1,17 +1,21 @@
-import Link from "next/link";
+import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { MapPin } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Link } from "@/i18n/navigation";
+import type { AppLocale } from "@/i18n/routing";
 import { getPublishedJobs } from "@/lib/queries/jobs";
 import { buildMetadata } from "@/lib/seo/metadata";
+import type { EmploymentType, ExperienceLevel } from "@/types/database";
 
-export const metadata = buildMetadata({
-  title: "Browse Jobs",
-  description: "Open roles across every company on PRA Talent Intelligence. Free to browse, no account required.",
-  path: "/jobs",
-});
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "Metadata.jobs" });
+  return buildMetadata({ title: t("title"), description: t("description"), path: "/jobs", locale: locale as AppLocale });
+}
 
 export default async function PublicJobsPage({
   searchParams,
@@ -20,28 +24,30 @@ export default async function PublicJobsPage({
 }) {
   const params = await searchParams;
   const jobs = await getPublishedJobs({ search: params.search, location: params.location });
+  const t = await getTranslations("Jobs");
+  const tCommon = await getTranslations("Common");
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 px-4 py-10">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Browse Jobs</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Open roles across every company on PRA.{" "}
+          {t("subtitlePrefix")}{" "}
           <Link href="/register" className="text-primary hover:underline">
-            Create an account
+            {t("createAccount")}
           </Link>{" "}
-          to get AI-matched recommendations and one-click apply.
+          {t("subtitleSuffix")}
         </p>
       </div>
 
       <form className="flex flex-col gap-3 sm:flex-row">
-        <Input name="search" defaultValue={params.search} placeholder="Search job titles…" className="sm:max-w-sm" />
-        <Input name="location" defaultValue={params.location} placeholder="Location" className="sm:max-w-xs" />
+        <Input name="search" defaultValue={params.search} placeholder={t("searchPlaceholder")} className="sm:max-w-sm" />
+        <Input name="location" defaultValue={params.location} placeholder={t("locationPlaceholder")} className="sm:max-w-xs" />
       </form>
 
       <div className="space-y-3">
         {jobs.length === 0 && (
-          <p className="py-12 text-center text-sm text-muted-foreground">No jobs match your search right now.</p>
+          <p className="py-12 text-center text-sm text-muted-foreground">{t("noResults")}</p>
         )}
         {jobs.map((job) => (
           <Card key={job.id} className="transition-shadow hover:shadow-md">
@@ -53,13 +59,13 @@ export default async function PublicJobsPage({
                 <p className="mt-1 text-sm text-muted-foreground">{job.company?.name}</p>
                 <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
-                    <MapPin className="h-3 w-3" /> {job.location ?? "Remote"}
+                    <MapPin className="h-3 w-3" /> {job.location ?? tCommon("remote")}
                   </span>
                   <Badge variant="outline" className="capitalize">
-                    {job.employment_type.replace("_", " ")}
+                    {tCommon(`employmentType.${job.employment_type as EmploymentType}`)}
                   </Badge>
                   <Badge variant="outline" className="capitalize">
-                    {job.experience_level}
+                    {tCommon(`experienceLevel.${job.experience_level as ExperienceLevel}`)}
                   </Badge>
                 </div>
               </Link>

@@ -1,19 +1,13 @@
 "use client";
 
-import Link from "next/link";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScoreRing } from "@/components/shared/score-ring";
-
-const POINTS = [
-  "Complete ATS compatibility score — no hidden or gated sections",
-  "Experience, skills, formatting, and education breakdowns",
-  "Concrete weaknesses and suggestions you can act on immediately",
-  "Free, instant, and no account required for your first check",
-];
+import { Link } from "@/i18n/navigation";
 
 /**
  * The homepage's clearest, most prominent call-to-action into the live
@@ -23,6 +17,11 @@ const POINTS = [
  * marketing illustration.
  */
 export function AtsCheckerTeaser() {
+  const t = useTranslations("Home.AtsTeaser");
+  const tAts = useTranslations("AtsChecker.subScores");
+  const breakdown = t.raw("breakdown") as { key: "experience" | "skills" | "formatting" | "education"; value: number }[];
+  const points = t.raw("points") as string[];
+
   return (
     <section className="py-24">
       <div className="container grid items-center gap-16 lg:grid-cols-2">
@@ -37,27 +36,22 @@ export function AtsCheckerTeaser() {
             <CardContent className="p-8">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Your resume</p>
-                  <p className="text-lg font-semibold">Instant ATS Score</p>
-                  <p className="text-sm text-muted-foreground">Free — no account required</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t("yourResume")}</p>
+                  <p className="text-lg font-semibold">{t("instantScore")}</p>
+                  <p className="text-sm text-muted-foreground">{t("freeNoAccount")}</p>
                 </div>
-                <ScoreRing score={87} size={80} label="ATS" />
+                <ScoreRing score={87} size={80} label={t("atsLabel")} />
               </div>
               <div className="mt-6 grid grid-cols-2 gap-3">
-                {[
-                  ["Experience", 90],
-                  ["Skills", 85],
-                  ["Formatting", 92],
-                  ["Education", 80],
-                ].map(([label, value]) => (
-                  <div key={label as string} className="rounded-xl border border-border bg-background/50 p-3">
+                {breakdown.map(({ key, value }) => (
+                  <div key={key} className="rounded-xl border border-border bg-background/50 p-3">
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>{label}</span>
+                      <span>{tAts(key)}</span>
                       <span className="font-semibold text-foreground">{value}</span>
                     </div>
                     <div className="mt-2 h-1.5 rounded-full bg-muted">
                       <div
-                        className="h-1.5 rounded-full bg-gradient-to-r from-indigo-500 to-fuchsia-500"
+                        className="h-1.5 rounded-full bg-gradient-to-r from-indigo-500 to-fuchsia-500 rtl:bg-gradient-to-l"
                         style={{ width: `${value}%` }}
                       />
                     </div>
@@ -76,14 +70,11 @@ export function AtsCheckerTeaser() {
           className="order-1 lg:order-2"
         >
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Free AI Resume Checker — see your <span className="gradient-text">ATS score</span> in seconds
+            {t.rich("title", { highlight: (chunks) => <span className="gradient-text">{chunks}</span> })}
           </h2>
-          <p className="mt-4 text-muted-foreground">
-            Upload your resume and get a complete, AI-powered ATS compatibility analysis instantly —
-            no account, no credit card, no waiting.
-          </p>
+          <p className="mt-4 text-muted-foreground">{t("subtitle")}</p>
           <ul className="mt-8 space-y-4">
-            {POINTS.map((point) => (
+            {points.map((point) => (
               <li key={point} className="flex items-start gap-3">
                 <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-success" />
                 <span className="text-sm text-muted-foreground">{point}</span>
@@ -92,7 +83,7 @@ export function AtsCheckerTeaser() {
           </ul>
           <Button size="lg" variant="gradient" asChild className="mt-8">
             <Link href="/ai-tools/ats-checker">
-              Check my resume free <ArrowRight className="h-4 w-4" />
+              {t("checkMyResume")} <ArrowRight className="h-4 w-4 rtl:rotate-180" />
             </Link>
           </Button>
         </motion.div>

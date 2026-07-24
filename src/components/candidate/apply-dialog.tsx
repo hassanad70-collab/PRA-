@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
@@ -48,7 +49,7 @@ export function ApplyDialog({ jobId, resumes }: { jobId: string; resumes: Resume
   if (resumes.length === 0) {
     return (
       <Button variant="gradient" asChild>
-        <a href="/candidate/resume">Upload a resume to apply</a>
+        <Link href="/candidate/resume">Upload a resume to apply</Link>
       </Button>
     );
   }

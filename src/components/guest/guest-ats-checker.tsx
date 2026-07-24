@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { AlertCircle, Loader2, Sparkles, UploadCloud } from "lucide-react";
 
@@ -9,10 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { checkResumeAsGuest, trackGuestCtaClick } from "@/actions/guest-tools";
 import { GuestAtsResults } from "@/components/guest/guest-ats-results";
+import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import type { AtsScoreResult } from "@/lib/ai/ats-scorer";
 
 export function GuestAtsChecker() {
+  const t = useTranslations("AtsChecker");
+  const tCommon = useTranslations("Common");
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [isPending, startTransition] = React.useTransition();
   const [dragging, setDragging] = React.useState(false);
@@ -29,9 +32,9 @@ export function GuestAtsChecker() {
       if (response.success && response.result) {
         setResult(response.result);
       } else if (response.blocked) {
-        setBlockedMessage(response.error ?? "You've used your free scan.");
+        setBlockedMessage(response.error ?? t("scanUsedFallback"));
       } else {
-        toast.error(response.error ?? "Failed to analyze resume.");
+        toast.error(response.error ?? t("analyzeFailed"));
       }
     });
   };
@@ -44,13 +47,11 @@ export function GuestAtsChecker() {
           <CardContent className="flex flex-col items-center gap-4 py-8 text-center">
             <Sparkles className="h-8 w-8 text-primary" />
             <div>
-              <p className="text-lg font-semibold">Create a free account to save this analysis</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Unlock unlimited ATS scans, AI resume improvement, job matching, and more.
-              </p>
+              <p className="text-lg font-semibold">{t("createAccountTitle")}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{t("createAccountSubtitle")}</p>
             </div>
             <Button variant="gradient" size="lg" asChild onClick={() => trackGuestCtaClick()}>
-              <Link href="/register">Create your free account</Link>
+              <Link href="/register">{tCommon("createFreeAccount")}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -64,11 +65,11 @@ export function GuestAtsChecker() {
         <CardContent className="flex flex-col items-center gap-4 py-10 text-center">
           <AlertCircle className="h-8 w-8 text-warning" />
           <div>
-            <p className="text-lg font-semibold">Free scan used</p>
+            <p className="text-lg font-semibold">{t("scanUsedTitle")}</p>
             <p className="mt-1 text-sm text-muted-foreground">{blockedMessage}</p>
           </div>
           <Button variant="gradient" size="lg" asChild onClick={() => trackGuestCtaClick()}>
-            <Link href="/register">Create your free account</Link>
+            <Link href="/register">{tCommon("createFreeAccount")}</Link>
           </Button>
         </CardContent>
       </Card>
@@ -98,15 +99,15 @@ export function GuestAtsChecker() {
       ) : (
         <UploadCloud className="h-10 w-10 text-muted-foreground" />
       )}
-      <p className="mt-4 font-medium">{isPending ? "Analyzing your resume…" : "Drag & drop your resume here"}</p>
-      <p className="mt-1 text-sm text-muted-foreground">PDF or Word, up to 10MB · No account required</p>
+      <p className="mt-4 font-medium">{isPending ? t("dropzoneAnalyzing") : t("dropzoneIdle")}</p>
+      <p className="mt-1 text-sm text-muted-foreground">{t("dropzoneHint")}</p>
       <Button
         variant="outline"
         className="mt-4"
         disabled={isPending}
         onClick={() => inputRef.current?.click()}
       >
-        Browse files
+        {t("browseFiles")}
       </Button>
       <input
         ref={inputRef}
