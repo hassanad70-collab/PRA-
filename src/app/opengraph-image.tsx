@@ -1,6 +1,12 @@
 import { ImageResponse } from "next/og";
 
-export const runtime = "edge";
+// Node.js runtime (the app's only runtime elsewhere) rather than edge --
+// ImageResponse works fine on Node.js since Next.js 13.3+, and edge here
+// was the suspected cause of dynamic route ([id]/[slug]) 404s in
+// production that didn't reproduce with a local `next start` of the same
+// build. Mixing edge and Node.js runtimes in one app is a known source of
+// Vercel-specific routing quirks; removing the mix is the safer fix than
+// investigating exactly which Vercel routing layer was affected.
 export const alt = "PRA Talent Intelligence — AI Career Platform";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
