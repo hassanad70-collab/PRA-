@@ -10,31 +10,39 @@ import { createClient } from "@/lib/supabase/server";
 export async function GET() {
   const supabase = await createClient();
 
-  const jobResult = await supabase
+  const jobSingle = await supabase
     .from("jobs")
     .select("*, company:companies(*)")
     .eq("id", "174ed530-f4d3-45d0-a328-c4865d2349b4")
     .single();
 
-  const companyResult = await supabase
-    .from("companies")
-    .select("*")
-    .eq("slug", "prod-audit-company")
-    .is("deleted_at", null)
-    .single();
+  const jobArray = await supabase
+    .from("jobs")
+    .select("*, company:companies(*)")
+    .eq("id", "174ed530-f4d3-45d0-a328-c4865d2349b4")
+    .limit(1);
+
+  const jobMaybeSingle = await supabase
+    .from("jobs")
+    .select("*, company:companies(*)")
+    .eq("id", "174ed530-f4d3-45d0-a328-c4865d2349b4")
+    .maybeSingle();
 
   return NextResponse.json({
-    job: {
-      data: jobResult.data ? { id: jobResult.data.id, title: jobResult.data.title, status: jobResult.data.status } : null,
-      error: jobResult.error,
-      status: jobResult.status,
-      statusText: jobResult.statusText,
+    jobSingle: {
+      data: jobSingle.data ? { id: jobSingle.data.id, title: jobSingle.data.title } : null,
+      errorMessage: jobSingle.error?.message?.slice(0, 100) ?? null,
+      status: jobSingle.status,
     },
-    company: {
-      data: companyResult.data ? { id: companyResult.data.id, name: companyResult.data.name } : null,
-      error: companyResult.error,
-      status: companyResult.status,
-      statusText: companyResult.statusText,
+    jobArray: {
+      dataLength: jobArray.data?.length ?? null,
+      errorMessage: jobArray.error?.message?.slice(0, 100) ?? null,
+      status: jobArray.status,
+    },
+    jobMaybeSingle: {
+      data: jobMaybeSingle.data ? { id: jobMaybeSingle.data.id, title: jobMaybeSingle.data.title } : null,
+      errorMessage: jobMaybeSingle.error?.message?.slice(0, 100) ?? null,
+      status: jobMaybeSingle.status,
     },
   });
 }
