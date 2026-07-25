@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { useTranslations } from "next-intl";
 import {
   BarChart3,
@@ -34,7 +34,7 @@ export function Features() {
           {items.map((feature, i) => {
             const Icon = ICONS[i];
             return (
-              <motion.div
+              <m.div
                 key={feature.title}
                 initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -50,7 +50,7 @@ export function Features() {
                     <CardDescription>{feature.description}</CardDescription>
                   </CardContent>
                 </Card>
-              </motion.div>
+              </m.div>
             );
           })}
         </div>

@@ -14,9 +14,7 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FunnelChart } from "@/components/recruiter/charts/funnel-chart";
-import { TopSkillsChart } from "@/components/recruiter/charts/top-skills-chart";
-import { MonthlyCountChart } from "@/components/admin/charts/monthly-count-chart";
+import { FunnelChart, MonthlyCountChart, TopSkillsChart } from "@/components/shared/dynamic-charts";
 import { formatBytes, formatRelativeTime } from "@/lib/utils";
 import {
   getAdminAuditLogs,

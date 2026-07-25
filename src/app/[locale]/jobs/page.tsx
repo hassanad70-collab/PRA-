@@ -17,6 +17,12 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return buildMetadata({ title: t("title"), description: t("description"), path: "/jobs", locale: locale as AppLocale });
 }
 
+// Same ISR window as the homepage (src/app/[locale]/page.tsx) -- job
+// postings don't change second-to-second, so this was previously fully
+// dynamic (a fresh DB round trip on every request) for no freshness benefit
+// users would ever notice.
+export const revalidate = 300;
+
 export default async function PublicJobsPage({
   searchParams,
 }: {

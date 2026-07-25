@@ -29,7 +29,9 @@ export async function getTopSkills(companyId: string, limit = 8) {
   const { data } = await supabase
     .from("applications")
     .select("candidate:candidates(id), job:jobs!inner(company_id)")
-    .eq("job.company_id", companyId);
+    .eq("job.company_id", companyId)
+    // Scalability guard-rail, not a UX change -- see getPublishedJobs.
+    .limit(2000);
 
   if (!data?.length) return [];
 

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { Sparkles } from "lucide-react";
 
@@ -76,7 +76,7 @@ export function AICareerToolsSection() {
 
             if (isLive) {
               return (
-                <motion.div
+                <m.div
                   key={tool.key}
                   initial={{ opacity: 0, y: 16 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -86,12 +86,12 @@ export function AICareerToolsSection() {
                   <Link href={tool.href} className="group block h-full">
                     <Card className="h-full transition-shadow hover:shadow-md">{cardInner}</Card>
                   </Link>
-                </motion.div>
+                </m.div>
               );
             }
 
             return (
-              <motion.div
+              <m.div
                 key={tool.key}
                 initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -106,7 +106,7 @@ export function AICareerToolsSection() {
                 >
                   <Card className="h-full opacity-75 transition-opacity hover:opacity-100">{cardInner}</Card>
                 </button>
-              </motion.div>
+              </m.div>
             );
           })}
         </div>

@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { AssignCompanyDialog } from "@/components/admin/assign-company-dialog";
+import { AssignCompanyDialog } from "@/components/shared/dynamic-dialogs";
 import { Pagination } from "@/components/admin/pagination";
 import { UserRowActions } from "@/components/admin/user-row-actions";
 import { UserStatusBadge } from "@/components/admin/user-status-badge";

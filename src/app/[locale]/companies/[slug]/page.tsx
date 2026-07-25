@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { Globe, MapPin, Users } from "lucide-react";
 
@@ -29,6 +30,10 @@ export async function generateMetadata({
   });
 }
 
+// Same ISR window as the homepage/jobs pages -- a company profile changes
+// rarely (logo, description, open-roles list).
+export const revalidate = 300;
+
 export default async function PublicCompanyProfilePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const company = await getCompanyBySlug(slug);
@@ -45,8 +50,13 @@ export default async function PublicCompanyProfilePage({ params }: { params: Pro
         <CardContent className="pt-6">
           <div className="flex items-center gap-4">
             {company.logo_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={company.logo_url} alt={company.name} className="h-16 w-16 rounded-xl object-cover" />
+              <Image
+                src={company.logo_url}
+                alt={company.name}
+                width={64}
+                height={64}
+                className="h-16 w-16 rounded-xl object-cover"
+              />
             ) : (
               <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-primary/10 text-xl font-semibold text-primary">
                 {company.name.slice(0, 1).toUpperCase()}

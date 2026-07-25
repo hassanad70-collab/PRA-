@@ -30,6 +30,10 @@ export async function generateMetadata({
   });
 }
 
+// Same ISR window as the homepage/jobs list -- a job posting's content
+// (title, description, requirements) changes rarely after publish.
+export const revalidate = 300;
+
 export default async function PublicJobDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const job = await getJobById(id);

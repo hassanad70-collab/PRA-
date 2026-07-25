@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { getLocale } from "next-intl/server";
 
 import { ThemeProvider } from "@/components/shared/theme-provider";
+import { WebVitalsReporter } from "@/components/shared/web-vitals-reporter";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { localeDirections, type AppLocale } from "@/i18n/routing";
@@ -55,6 +56,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {organizationAndWebsiteSchema().map((schema) => (
           <JsonLd key={schema["@type"] as string} data={schema} />
         ))}
+        <WebVitalsReporter />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <TooltipProvider delayDuration={150}>
             {children}

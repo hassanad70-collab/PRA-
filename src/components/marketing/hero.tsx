@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { ArrowRight, Sparkles } from "lucide-react";
 
@@ -17,7 +17,7 @@ export function Hero() {
       <div className="absolute start-1/2 top-0 -z-10 h-[600px] w-[900px] -translate-x-1/2 rounded-full bg-gradient-to-tr from-indigo-500/20 via-violet-500/20 to-fuchsia-500/20 blur-3xl rtl:translate-x-1/2" />
 
       <div className="container flex flex-col items-center text-center">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -25,27 +25,27 @@ export function Hero() {
         >
           <Sparkles className="h-3.5 w-3.5 text-primary" />
           {t("eyebrow")}
-        </motion.div>
+        </m.div>
 
-        <motion.h1
+        <m.h1
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
           className="max-w-4xl text-4xl font-bold tracking-tight sm:text-6xl"
         >
           {t.rich("title", { highlight: (chunks) => <span className="gradient-text">{chunks}</span> })}
-        </motion.h1>
+        </m.h1>
 
-        <motion.p
+        <m.p
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
           className="mt-6 max-w-2xl text-lg text-muted-foreground"
         >
           {t("subtitle")}
-        </motion.p>
+        </m.p>
 
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
@@ -59,9 +59,9 @@ export function Hero() {
           <Button size="lg" variant="outline" asChild>
             <Link href="/ai-tools/ats-checker">{t("tryAtsChecker")}</Link>
           </Button>
-        </motion.div>
+        </m.div>
 
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.4 }}
@@ -73,7 +73,7 @@ export function Hero() {
               <div className="mt-1 text-xs text-muted-foreground">{stat.label}</div>
             </div>
           ))}
-        </motion.div>
+        </m.div>
       </div>
     </section>
   );

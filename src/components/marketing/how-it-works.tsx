@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { FileUp, Search, Sparkles, Target } from "lucide-react";
 
@@ -23,7 +23,7 @@ export function HowItWorks() {
           {steps.map((step, i) => {
             const Icon = ICONS[i];
             return (
-              <motion.div
+              <m.div
                 key={step.title}
                 initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -36,7 +36,7 @@ export function HowItWorks() {
                 </div>
                 <h3 className="mt-4 font-semibold">{step.title}</h3>
                 <p className="mt-2 text-sm text-muted-foreground">{step.description}</p>
-              </motion.div>
+              </m.div>
             );
           })}
         </div>

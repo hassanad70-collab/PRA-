@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { domAnimation, LazyMotion } from "framer-motion";
 import { getTranslations } from "next-intl/server";
 
 import { AICareerToolsSection } from "@/components/marketing/ai-career-tools-section";
@@ -35,20 +36,30 @@ export default async function HomePage() {
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
-      <main className="flex-1">
-        <Hero />
-        <TrustedCompanies />
-        <AtsCheckerTeaser />
-        <AICareerToolsSection />
-        <Features />
-        <HowItWorks />
-        <JobsPreviewSection jobs={jobs} />
-        <CompaniesPreviewSection jobs={jobs} />
-        <AIRecruitment />
-        <Testimonials />
-        <FAQ />
-        <CTA />
-      </main>
+      {/*
+        LazyMotion + the `m` component (used inside Hero/AtsCheckerTeaser/
+        AICareerToolsSection/Features/HowItWorks/AIRecruitment/Testimonials)
+        ships a smaller animation runtime than importing `motion` directly
+        in each of those 7 files, without changing any animation behavior
+        -- `domAnimation` covers the opacity/transform whileInView fades
+        they all use.
+      */}
+      <LazyMotion features={domAnimation}>
+        <main className="flex-1">
+          <Hero />
+          <TrustedCompanies />
+          <AtsCheckerTeaser />
+          <AICareerToolsSection />
+          <Features />
+          <HowItWorks />
+          <JobsPreviewSection jobs={jobs} />
+          <CompaniesPreviewSection jobs={jobs} />
+          <AIRecruitment />
+          <Testimonials />
+          <FAQ />
+          <CTA />
+        </main>
+      </LazyMotion>
       <Footer />
     </div>
   );

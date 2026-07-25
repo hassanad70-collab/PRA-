@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { Star } from "lucide-react";
 
@@ -20,7 +20,7 @@ export function Testimonials() {
         </div>
         <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-3">
           {items.map((item, i) => (
-            <motion.div
+            <m.div
               key={item.name}
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -46,7 +46,7 @@ export function Testimonials() {
                   </div>
                 </CardContent>
               </Card>
-            </motion.div>
+            </m.div>
           ))}
         </div>
       </div>

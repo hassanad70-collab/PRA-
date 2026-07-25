@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 
 import { Card } from "@/components/ui/card";
 import { Link } from "@/i18n/navigation";
@@ -40,8 +41,13 @@ export function CompaniesPreviewSection({ jobs }: { jobs: Awaited<ReturnType<typ
             <Link key={company.id} href={`/companies/${company.slug}`}>
               <Card className="flex h-full flex-col items-center gap-3 p-4 text-center transition-shadow hover:shadow-md">
                 {company.logo_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={company.logo_url} alt={company.name} className="h-12 w-12 rounded-lg object-cover" />
+                  <Image
+                    src={company.logo_url}
+                    alt={company.name}
+                    width={48}
+                    height={48}
+                    className="h-12 w-12 rounded-lg object-cover"
+                  />
                 ) : (
                   <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-lg font-semibold text-primary">
                     {company.name.slice(0, 1).toUpperCase()}

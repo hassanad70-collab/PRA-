@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { AlertCircle, Loader2, Sparkles, UploadCloud } from "lucide-react";
@@ -8,10 +9,19 @@ import { AlertCircle, Loader2, Sparkles, UploadCloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { checkResumeAsGuest, trackGuestCtaClick } from "@/actions/guest-tools";
-import { GuestAtsResults } from "@/components/guest/guest-ats-results";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import type { AtsScoreResult } from "@/lib/ai/ats-scorer";
+
+// Unlike the dialogs in src/components/shared/dynamic-dialogs.tsx, this has
+// no always-visible trigger to preserve -- nothing from the results panel
+// is shown until a scan actually completes, so `ssr: false` here has no
+// user-visible cost and keeps its markup/JS out of every guest's initial
+// page load even though most guests will eventually trigger it.
+const GuestAtsResults = dynamic(() => import("@/components/guest/guest-ats-results").then((m) => m.GuestAtsResults), {
+  ssr: false,
+  loading: () => <div className="h-64 w-full animate-pulse rounded-2xl bg-muted" />,
+});
 
 export function GuestAtsChecker() {
   const t = useTranslations("AtsChecker");

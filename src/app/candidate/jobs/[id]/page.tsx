@@ -4,7 +4,7 @@ import { Briefcase, CheckCircle2, MapPin, Sparkles, XCircle } from "lucide-react
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { ApplyDialog } from "@/components/candidate/apply-dialog";
+import { ApplyDialog } from "@/components/shared/dynamic-dialogs";
 import { createClient } from "@/lib/supabase/server";
 import { getCandidateFullProfile, getCurrentUser } from "@/lib/queries/candidate";
 import { getJobById } from "@/lib/queries/jobs";

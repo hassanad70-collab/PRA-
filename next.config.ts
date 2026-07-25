@@ -1,7 +1,12 @@
 import type { NextConfig } from "next";
+import createBundleAnalyzer from "@next/bundle-analyzer";
 import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
+// Opt-in only (ANALYZE=true npm run build) -- adds no cost to a normal
+// build/deploy, gives an ongoing way to check bundle composition before it
+// regresses again.
+const withBundleAnalyzer = createBundleAnalyzer({ enabled: process.env.ANALYZE === "true" });
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
@@ -37,4 +42,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withNextIntl(nextConfig);
+export default withBundleAnalyzer(withNextIntl(nextConfig));

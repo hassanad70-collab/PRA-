@@ -1,6 +1,26 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
+import type { ApplicationStatus, ScreeningResult } from "@/types/database";
+
+// This project's Supabase client has no generated `Database` generic (see
+// src/types/database.ts's header), so narrowing an embedded relation's
+// column list away from "*" makes postgrest-js's fallback type parser
+// misinfer its cardinality. `.returns<T>()` declares the real shape
+// explicitly instead -- see the longer explanation in
+// src/lib/queries/jobs.ts's getPublishedJobs.
+interface ApplicationListItem {
+  id: string;
+  status: ApplicationStatus;
+  candidate_id: string;
+  resume_id: string;
+  candidate: {
+    current_position: string | null;
+    years_of_experience: number;
+    profile: { full_name: string } | null;
+  } | null;
+  screening_result: ScreeningResult[];
+}
 
 /**
  * job_matches and ats_scores both relate to applications indirectly (via
@@ -14,19 +34,26 @@ import { createClient } from "@/lib/supabase/server";
  * shape the UI already expects.
  */
 
-/** All applications for a job, ranked by AI screening score (best first). */
+/**
+ * All applications for a job, ranked by AI screening score (best first).
+ * `resume:resumes(*)` was previously joined here but never read by this
+ * list's UI (src/app/recruiter/jobs/[id]/candidates/page.tsx) -- every
+ * resume row it pulled included a vector(1536) embedding plus raw_text and
+ * parsed_data, none of which this view uses. candidate/profile are narrowed
+ * to the fields that view actually renders for the same reason.
+ */
 export async function getApplicationsForJob(jobId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("applications")
     .select(
-      `*,
-      candidate:candidates(*, profile:profiles(*)),
-      resume:resumes(*),
+      `id, status, candidate_id, resume_id,
+      candidate:candidates(current_position, years_of_experience, profile:profiles(full_name)),
       screening_result:screening_results(*)`
     )
     .eq("job_id", jobId)
-    .order("applied_at", { ascending: false });
+    .order("applied_at", { ascending: false })
+    .returns<ApplicationListItem[]>();
 
   if (error) {
     console.error("getApplicationsForJob failed", error);

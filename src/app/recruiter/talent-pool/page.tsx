@@ -20,7 +20,11 @@ export default async function TalentPoolPage() {
     .from("talent_pool")
     .select("*, candidate:candidates(*, profile:profiles(*))")
     .eq("company_id", recruiter.company_id)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    // Scalability guard-rail, not a UX change: caps an otherwise-unbounded
+    // query at a size no real company is near yet, without adding
+    // pagination controls to this page.
+    .limit(500);
 
   return (
     <div className="space-y-6">

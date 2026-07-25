@@ -4,9 +4,9 @@ import { FileText, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AtsScoreCard } from "@/components/candidate/ats-score-card";
-import { ImproveResumeDialog } from "@/components/candidate/improve-resume-dialog";
 import { ResumeUpload } from "@/components/candidate/resume-upload";
 import { SetPrimaryButton } from "@/components/candidate/set-primary-button";
+import { ImproveResumeDialog } from "@/components/shared/dynamic-dialogs";
 import { getCandidateFullProfile, getCurrentUser, getLatestAtsScore } from "@/lib/queries/candidate";
 import { formatRelativeTime } from "@/lib/utils";
 

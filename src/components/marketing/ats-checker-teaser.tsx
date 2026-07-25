@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 
@@ -25,7 +25,7 @@ export function AtsCheckerTeaser() {
   return (
     <section className="py-24">
       <div className="container grid items-center gap-16 lg:grid-cols-2">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, x: 24 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
@@ -60,9 +60,9 @@ export function AtsCheckerTeaser() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </m.div>
 
-        <motion.div
+        <m.div
           initial={{ opacity: 0, x: -24 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
@@ -86,7 +86,7 @@ export function AtsCheckerTeaser() {
               {t("checkMyResume")} <ArrowRight className="h-4 w-4 rtl:rotate-180" />
             </Link>
           </Button>
-        </motion.div>
+        </m.div>
       </div>
     </section>
   );

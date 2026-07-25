@@ -2,9 +2,7 @@ import { redirect } from "next/navigation";
 import { Briefcase, Star, TrendingUp, Users } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FunnelChart } from "@/components/recruiter/charts/funnel-chart";
-import { TopSkillsChart } from "@/components/recruiter/charts/top-skills-chart";
-import { TrendChart } from "@/components/recruiter/charts/trend-chart";
+import { FunnelChart, TopSkillsChart, TrendChart } from "@/components/shared/dynamic-charts";
 import { getCurrentUser } from "@/lib/queries/candidate";
 import { getCompanyDashboardStats, getMonthlyApplicationTrend, getTopSkills } from "@/lib/queries/dashboard";
 import { getRecruiterContext } from "@/lib/queries/jobs";

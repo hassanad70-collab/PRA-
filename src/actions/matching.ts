@@ -6,6 +6,15 @@ import type { Job, ParsedResumeData } from "@/types/database";
 
 const MAX_MATCHES_PER_RUN = 15;
 
+// Both `jobs` selects below list every column except `embedding` (a
+// vector(1536) never read by analyzeJobMatch) as an inline literal, not a
+// shared constant -- supabase-js infers a query's result type by parsing
+// its select string as a TypeScript literal type, and referencing a
+// separately-declared const (even in the same file) collapses that to
+// `any`/wrong join cardinality instead. If this column list needs to
+// change, update it in both places here and in src/lib/queries/jobs.ts's
+// getJobById.
+
 /**
  * Matches a single resume against every published job using vector
  * similarity (pgvector) to shortlist candidates, then runs a deep AI
@@ -37,7 +46,12 @@ export async function generateMatchesForResume(resumeId: string, candidateId: st
   if (error || !shortlist?.length) return;
 
   const jobIds = shortlist.map((s: { job_id: string }) => s.job_id);
-  const { data: jobs } = await admin.from("jobs").select("*").in("id", jobIds);
+  const { data: jobs } = await admin
+    .from("jobs")
+    .select(
+      "id, company_id, recruiter_id, title, slug, department, description, responsibilities, requirements, benefits, employment_type, experience_level, min_experience_years, education_requirement, required_skills, nice_to_have_skills, location, is_remote, salary_min, salary_max, salary_currency, headcount, status, is_archived, duplicated_from, views_count, applications_count, published_at, closes_at, created_at, updated_at"
+    )
+    .in("id", jobIds);
   if (!jobs?.length) return;
 
   const parsed = resume.parsed_data as ParsedResumeData;
@@ -82,7 +96,13 @@ export async function generateMatchesForResume(resumeId: string, candidateId: st
 export async function generateMatchesForJob(jobId: string) {
   const admin = createAdminClient();
 
-  const { data: job } = await admin.from("jobs").select("*").eq("id", jobId).single();
+  const { data: job } = await admin
+    .from("jobs")
+    .select(
+      "id, company_id, recruiter_id, title, slug, department, description, responsibilities, requirements, benefits, employment_type, experience_level, min_experience_years, education_requirement, required_skills, nice_to_have_skills, location, is_remote, salary_min, salary_max, salary_currency, headcount, status, is_archived, duplicated_from, views_count, applications_count, published_at, closes_at, created_at, updated_at, embedding"
+    )
+    .eq("id", jobId)
+    .single();
   if (!job?.embedding) return;
 
   const { data: shortlist, error } = await admin.rpc("match_candidates_for_job", {
@@ -93,18 +113,21 @@ export async function generateMatchesForJob(jobId: string) {
 
   if (error || !shortlist?.length) return;
 
+  // Batched instead of one pair of queries per shortlist candidate (up to
+  // MAX_MATCHES_PER_RUN=15 candidates -- was up to 30 round trips per run).
+  const resumeIds = shortlist.map((s: { resume_id: string }) => s.resume_id);
+  const candidateIds = shortlist.map((s: { candidate_id: string }) => s.candidate_id);
+  const [{ data: resumes }, { data: candidateRows }] = await Promise.all([
+    admin.from("resumes").select("id, parsed_data").in("id", resumeIds),
+    admin.from("candidates").select("id, years_of_experience").in("id", candidateIds),
+  ]);
+  const resumeById = new Map((resumes ?? []).map((r) => [r.id, r]));
+  const candidateById = new Map((candidateRows ?? []).map((c) => [c.id, c]));
+
   await Promise.allSettled(
     shortlist.map(async (s: { candidate_id: string; resume_id: string; similarity: number }) => {
-      const { data: resume } = await admin
-        .from("resumes")
-        .select("parsed_data")
-        .eq("id", s.resume_id)
-        .single();
-      const { data: candidateRow } = await admin
-        .from("candidates")
-        .select("years_of_experience")
-        .eq("id", s.candidate_id)
-        .single();
+      const resume = resumeById.get(s.resume_id);
+      const candidateRow = candidateById.get(s.candidate_id);
 
       if (!resume?.parsed_data) return;
       const parsed = resume.parsed_data as ParsedResumeData;
