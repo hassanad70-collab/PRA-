@@ -79,12 +79,18 @@ test.describe("Internationalization (English / Arabic)", () => {
   // the ATS Checker page render in this phase's approved scope (/jobs,
   // /companies, and the auth pages have no nav chrome -- a pre-existing gap
   // predating Phase 1D, not something this phase adds or fixes).
-  test("language switcher preserves the current page", async ({ page }) => {
+  test("language switcher preserves the current page and updates html lang/dir without a reload", async ({ page }) => {
     await page.goto("/en/ai-tools/ats-checker");
     await page.getByRole("button", { name: "Change language" }).first().click();
     await page.getByRole("menuitem", { name: "العربية" }).click();
     await expect(page).toHaveURL(/\/ar\/ai-tools\/ats-checker$/);
     await expect(page.getByRole("heading", { name: "فاحص السيرة الذاتية المجاني بالذكاء الاصطناعي" })).toBeVisible();
+
+    // The root layout that renders <html> lives outside the [locale] tree,
+    // so a client-side (soft) navigation between locales doesn't re-render
+    // it on its own -- regression coverage for that gap.
+    await expect(page.locator("html")).toHaveAttribute("lang", "ar");
+    await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
   });
 
   test("a manually selected language persists across a reload and overrides browser detection", async ({ page }) => {

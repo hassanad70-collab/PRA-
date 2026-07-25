@@ -5,7 +5,20 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
-  { ignores: [".next/**", "node_modules/**", "next-env.d.ts"] },
+  {
+    ignores: [
+      ".next/**",
+      "node_modules/**",
+      "next-env.d.ts",
+      // Generated Playwright output (gitignored, but not previously
+      // eslint-ignored) -- surfaced once a local test run left a report
+      // bundle on disk, since eslint has its own ignore list separate from
+      // git's.
+      "playwright-report/**",
+      "test-results/**",
+      "playwright/.cache/**",
+    ],
+  },
   ...compat.extends("next/core-web-vitals", "next/typescript"),
   {
     rules: {
