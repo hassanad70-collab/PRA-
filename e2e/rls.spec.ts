@@ -1,7 +1,13 @@
 import { test, expect } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 
-import { TEST_USERS } from "./global-setup";
+import { TEST_OTHER_COMPANY_JOB_SLUG, TEST_USERS } from "./global-setup";
+
+function adminClient() {
+  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+}
 
 /**
  * These tests bypass the UI entirely and drive Supabase directly with real
@@ -100,5 +106,62 @@ test.describe("RLS / tenant isolation", () => {
     const result = await anon.from("candidates").select("id").limit(5);
     expect(result.error).toBeNull();
     expect(result.data).toEqual([]);
+  });
+
+  test("a recruiter can see a candidate who opted into is_open_to_work AND is AI-matched to one of their company's jobs, but not before either condition holds", async () => {
+    const admin = adminClient();
+    const { supabase: recruiterSession } = await signIn(TEST_USERS.recruiterOther.email, TEST_USERS.recruiterOther.password);
+    const { userId: candidateId } = await signIn(TEST_USERS.candidateOther.email, TEST_USERS.candidateOther.password);
+
+    const { data: job } = await admin.from("jobs").select("id").eq("slug", TEST_OTHER_COMPANY_JOB_SLUG).single();
+
+    // job_matches.resume_id is NOT NULL, so a real resume row is required to
+    // create one -- reuse the candidate's existing resume if any, else make one.
+    let { data: resume } = await admin.from("resumes").select("id").eq("candidate_id", candidateId).limit(1).maybeSingle();
+    if (!resume) {
+      const inserted = await admin
+        .from("resumes")
+        .insert({ candidate_id: candidateId, file_name: "rls-discovery-test.pdf", file_url: "https://example.test/x.pdf", file_path: `${candidateId}/rls-discovery-test.pdf`, parse_status: "completed" })
+        .select("id")
+        .single();
+      resume = inserted.data;
+    }
+
+    // job_matches has no candidate-facing delete policy (writes come from the
+    // service-role AI pipeline in production), so setup/teardown here goes
+    // through the admin client rather than the candidate's own session.
+    await admin.from("candidates").update({ is_open_to_work: false }).eq("id", candidateId);
+    await admin.from("job_matches").delete().eq("job_id", job!.id).eq("candidate_id", candidateId);
+
+    // Neither opted in nor matched yet -- not visible.
+    const beforeOptIn = await recruiterSession.from("candidates").select("id").eq("id", candidateId).maybeSingle();
+    expect(beforeOptIn.data).toBeNull();
+
+    // Matched but not opted in -- still not visible.
+    const matchUpsert = await admin
+      .from("job_matches")
+      .upsert(
+        { job_id: job!.id, candidate_id: candidateId, resume_id: resume!.id, match_score: 75 },
+        { onConflict: "job_id,candidate_id" }
+      );
+    expect(matchUpsert.error).toBeNull();
+    const matchedNotOptedIn = await recruiterSession.from("candidates").select("id").eq("id", candidateId).maybeSingle();
+    expect(matchedNotOptedIn.data).toBeNull();
+
+    // Opted in AND matched -- now visible.
+    await admin.from("candidates").update({ is_open_to_work: true }).eq("id", candidateId);
+    const visible = await recruiterSession.from("candidates").select("id").eq("id", candidateId).maybeSingle();
+    expect(visible.error).toBeNull();
+    expect(visible.data?.id).toBe(candidateId);
+
+    // Turning the opt-in back off immediately removes discoverability again,
+    // even though the job_matches row (the AI's work) still exists.
+    await admin.from("candidates").update({ is_open_to_work: false }).eq("id", candidateId);
+    const afterOptOut = await recruiterSession.from("candidates").select("id").eq("id", candidateId).maybeSingle();
+    expect(afterOptOut.data).toBeNull();
+
+    // Cleanup so this doesn't leak into other tests/runs.
+    await admin.from("candidates").update({ is_open_to_work: false }).eq("id", candidateId);
+    await admin.from("job_matches").delete().eq("job_id", job!.id).eq("candidate_id", candidateId);
   });
 });

@@ -37,4 +37,20 @@ test.describe("Candidate workflow", () => {
     await page.getByRole("link", { name: "Applications" }).click();
     await expect(page).toHaveURL(/\/candidate\/applications$/);
   });
+
+  test("can toggle discoverability to recruiters on the profile page", async ({ page }) => {
+    await page.goto("/candidate/profile");
+    const toggle = page.getByLabel("Open to being discovered by recruiters");
+    const initiallyChecked = await toggle.isChecked();
+
+    await toggle.click();
+    await expect(toggle).toBeChecked({ checked: !initiallyChecked, timeout: 10_000 });
+
+    await page.reload();
+    await expect(page.getByLabel("Open to being discovered by recruiters")).toBeChecked({ checked: !initiallyChecked });
+
+    // Restore original state so this doesn't leak into other tests.
+    await page.getByLabel("Open to being discovered by recruiters").click();
+    await expect(page.getByLabel("Open to being discovered by recruiters")).toBeChecked({ checked: initiallyChecked });
+  });
 });

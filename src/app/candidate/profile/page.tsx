@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BasicInfoForm } from "@/components/candidate/basic-info-form";
 import { EducationSection } from "@/components/candidate/education-section";
 import { ExperienceSection } from "@/components/candidate/experience-section";
+import { OpenToWorkToggle } from "@/components/candidate/open-to-work-toggle";
 import { SkillsSection } from "@/components/candidate/skills-section";
 import { getCandidateFullProfile, getCurrentUser } from "@/lib/queries/candidate";
 
@@ -49,12 +50,13 @@ export default async function ProfilePage() {
           <TabsTrigger value="more">Languages & Projects</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="basic">
+        <TabsContent value="basic" className="space-y-4">
           <Card>
             <CardContent className="pt-6">
               <BasicInfoForm candidate={candidate} />
             </CardContent>
           </Card>
+          <OpenToWorkToggle initialEnabled={candidate.is_open_to_work} />
         </TabsContent>
 
         <TabsContent value="experience">

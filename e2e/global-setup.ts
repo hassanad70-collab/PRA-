@@ -17,6 +17,7 @@ export const TEST_USERS = {
 };
 
 export const TEST_JOB_SLUG = "e2e-test-published-job";
+export const TEST_OTHER_COMPANY_JOB_SLUG = "e2e-other-company-published-job";
 
 function getAdminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -146,6 +147,29 @@ async function globalSetup() {
       published_at: new Date().toISOString(),
     });
     if (error) throw new Error(`Failed to create test job: ${error.message}`);
+  }
+
+  // A published job at the other test company -- needed by rls.spec.ts and
+  // ai-candidate-discovery.spec.ts, which test AI-matching discoverability
+  // scoped to "the recruiter's own company" and specifically need a second,
+  // isolated company/job pair distinct from the primary one above.
+  const { data: existingOtherJob } = await admin
+    .from("jobs")
+    .select("id")
+    .eq("slug", TEST_OTHER_COMPANY_JOB_SLUG)
+    .maybeSingle();
+  if (!existingOtherJob) {
+    const { error } = await admin.from("jobs").insert({
+      company_id: companyOther.id,
+      recruiter_id: recruiterOtherId,
+      title: "E2E Other Company Test — Product Manager",
+      slug: TEST_OTHER_COMPANY_JOB_SLUG,
+      description: "Fixture job used by the Playwright end-to-end suite. Safe to ignore.",
+      required_skills: ["Product Strategy", "Testing"],
+      status: "published",
+      published_at: new Date().toISOString(),
+    });
+    if (error) throw new Error(`Failed to create other-company test job: ${error.message}`);
   }
 }
 

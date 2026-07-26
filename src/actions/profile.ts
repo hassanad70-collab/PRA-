@@ -163,6 +163,17 @@ export async function deleteSkill(id: string): Promise<ActionResult> {
   return { success: true };
 }
 
+export async function toggleOpenToWork(enabled: boolean): Promise<ActionResult> {
+  const ctx = await requireCandidate();
+  if (!ctx) return { success: false, error: "You must be signed in." };
+
+  const { error } = await ctx.supabase.from("candidates").update({ is_open_to_work: enabled }).eq("id", ctx.userId);
+  if (error) return { success: false, error: error.message };
+
+  revalidatePath("/candidate/profile");
+  return { success: true };
+}
+
 export async function toggleSavedJob(jobId: string): Promise<ActionResult & { saved?: boolean }> {
   const ctx = await requireCandidate();
   if (!ctx) return { success: false, error: "You must be signed in." };
