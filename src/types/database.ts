@@ -407,3 +407,94 @@ export interface ApplicationWithDetails extends Application {
   ats_score: AtsScore | null;
   screening_result: ScreeningResult | null;
 }
+
+// ============================================================================
+// AI Resume Builder (v1.1.6)
+// ============================================================================
+
+export type ResumeDraftStatus = "draft" | "finalized";
+
+export type ResumeSectionType =
+  | "personal_info"
+  | "summary"
+  | "experience"
+  | "education"
+  | "skills"
+  | "certifications"
+  | "languages"
+  | "projects"
+  | "achievements"
+  | "social_links";
+
+// Only these three go through the 'ai_suggested' state -- everything else
+// is profile-sourced or manually edited, never AI-rewritten (the AI must
+// never invent employment history, education, certifications, dates, etc.)
+export const AI_ELIGIBLE_SECTION_TYPES = ["summary", "experience", "skills"] as const;
+export type AiEligibleSectionType = (typeof AI_ELIGIBLE_SECTION_TYPES)[number];
+
+export type ResumeSectionStatus = "empty" | "ai_suggested" | "accepted" | "edited";
+
+export interface ResumeDraft {
+  id: string;
+  candidate_id: string;
+  title: string;
+  status: ResumeDraftStatus;
+  source_resume_id: string | null;
+  finalized_pdf_url: string | null;
+  finalized_docx_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Per-section-type content shapes -- deliberately mirror ParsedResumeData's
+ * existing field shapes so import/merge logic and AI prompts can share
+ * types with the resume-parsing pipeline instead of duplicating them. */
+export interface ResumeSectionContentMap {
+  personal_info: {
+    full_name?: string;
+    email?: string;
+    phone?: string;
+    address?: string;
+    current_position?: string;
+  };
+  summary: { text?: string };
+  experience: NonNullable<ParsedResumeData["experience"]>;
+  education: NonNullable<ParsedResumeData["education"]>;
+  skills: { items: string[] };
+  certifications: NonNullable<ParsedResumeData["certificates"]>;
+  languages: NonNullable<ParsedResumeData["languages"]>;
+  projects: NonNullable<ParsedResumeData["projects"]>;
+  achievements: NonNullable<ParsedResumeData["achievements"]>;
+  social_links: {
+    linkedin_url?: string;
+    github_url?: string;
+    portfolio_url?: string;
+    website_url?: string;
+  };
+}
+
+export interface ResumeDraftSection<T extends ResumeSectionType = ResumeSectionType> {
+  id: string;
+  draft_id: string;
+  section_type: T;
+  content: ResumeSectionContentMap[T];
+  ai_suggestion: ResumeSectionContentMap[T] | null;
+  status: ResumeSectionStatus;
+  order_index: number;
+  updated_at: string;
+}
+
+export interface ResumeDraftWithSections extends ResumeDraft {
+  sections: ResumeDraftSection[];
+}
+
+/** One field-level diff produced when importing an uploaded resume into an
+ * existing draft (priority 2 data source) -- surfaced for the candidate to
+ * accept/reject per field, never auto-merged. */
+export interface ImportFieldDiff {
+  section_type: ResumeSectionType;
+  field: string;
+  currentValue: unknown;
+  importedValue: unknown;
+  hasConflict: boolean;
+}

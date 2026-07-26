@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
-import { FileText, Star } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, FileText, Sparkles, Star } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AtsScoreCard } from "@/components/candidate/ats-score-card";
 import { ResumeUpload } from "@/components/candidate/resume-upload";
@@ -29,6 +31,25 @@ export default async function ResumePage() {
           Upload your resume for instant AI parsing, ATS scoring, and job matching.
         </p>
       </div>
+
+      <Card className="border-primary/30 bg-primary/5">
+        <CardContent className="flex flex-wrap items-center justify-between gap-4 pt-6">
+          <div className="flex items-center gap-3">
+            <Sparkles className="h-6 w-6 shrink-0 text-primary" />
+            <div>
+              <p className="font-medium">AI Resume Builder</p>
+              <p className="text-sm text-muted-foreground">
+                Build a polished resume from your profile, refine it with AI, and export it as PDF or Word.
+              </p>
+            </div>
+          </div>
+          <Button variant="gradient" asChild>
+            <Link href="/candidate/resume-builder">
+              Open builder <ArrowRight className="h-4 w-4" />
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
 
       <ResumeUpload />
 
