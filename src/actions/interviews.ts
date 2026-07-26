@@ -1,0 +1,155 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+
+import { generateInterviewQuestions } from "@/lib/ai/interview-questions";
+import { createClient } from "@/lib/supabase/server";
+import { interviewFeedbackSchema, scheduleInterviewSchema } from "@/lib/validations/interview";
+import { INTERVIEW_COMPETENCIES } from "@/types/database";
+import type { CompetencyRatings, InterviewQuestionCategory, InterviewStatus, StarEvaluation } from "@/types/database";
+import type { ActionResult } from "./auth";
+
+async function requireRecruiter() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+  const { data: recruiter } = await supabase.from("recruiters").select("id").eq("id", user.id).single();
+  if (!recruiter) return null;
+  return { supabase, userId: user.id };
+}
+
+/**
+ * Regenerates the job's interview question bank from scratch. Questions are
+ * fully AI-owned (no manual editing exists yet), so a delete+insert is safe.
+ */
+export async function generateInterviewQuestionsForJob(jobId: string): Promise<ActionResult> {
+  const ctx = await requireRecruiter();
+  if (!ctx) return { success: false, error: "Only recruiters can generate interview questions." };
+
+  const { data: job } = await ctx.supabase
+    .from("jobs")
+    .select(
+      "id, title, description, requirements, required_skills, nice_to_have_skills, experience_level, min_experience_years, education_requirement"
+    )
+    .eq("id", jobId)
+    .maybeSingle();
+  if (!job) return { success: false, error: "Job not found." };
+
+  const questionSet = await generateInterviewQuestions(job);
+
+  const { error: deleteError } = await ctx.supabase.from("interview_questions").delete().eq("job_id", jobId);
+  if (deleteError) return { success: false, error: deleteError.message };
+
+  const rows = (
+    Object.entries(questionSet) as [InterviewQuestionCategory, (typeof questionSet)["technical"]][]
+  ).flatMap(([category, questions]) =>
+    questions.map((q) => ({
+      job_id: jobId,
+      category,
+      question: q.question,
+      expected_answer: q.expected_answer,
+      evaluation_criteria: q.evaluation_criteria,
+    }))
+  );
+
+  if (rows.length) {
+    const { error: insertError } = await ctx.supabase.from("interview_questions").insert(rows);
+    if (insertError) return { success: false, error: insertError.message };
+  }
+
+  revalidatePath(`/recruiter/jobs/${jobId}`);
+  return { success: true };
+}
+
+const ADVANCEABLE_STATUSES = ["submitted", "screening", "shortlisted"];
+
+export async function scheduleInterview(applicationId: string, jobId: string, formData: FormData): Promise<ActionResult> {
+  const ctx = await requireRecruiter();
+  if (!ctx) return { success: false, error: "Only recruiters can schedule interviews." };
+
+  const raw = Object.fromEntries(formData.entries());
+  const parsed = scheduleInterviewSchema.safeParse(raw);
+  if (!parsed.success) {
+    return {
+      success: false,
+      fieldErrors: Object.fromEntries(
+        Object.entries(parsed.error.flatten().fieldErrors).map(([k, v]) => [k, v?.[0] ?? ""])
+      ),
+    };
+  }
+
+  const { error } = await ctx.supabase.from("interviews").insert({
+    application_id: applicationId,
+    scheduled_at: new Date(parsed.data.scheduledAt).toISOString(),
+    duration_minutes: parsed.data.durationMinutes,
+    interview_type: parsed.data.interviewType,
+    location_or_link: parsed.data.locationOrLink || null,
+    created_by: ctx.userId,
+  });
+  if (error) return { success: false, error: error.message };
+
+  // Advance the pipeline stage, but don't clobber a later stage (offer/hired/rejected).
+  await ctx.supabase.from("applications").update({ status: "interview" }).eq("id", applicationId).in("status", ADVANCEABLE_STATUSES);
+
+  revalidatePath(`/recruiter/applications/${applicationId}`);
+  revalidatePath(`/recruiter/jobs/${jobId}/candidates`);
+  revalidatePath("/candidate/applications");
+  return { success: true };
+}
+
+export async function updateInterviewStatus(interviewId: string, applicationId: string, status: InterviewStatus): Promise<ActionResult> {
+  const ctx = await requireRecruiter();
+  if (!ctx) return { success: false, error: "Only recruiters can update interviews." };
+
+  const { error } = await ctx.supabase.from("interviews").update({ status }).eq("id", interviewId);
+  if (error) return { success: false, error: error.message };
+
+  revalidatePath(`/recruiter/applications/${applicationId}`);
+  revalidatePath("/candidate/applications");
+  return { success: true };
+}
+
+export async function submitInterviewFeedback(
+  interviewId: string,
+  applicationId: string,
+  formData: FormData
+): Promise<ActionResult> {
+  const ctx = await requireRecruiter();
+  if (!ctx) return { success: false, error: "Only recruiters can submit interview feedback." };
+
+  const raw = Object.fromEntries(formData.entries());
+  const parsed = interviewFeedbackSchema.safeParse(raw);
+  if (!parsed.success) return { success: false, error: "Please select a hiring recommendation." };
+
+  const star_evaluation: StarEvaluation = {
+    situation: parsed.data.situation || "",
+    task: parsed.data.task || "",
+    action: parsed.data.action || "",
+    result: parsed.data.result || "",
+  };
+
+  const competency_ratings: CompetencyRatings = {};
+  for (const competency of INTERVIEW_COMPETENCIES) {
+    const raw_ = formData.get(`competency_${competency}`);
+    const value = raw_ ? Number(raw_) : NaN;
+    if (Number.isFinite(value) && value >= 1 && value <= 5) competency_ratings[competency] = value;
+  }
+
+  const { error } = await ctx.supabase
+    .from("interviews")
+    .update({
+      feedback: parsed.data.feedback || null,
+      star_evaluation,
+      competency_ratings,
+      hiring_recommendation: parsed.data.hiringRecommendation,
+      status: "completed",
+    })
+    .eq("id", interviewId);
+
+  if (error) return { success: false, error: error.message };
+
+  revalidatePath(`/recruiter/applications/${applicationId}`);
+  return { success: true };
+}

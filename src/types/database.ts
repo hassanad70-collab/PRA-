@@ -338,6 +338,53 @@ export interface ScreeningResult {
   created_at: string;
 }
 
+export interface StarEvaluation {
+  situation: string;
+  task: string;
+  action: string;
+  result: string;
+}
+
+export const INTERVIEW_COMPETENCIES = [
+  "Technical Skills",
+  "Communication",
+  "Problem Solving",
+  "Culture Fit",
+  "Leadership",
+] as const;
+export type InterviewCompetency = (typeof INTERVIEW_COMPETENCIES)[number];
+export type CompetencyRatings = Partial<Record<InterviewCompetency, number>>;
+
+export interface Interview {
+  id: string;
+  application_id: string;
+  scheduled_at: string;
+  duration_minutes: number;
+  interview_type: InterviewType;
+  location_or_link: string | null;
+  interviewer_ids: string[];
+  status: InterviewStatus;
+  feedback: string | null;
+  star_evaluation: StarEvaluation | null;
+  competency_ratings: CompetencyRatings | null;
+  hiring_recommendation: HiringRecommendation | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type InterviewQuestionCategory = "technical" | "behavioral" | "situational" | "case_study";
+
+export interface InterviewQuestion {
+  id: string;
+  job_id: string;
+  category: InterviewQuestionCategory;
+  question: string;
+  expected_answer: string | null;
+  evaluation_criteria: string | null;
+  created_at: string;
+}
+
 export interface Notification {
   id: string;
   user_id: string;

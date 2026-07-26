@@ -5,9 +5,12 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScoreRing } from "@/components/shared/score-ring";
+import { InterviewList } from "@/components/recruiter/interview-list";
+import { ScheduleInterviewDialog } from "@/components/recruiter/schedule-interview-dialog";
 import { StatusSelect } from "@/components/recruiter/status-select";
 import { getApplicationDetail } from "@/lib/queries/applications";
 import { getCurrentUser } from "@/lib/queries/candidate";
+import { getInterviewsForApplication } from "@/lib/queries/interviews";
 import { getRecruiterContext } from "@/lib/queries/jobs";
 import { formatRelativeTime, initials } from "@/lib/utils";
 import type { ApplicationStatus } from "@/types/database";
@@ -23,6 +26,7 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
   const app = await getApplicationDetail(applicationId);
   if (!app || app.job?.company_id !== recruiter.company_id) notFound();
 
+  const interviews = await getInterviewsForApplication(applicationId);
   const screening = app.screening_result?.[0];
   const match = app.job_match?.[0];
   const ats = app.ats_score?.[0];
@@ -58,6 +62,16 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
             </div>
           </div>
           <StatusSelect applicationId={app.id} status={app.status as ApplicationStatus} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between gap-2">
+          <CardTitle className="text-base">Interviews</CardTitle>
+          <ScheduleInterviewDialog applicationId={app.id} jobId={app.job_id} />
+        </CardHeader>
+        <CardContent>
+          <InterviewList applicationId={app.id} interviews={interviews} />
         </CardContent>
       </Card>
 

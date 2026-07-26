@@ -6,9 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { InterviewQuestionsPanel } from "@/components/recruiter/interview-questions-panel";
 import { JobActionsMenu } from "@/components/recruiter/job-actions-menu";
 import { JobForm } from "@/components/recruiter/job-form";
 import { getCurrentUser } from "@/lib/queries/candidate";
+import { getInterviewQuestionsForJob } from "@/lib/queries/interviews";
 import { getJobById, getRecruiterContext } from "@/lib/queries/jobs";
 import type { JobStatus } from "@/types/database";
 
@@ -22,6 +24,8 @@ export default async function RecruiterJobDetailPage({ params }: { params: Promi
 
   const job = await getJobById(id);
   if (!job || job.company_id !== recruiter.company_id) notFound();
+
+  const questionGroups = await getInterviewQuestionsForJob(id);
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -50,6 +54,7 @@ export default async function RecruiterJobDetailPage({ params }: { params: Promi
       <Tabs defaultValue="edit">
         <TabsList>
           <TabsTrigger value="edit">Edit job</TabsTrigger>
+          <TabsTrigger value="interview-questions">Interview Questions</TabsTrigger>
         </TabsList>
         <TabsContent value="edit">
           <Card>
@@ -57,6 +62,9 @@ export default async function RecruiterJobDetailPage({ params }: { params: Promi
               <JobForm job={job} />
             </CardContent>
           </Card>
+        </TabsContent>
+        <TabsContent value="interview-questions">
+          <InterviewQuestionsPanel jobId={job.id} groups={questionGroups} />
         </TabsContent>
       </Tabs>
     </div>
