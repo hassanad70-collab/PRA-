@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScoreRing } from "@/components/shared/score-ring";
+import { DraftMessageDialog } from "@/components/recruiter/draft-message-dialog";
 import { InterviewList } from "@/components/recruiter/interview-list";
 import { ScheduleInterviewDialog } from "@/components/recruiter/schedule-interview-dialog";
 import { StatusSelect } from "@/components/recruiter/status-select";
@@ -68,7 +69,10 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-2">
           <CardTitle className="text-base">Interviews</CardTitle>
-          <ScheduleInterviewDialog applicationId={app.id} jobId={app.job_id} />
+          <div className="flex items-center gap-2">
+            <DraftMessageDialog applicationId={app.id} />
+            <ScheduleInterviewDialog applicationId={app.id} jobId={app.job_id} />
+          </div>
         </CardHeader>
         <CardContent>
           <InterviewList applicationId={app.id} interviews={interviews} />

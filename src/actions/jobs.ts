@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { generateEmbedding, toVectorLiteral } from "@/lib/ai/embeddings";
+import { generateJobDescriptionDraft, type JobDraft } from "@/lib/ai/job-description-writer";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { slugify } from "@/lib/utils";
@@ -46,6 +47,25 @@ function buildEmbeddingText(input: {
 
 export interface JobActionResult extends ActionResult {
   jobId?: string;
+}
+
+/**
+ * Drafts a job posting for the recruiter to review and edit in the job
+ * form -- never auto-submitted or persisted here.
+ */
+export async function draftJobDescription(input: {
+  title: string;
+  department?: string;
+  employmentType: string;
+  experienceLevel: string;
+  keyPoints: string;
+}): Promise<ActionResult & { draft?: JobDraft }> {
+  const ctx = await requireRecruiter();
+  if (!ctx) return { success: false, error: "You must be a recruiter to use this." };
+  if (!input.title.trim()) return { success: false, error: "Add a job title first." };
+
+  const draft = await generateJobDescriptionDraft(input);
+  return { success: true, draft };
 }
 
 export async function createJob(formData: FormData): Promise<JobActionResult> {
