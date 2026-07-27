@@ -304,7 +304,7 @@
     "Nav": {
       "dashboard": "Dashboard",
       "profile": "Profile",
-      "resumeAts": "Resume & ATS",
+      "resumeAts": "Resume Intelligence",
       "applications": "Applications",
       "interviews": "Interviews",
       "settings": "Settings",
@@ -432,7 +432,7 @@
       "toastFailed": "Failed to update."
     },
     "Resume": {
-      "title": "Resume & ATS Score",
+      "title": "Resume Intelligence",
       "subtitle": "Upload your resume for instant AI parsing, ATS scoring, and job matching.",
       "builderTitle": "AI Resume Builder",
       "builderSubtitle": "Build a polished resume from your profile, refine it with AI, and export it as PDF or Word.",
@@ -613,6 +613,59 @@
         "technical": "Technical",
         "panel": "Panel",
         "final": "Final"
+      }
+    },
+    "ResumeIntelligence": {
+      "scoreHealthTitle": "Score & Health",
+      "checklistTitle": "Resume health checklist",
+      "checklistSubtitle": "Deterministic checks -- not AI opinion -- run against your primary resume's parsed content.",
+      "checks": {
+        "email": {
+          "pass": "Email address detected.",
+          "fail": "No email address detected — add one so recruiters can reach you."
+        },
+        "phone": {
+          "pass": "Phone number detected.",
+          "fail": "No phone number detected — add one so recruiters can reach you."
+        },
+        "summary": {
+          "pass": "Professional summary present.",
+          "warning": "No professional summary detected — a short summary helps recruiters skim your fit quickly."
+        },
+        "experience": {
+          "pass": "Work experience section present.",
+          "fail": "No work experience detected."
+        },
+        "education": {
+          "pass": "Education section present.",
+          "warning": "No education section detected."
+        },
+        "skills": {
+          "pass": "Skills section present.",
+          "fail": "No skills listed."
+        },
+        "length": {
+          "pass": "{words} words — a healthy resume length.",
+          "warning": "{words} words — consider trimming to roughly one to two pages.",
+          "fail": "Only {words} words — likely too short for recruiters to judge your fit."
+        },
+        "quantified": {
+          "pass": "Experience descriptions include quantified, measurable details.",
+          "fail": "Few numbers found in your experience — add measurable impact (e.g. \"increased X by 20%\").",
+          "warning": "No experience descriptions to evaluate yet."
+        },
+        "weak_phrasing": {
+          "pass": "No passive or weak phrasing detected.",
+          "warning": "Passive phrasing found (\"{phrase}\") — lead with a strong action verb instead."
+        },
+        "action_verbs": {
+          "pass": "Bullet points use strong action verbs.",
+          "warning": "Consider opening bullet points with strong action verbs (Led, Built, Improved...)."
+        },
+        "cliches": {
+          "pass": "No generic filler phrases detected.",
+          "warning": "Generic phrase found (\"{phrase}\") — replace with specific evidence."
+        }
       }
     },
     "SaveJob": {

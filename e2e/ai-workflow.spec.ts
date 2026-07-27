@@ -71,4 +71,18 @@ test.describe("AI pipeline (resume parsing / ATS scoring / job matching)", () =>
     await page.goto("/candidate/resume");
     await expect(page.getByText("AI ATS Score")).toBeVisible();
   });
+
+  test("the deterministic resume health checklist (Unit A) renders alongside the AI ATS score", async ({ page }) => {
+    const resume = await uploadAndGetResumeId(page);
+    test.skip(resume.parse_status !== "completed", `Text extraction did not complete for this run (status: ${resume.parse_status}) — nothing to score.`);
+
+    await page.goto("/candidate/resume");
+    await expect(page.getByRole("heading", { name: "Score & Health" })).toBeVisible();
+    await expect(page.getByText("Resume health checklist")).toBeVisible();
+    // Word count is always computed from raw_text regardless of whether the
+    // AI parsing step succeeded, so it's a safe always-present assertion.
+    // (A bare /words?/i regex also matches unrelated UI copy like "PDF or
+    // Word, up to 10MB" -- require a leading digit to target the checklist.)
+    await expect(page.getByText(/\d+\s+words?\b/i)).toBeVisible();
+  });
 });

@@ -15,7 +15,7 @@ test.describe("Candidate workflow", () => {
 
     await expect(page.getByRole("link", { name: "Dashboard" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Profile" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Resume & ATS" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Resume Intelligence" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Browse Jobs" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Applications" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Interviews" })).toBeVisible();

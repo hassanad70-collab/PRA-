@@ -7,10 +7,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AtsScoreCard } from "@/components/candidate/ats-score-card";
+import { ResumeHealthChecklist } from "@/components/candidate/resume-intelligence/health-checklist";
 import { ResumeUpload } from "@/components/candidate/resume-upload";
 import { SetPrimaryButton } from "@/components/candidate/set-primary-button";
 import { ImproveResumeDialog } from "@/components/shared/dynamic-dialogs";
 import { getCandidateFullProfile, getCurrentUser, getLatestAtsScore } from "@/lib/queries/candidate";
+import { runStructuralChecks } from "@/lib/resume-intelligence/structural-checks";
 import { formatRelativeTime } from "@/lib/utils";
 
 export default async function ResumePage({ params }: { params: Promise<{ locale: string }> }) {
@@ -18,14 +20,17 @@ export default async function ResumePage({ params }: { params: Promise<{ locale:
   const user = await getCurrentUser();
   if (!user) redirect({ href: "/login", locale });
 
-  const [{ resumes }, atsScore, t, tShared] = await Promise.all([
+  const [{ resumes }, atsScore, t, tShared, tResumeIntelligence] = await Promise.all([
     getCandidateFullProfile(user.id),
     getLatestAtsScore(user.id),
     getTranslations("Candidate.Resume"),
     getTranslations("Candidate.Shared"),
+    getTranslations("Candidate.ResumeIntelligence"),
   ]);
 
   const primaryResume = resumes.find((r) => r.is_primary) ?? resumes[0];
+  const scoredResume = atsScore ? resumes.find((r) => r.id === atsScore.resume_id) : undefined;
+  const structuralChecks = scoredResume?.raw_text ? runStructuralChecks(scoredResume.raw_text, scoredResume.parsed_data ?? {}) : null;
 
   return (
     <div className="space-y-8">
@@ -99,6 +104,13 @@ export default async function ResumePage({ params }: { params: Promise<{ locale:
           </Card>
         )}
       </div>
+
+      {structuralChecks && (
+        <div className="space-y-3">
+          <h2 className="text-sm font-semibold text-muted-foreground">{tResumeIntelligence("scoreHealthTitle")}</h2>
+          <ResumeHealthChecklist checks={structuralChecks} />
+        </div>
+      )}
     </div>
   );
 }
