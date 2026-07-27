@@ -306,6 +306,7 @@
       "profile": "الملف الشخصي",
       "resumeAts": "السيرة الذاتية وتوافق ATS",
       "applications": "طلباتي",
+      "interviews": "المقابلات",
       "settings": "الإعدادات",
       "signOut": "تسجيل الخروج",
       "openMenu": "فتح القائمة"
@@ -586,9 +587,33 @@
       "title": "طلباتي",
       "subtitle": "تابع حالة كل وظيفة تقدّمت لها.",
       "empty": "لم تتقدم لأي وظيفة بعد.",
+      "appliedRelative": "تم التقديم {time}",
       "withdraw": "سحب الطلب",
       "toastWithdrawn": "تم سحب الطلب",
       "toastWithdrawFailed": "فشل سحب الطلب"
+    },
+    "Interviews": {
+      "title": "المقابلات",
+      "subtitle": "تابع كل مقابلة عبر طلباتك.",
+      "upcoming": "القادمة",
+      "past": "السابقة",
+      "noUpcoming": "لا توجد مقابلات قادمة.",
+      "noPast": "لا توجد مقابلات سابقة بعد.",
+      "status": {
+        "scheduled": "مجدولة",
+        "completed": "مكتملة",
+        "cancelled": "ملغاة",
+        "no_show": "لم يحضر",
+        "rescheduled": "أُعيدت جدولتها"
+      },
+      "type": {
+        "phone": "هاتفية",
+        "video": "عبر الفيديو",
+        "onsite": "حضورية",
+        "technical": "تقنية",
+        "panel": "لجنة",
+        "final": "نهائية"
+      }
     },
     "SaveJob": {
       "save": "حفظ الوظيفة",

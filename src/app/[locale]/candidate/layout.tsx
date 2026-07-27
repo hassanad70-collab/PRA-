@@ -31,6 +31,7 @@ export default async function CandidateLayout({
     { href: `/${locale}/candidate/resume`, label: tNav("resumeAts"), icon: "FileText" },
     { href: `/${locale}/candidate/jobs`, label: tCommon("browseJobs"), icon: "Search" },
     { href: `/${locale}/candidate/applications`, label: tNav("applications"), icon: "Bookmark" },
+    { href: `/${locale}/candidate/interviews`, label: tNav("interviews"), icon: "Calendar" },
   ];
 
   return (

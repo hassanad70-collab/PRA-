@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { updateApplicationStatus } from "@/actions/applications";
+import { cn } from "@/lib/utils";
 import type { ApplicationStatus } from "@/types/database";
 
 const STATUSES: ApplicationStatus[] = [
@@ -24,7 +25,15 @@ const STATUSES: ApplicationStatus[] = [
   "rejected",
 ];
 
-export function StatusSelect({ applicationId, status }: { applicationId: string; status: ApplicationStatus }) {
+export function StatusSelect({
+  applicationId,
+  status,
+  className,
+}: {
+  applicationId: string;
+  status: ApplicationStatus;
+  className?: string;
+}) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -44,7 +53,7 @@ export function StatusSelect({ applicationId, status }: { applicationId: string;
         })
       }
     >
-      <SelectTrigger className="w-44 capitalize">
+      <SelectTrigger className={cn("w-44 capitalize", className)}>
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

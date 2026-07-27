@@ -26,10 +26,11 @@ export default async function ApplicationsPage({ params }: { params: Promise<{ l
   const user = await getCurrentUser();
   if (!user) redirect({ href: "/login", locale });
 
-  const [applications, t, tShared] = await Promise.all([
+  const [applications, t, tShared, tInterviews] = await Promise.all([
     getCandidateApplications(user.id),
     getTranslations("Candidate.Applications"),
     getTranslations("Candidate.Shared"),
+    getTranslations("Candidate.Interviews"),
   ]);
 
   return (
@@ -53,13 +54,13 @@ export default async function ApplicationsPage({ params }: { params: Promise<{ l
                   {app.job?.title}
                 </Link>
                 <p className="text-sm text-muted-foreground">{app.job?.company?.name}</p>
-                <p className="mt-1 text-xs text-muted-foreground">Applied {formatRelativeTime(app.applied_at)}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{t("appliedRelative", { time: formatRelativeTime(app.applied_at) })}</p>
                 {upcomingInterview && (
                   <div className="mt-2 space-y-1 rounded-lg border border-primary/30 bg-primary/5 p-2.5 text-xs">
                     <p className="flex items-center gap-1.5 font-medium text-primary">
                       <Calendar className="h-3.5 w-3.5" />
                       {formatDate(upcomingInterview.scheduled_at)} · {upcomingInterview.duration_minutes} min ·{" "}
-                      <span className="capitalize">{upcomingInterview.interview_type}</span>
+                      {tInterviews(`type.${upcomingInterview.interview_type}`)}
                     </p>
                     {upcomingInterview.location_or_link && (
                       <p className="flex items-center gap-1.5 text-muted-foreground">

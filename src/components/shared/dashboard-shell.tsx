@@ -7,6 +7,7 @@ import {
   Bookmark,
   Briefcase,
   Building2,
+  Calendar,
   FileText,
   GraduationCap,
   LayoutDashboard,
@@ -52,6 +53,7 @@ const ICON_MAP = {
   GraduationCap,
   ScrollText,
   Settings,
+  Calendar,
 } as const;
 
 export type IconName = keyof typeof ICON_MAP;

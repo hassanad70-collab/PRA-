@@ -306,6 +306,7 @@
       "profile": "Profile",
       "resumeAts": "Resume & ATS",
       "applications": "Applications",
+      "interviews": "Interviews",
       "settings": "Settings",
       "signOut": "Sign out",
       "openMenu": "Open menu"
@@ -586,9 +587,33 @@
       "title": "My Applications",
       "subtitle": "Track the status of every job you've applied to.",
       "empty": "You haven't applied to any jobs yet.",
+      "appliedRelative": "Applied {time}",
       "withdraw": "Withdraw",
       "toastWithdrawn": "Application withdrawn",
       "toastWithdrawFailed": "Failed to withdraw"
+    },
+    "Interviews": {
+      "title": "Interviews",
+      "subtitle": "Track every interview across your applications.",
+      "upcoming": "Upcoming",
+      "past": "Past",
+      "noUpcoming": "No upcoming interviews.",
+      "noPast": "No past interviews yet.",
+      "status": {
+        "scheduled": "Scheduled",
+        "completed": "Completed",
+        "cancelled": "Cancelled",
+        "no_show": "No show",
+        "rescheduled": "Rescheduled"
+      },
+      "type": {
+        "phone": "Phone",
+        "video": "Video",
+        "onsite": "Onsite",
+        "technical": "Technical",
+        "panel": "Panel",
+        "final": "Final"
+      }
     },
     "SaveJob": {
       "save": "Save job",

@@ -8,6 +8,7 @@ import { getRecruiterContext } from "@/lib/queries/jobs";
 const NAV_ITEMS: NavItem[] = [
   { href: "/recruiter/dashboard", label: "Dashboard", icon: "LayoutDashboard" },
   { href: "/recruiter/jobs", label: "Jobs", icon: "Briefcase" },
+  { href: "/recruiter/interviews", label: "Interviews", icon: "Calendar" },
   { href: "/recruiter/talent-pool", label: "Talent Pool", icon: "Users" },
 ];
 

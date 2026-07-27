@@ -175,11 +175,26 @@ test.describe("Candidate portal internationalization", () => {
     await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
   });
 
+  test("candidate Interviews page (Unit H) renders correctly in both locales", async ({ page }) => {
+    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
+    await expect(page).toHaveURL(/\/en\/candidate\/dashboard$/, { timeout: 15_000 });
+
+    await page.goto("/en/candidate/interviews");
+    await expect(page.getByRole("heading", { name: "Interviews" })).toBeVisible();
+    expect(await page.locator("html").getAttribute("lang")).toBe("en");
+    expect(await page.locator("html").getAttribute("dir")).toBe("ltr");
+
+    await page.goto("/ar/candidate/interviews");
+    await expect(page.getByRole("heading", { name: "المقابلات" })).toBeVisible();
+    expect(await page.locator("html").getAttribute("lang")).toBe("ar");
+    expect(await page.locator("html").getAttribute("dir")).toBe("rtl");
+  });
+
   test("no internal candidate navigation link generates a legacy unprefixed URL", async ({ page }) => {
     await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
     await expect(page).toHaveURL(/\/en\/candidate\/dashboard$/, { timeout: 15_000 });
 
-    for (const name of ["Dashboard", "Profile", "Resume & ATS", "Browse Jobs", "Applications"]) {
+    for (const name of ["Dashboard", "Profile", "Resume & ATS", "Browse Jobs", "Applications", "Interviews"]) {
       const href = await page.getByRole("link", { name }).getAttribute("href");
       expect(href, `${name} nav link should be locale-prefixed`).toMatch(/^\/en\/candidate\//);
     }

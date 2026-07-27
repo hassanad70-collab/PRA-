@@ -18,8 +18,17 @@ test.describe("Candidate workflow", () => {
     await expect(page.getByRole("link", { name: "Resume & ATS" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Browse Jobs" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Applications" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Interviews" })).toBeVisible();
 
     expect(errors).toEqual([]);
+  });
+
+  test("can view the dedicated Interviews page", async ({ page }) => {
+    await page.getByRole("link", { name: "Interviews" }).click();
+    await expect(page).toHaveURL(/\/candidate\/interviews$/);
+    await expect(page.getByRole("heading", { name: "Interviews" })).toBeVisible();
+    await expect(page.getByText(/Upcoming \(\d+\)/)).toBeVisible();
+    await expect(page.getByText(/Past \(\d+\)/)).toBeVisible();
   });
 
   test("can navigate to profile and see the profile editor", async ({ page }) => {
