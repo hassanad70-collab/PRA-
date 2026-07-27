@@ -87,8 +87,8 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
               <p className="mt-1 font-medium">{recruiter.job_title ?? "—"}</p>
             </div>
             <div>
-              <p className="text-muted-foreground">Company admin</p>
-              <p className="mt-1 font-medium">{recruiter.is_company_admin ? "Yes" : "No"}</p>
+              <p className="text-muted-foreground">Role</p>
+              <p className="mt-1 font-medium capitalize">{recruiter.role}</p>
             </div>
           </CardContent>
         </Card>

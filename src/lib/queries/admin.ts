@@ -170,9 +170,12 @@ export async function getAdminUserDetail(userId: string) {
   if (!profile) return null;
 
   if (profile.role === "recruiter" || profile.role === "hr_manager") {
+    // Explicit FK hint needed since migration 0019 added a second FK path
+    // between recruiters and companies (companies.pending_owner_id) -- see
+    // getRecruiterContext in src/lib/queries/jobs.ts for the full explanation.
     const { data: recruiter } = await supabase
       .from("recruiters")
-      .select("*, company:companies(*)")
+      .select("*, company:companies!recruiters_company_id_fkey(*)")
       .eq("id", userId)
       .maybeSingle();
     return { profile, recruiter, candidate: null };
@@ -257,9 +260,12 @@ export async function getAdminRecruiters(filters: AdminRecruiterFilters): Promis
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
+  // Explicit FK hint needed since migration 0019 added a second FK path
+  // between recruiters and companies (companies.pending_owner_id) -- see
+  // getRecruiterContext in src/lib/queries/jobs.ts for the full explanation.
   let query = supabase
     .from("recruiters")
-    .select("*, profile:profiles!inner(*), company:companies(*)", { count: "exact" });
+    .select("*, profile:profiles!inner(*), company:companies!recruiters_company_id_fkey(*)", { count: "exact" });
 
   if (filters.search) {
     query = query.or(`full_name.ilike.%${filters.search}%,email.ilike.%${filters.search}%`, { referencedTable: "profiles" });

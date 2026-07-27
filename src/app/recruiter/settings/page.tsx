@@ -1,5 +1,9 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Users } from "lucide-react";
 
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,6 +41,14 @@ export default async function RecruiterSettingsPage() {
             <Label>Job title</Label>
             <Input defaultValue={recruiter.job_title ?? ""} disabled />
           </div>
+          <div className="space-y-2">
+            <Label>Role</Label>
+            <div>
+              <Badge variant="outline" className="capitalize">
+                {recruiter.role}
+              </Badge>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -53,6 +65,20 @@ export default async function RecruiterSettingsPage() {
             <Label>Industry</Label>
             <Input defaultValue={recruiter.company?.industry ?? ""} disabled />
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="flex items-center justify-between gap-4 pt-6">
+          <div>
+            <p className="font-medium">Team</p>
+            <p className="text-sm text-muted-foreground">Invite teammates and manage member roles.</p>
+          </div>
+          <Button variant="outline" asChild>
+            <Link href="/recruiter/settings/team">
+              <Users className="h-4 w-4" /> Manage team
+            </Link>
+          </Button>
         </CardContent>
       </Card>
     </div>

@@ -61,18 +61,53 @@ export interface Company {
   is_active: boolean;
   deleted_at: string | null;
   created_by: string | null;
+  pending_owner_id: string | null;
   created_at: string;
   updated_at: string;
 }
+
+export type RecruiterRole = "owner" | "admin" | "recruiter" | "viewer";
+
+export const CAPABILITIES = [
+  "manage_billing",
+  "manage_org_settings",
+  "invite_members",
+  "remove_members",
+  "change_member_roles",
+  "manage_jobs",
+  "view_jobs",
+  "manage_candidates",
+  "view_candidates",
+  "schedule_interviews",
+  "submit_interview_feedback",
+  "use_ai_features",
+  "view_analytics",
+] as const;
+export type Capability = (typeof CAPABILITIES)[number];
 
 export interface Recruiter {
   id: string;
   company_id: string;
   job_title: string | null;
   department: string | null;
-  is_company_admin: boolean;
+  role: RecruiterRole;
   created_at: string;
   updated_at: string;
+}
+
+export type InviteStatus = "pending" | "accepted" | "revoked" | "expired";
+
+export interface RecruiterInvite {
+  id: string;
+  company_id: string;
+  email: string;
+  role: RecruiterRole;
+  token: string;
+  invited_by: string | null;
+  status: InviteStatus;
+  expires_at: string;
+  created_at: string;
+  accepted_at: string | null;
 }
 
 export interface Candidate {

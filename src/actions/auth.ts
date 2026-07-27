@@ -145,7 +145,7 @@ export async function registerRecruiter(formData: FormData): Promise<ActionResul
     id: data.user.id,
     company_id: company.id,
     job_title: jobTitle,
-    is_company_admin: true,
+    role: "owner",
   });
 
   if (recruiterError) return { success: false, error: recruiterError.message };

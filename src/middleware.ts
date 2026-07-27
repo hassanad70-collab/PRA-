@@ -8,8 +8,10 @@ const intlMiddleware = createIntlMiddleware(routing);
 
 // Routes deliberately kept outside the [locale] tree (see src/i18n/routing.ts
 // and Phase 1D's approved scope): dashboards, the OAuth callback route
-// handler, and API routes never get locale-prefixed or redirected.
-const EXCLUDED_PREFIXES = ["/admin", "/candidate", "/recruiter", "/auth", "/api"];
+// handler, API routes, and the invite-accept flow (added in migration 0019 --
+// a recruiter-team-only page, styled like the English-only dashboards, not
+// the public marketing/auth surface) never get locale-prefixed or redirected.
+const EXCLUDED_PREFIXES = ["/admin", "/candidate", "/recruiter", "/auth", "/api", "/invite"];
 // Root-level special file routes (src/app/robots.ts, sitemap.ts,
 // opengraph-image.tsx) -- exact top-level paths, not prefix trees. Without
 // this exclusion, next-intl's middleware treats them as pages missing a

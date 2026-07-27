@@ -112,6 +112,17 @@ export async function getRecruiterJobs(companyId: string) {
 
 export const getRecruiterContext = cache(async (userId: string) => {
   const supabase = await createClient();
-  const { data } = await supabase.from("recruiters").select("*, company:companies(*)").eq("id", userId).single();
+  // companies.pending_owner_id (added in migration 0019, for ownership
+  // transfer) references recruiters(id), creating a second FK path between
+  // recruiters and companies alongside recruiters.company_id -- PostgREST
+  // can no longer infer which one this embed means without the explicit
+  // constraint name, and errors "more than one relationship was found"
+  // otherwise (which getRecruiterContext then silently swallowed into a
+  // null return, redirecting every /recruiter/* page in a loop).
+  const { data } = await supabase
+    .from("recruiters")
+    .select("*, company:companies!recruiters_company_id_fkey(*)")
+    .eq("id", userId)
+    .single();
   return data;
 });
