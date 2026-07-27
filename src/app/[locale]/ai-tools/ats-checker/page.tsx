@@ -1,10 +1,10 @@
-import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
 import { Footer } from "@/components/marketing/footer";
 import { Navbar } from "@/components/marketing/navbar";
 import { GuestAtsChecker } from "@/components/guest/guest-ats-checker";
+import { redirect } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
 import { trackEvent } from "@/lib/analytics/track";
 import { readGuestSessionId } from "@/lib/guest/session";
@@ -21,11 +21,12 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return buildMetadata({ title: t("title"), description: t("description"), path: PATH, locale: locale as AppLocale });
 }
 
-export default async function AtsCheckerPage() {
+export default async function AtsCheckerPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
   const user = await getCurrentUser();
-  // /candidate/resume is a dashboard route, deliberately outside the
-  // [locale] tree -- redirects there must never gain a locale prefix.
-  if (user?.role === "candidate") redirect("/candidate/resume");
+  // /candidate/resume now lives inside the [locale] tree (as of the
+  // Candidate Portal Internationalization unit).
+  if (user?.role === "candidate") redirect({ href: "/candidate/resume", locale });
 
   const guestSessionId = await readGuestSessionId();
   await trackEvent("ats_checker_page_view", { guestSessionId });

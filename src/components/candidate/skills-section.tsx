@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Plus, Sparkles, X } from "lucide-react";
 
@@ -11,6 +12,8 @@ import { addSkill, deleteSkill } from "@/actions/profile";
 import type { CandidateSkill } from "@/types/database";
 
 export function SkillsSection({ items }: { items: CandidateSkill[] }) {
+  const t = useTranslations("Candidate.Skills");
+  const tShared = useTranslations("Candidate.Shared");
   const [value, setValue] = React.useState("");
   const [isPending, startTransition] = React.useTransition();
 
@@ -23,13 +26,13 @@ export function SkillsSection({ items }: { items: CandidateSkill[] }) {
     startTransition(async () => {
       const result = await addSkill(formData);
       if (result.success) setValue("");
-      else toast.error(result.error ?? "Failed to add skill");
+      else toast.error(result.error ?? t("toastAddFailed"));
     });
   };
 
   return (
     <div className="space-y-4">
-      <h3 className="font-semibold">Skills</h3>
+      <h3 className="font-semibold">{tShared("skills")}</h3>
       <div className="flex gap-2">
         <Input
           value={value}
@@ -40,23 +43,23 @@ export function SkillsSection({ items }: { items: CandidateSkill[] }) {
               submit();
             }
           }}
-          placeholder="Add a skill and press Enter"
+          placeholder={t("placeholder")}
         />
         <Button variant="outline" onClick={submit} disabled={isPending}>
           <Plus className="h-4 w-4" />
         </Button>
       </div>
       <div className="flex flex-wrap gap-2">
-        {items.length === 0 && <p className="text-sm text-muted-foreground">No skills added yet.</p>}
+        {items.length === 0 && <p className="text-sm text-muted-foreground">{t("empty")}</p>}
         {items.map((skill) => (
-          <Badge key={skill.id} variant="secondary" className="gap-1.5 py-1.5 pl-3 pr-1.5">
+          <Badge key={skill.id} variant="secondary" className="gap-1.5 py-1.5 ps-3 pe-1.5">
             {skill.is_ai_extracted && <Sparkles className="h-3 w-3 text-primary" />}
             {skill.skill_name}
             <button
               onClick={() =>
                 startTransition(async () => {
                   const result = await deleteSkill(skill.id);
-                  if (!result.success) toast.error(result.error ?? "Failed to remove skill");
+                  if (!result.success) toast.error(result.error ?? t("toastRemoveFailed"));
                 })
               }
               className="rounded-full p-0.5 hover:bg-background/50"

@@ -2,6 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Users } from "lucide-react";
 
+import { getRedirectLocale } from "@/i18n/get-redirect-locale";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,7 +17,7 @@ export default async function RecruiterSettingsPage() {
   if (!user) redirect("/login");
 
   const recruiter = await getRecruiterContext(user.id);
-  if (!recruiter) redirect("/candidate/dashboard");
+  if (!recruiter) redirect(`/${await getRedirectLocale()}/candidate/dashboard`);
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">

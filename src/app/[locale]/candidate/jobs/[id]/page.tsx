@@ -1,5 +1,7 @@
-import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
+
+import { Link, redirect } from "@/i18n/navigation";
 import { Briefcase, CheckCircle2, MapPin, Sparkles, XCircle } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -8,20 +10,24 @@ import { ApplyDialog } from "@/components/shared/dynamic-dialogs";
 import { createClient } from "@/lib/supabase/server";
 import { getCandidateFullProfile, getCurrentUser } from "@/lib/queries/candidate";
 import { getJobById } from "@/lib/queries/jobs";
+import type { EmploymentType, ExperienceLevel } from "@/types/database";
 
-export default async function JobDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function JobDetailPage({ params }: { params: Promise<{ id: string; locale: string }> }) {
+  const { id, locale } = await params;
   const user = await getCurrentUser();
-  if (!user) redirect("/login");
+  if (!user) redirect({ href: "/login", locale });
 
   const job = await getJobById(id);
   if (!job) notFound();
 
   const supabase = await createClient();
-  const [{ resumes }, { data: existingApplication }, { data: match }] = await Promise.all([
+  const [{ resumes }, { data: existingApplication }, { data: match }, t, tJobDetail, tCommon] = await Promise.all([
     getCandidateFullProfile(user.id),
     supabase.from("applications").select("id, status").eq("job_id", id).eq("candidate_id", user.id).maybeSingle(),
     supabase.from("job_matches").select("*").eq("job_id", id).eq("candidate_id", user.id).maybeSingle(),
+    getTranslations("Candidate.JobDetail"),
+    getTranslations("JobDetail"),
+    getTranslations("Common"),
   ]);
 
   return (
@@ -34,13 +40,13 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
               <p className="mt-1 text-muted-foreground">{job.company?.name}</p>
               <div className="mt-3 flex flex-wrap gap-2 text-sm">
                 <Badge variant="outline">
-                  <MapPin className="mr-1 h-3 w-3" /> {job.location ?? "Remote"}
+                  <MapPin className="me-1 h-3 w-3" /> {job.location ?? tCommon("remote")}
                 </Badge>
                 <Badge variant="outline" className="capitalize">
-                  {job.employment_type.replace("_", " ")}
+                  {tCommon(`employmentType.${job.employment_type as EmploymentType}`)}
                 </Badge>
                 <Badge variant="outline" className="capitalize">
-                  <Briefcase className="mr-1 h-3 w-3" /> {job.experience_level}
+                  <Briefcase className="me-1 h-3 w-3" /> {tCommon(`experienceLevel.${job.experience_level as ExperienceLevel}`)}
                 </Badge>
                 {job.salary_min && (
                   <Badge variant="outline">
@@ -52,7 +58,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
             </div>
             {existingApplication ? (
               <Badge variant="secondary" className="h-fit px-4 py-2 text-sm capitalize">
-                Applied — {existingApplication.status.replace("_", " ")}
+                {t("applied", { status: existingApplication.status.replace("_", " ") })}
               </Badge>
             ) : (
               <ApplyDialog jobId={job.id} resumes={resumes} />
@@ -66,14 +72,12 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
           <CardContent className="space-y-4 pt-6">
             <div className="flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-primary" />
-              <h2 className="font-semibold">
-                {Math.round(match.match_score)}% AI Match — {match.ai_summary}
-              </h2>
+              <h2 className="font-semibold">{t("aiMatch", { score: Math.round(match.match_score), summary: match.ai_summary })}</h2>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               {!!match.strengths?.length && (
                 <div>
-                  <p className="mb-2 text-sm font-medium">Your strengths</p>
+                  <p className="mb-2 text-sm font-medium">{t("yourStrengths")}</p>
                   <ul className="space-y-1.5 text-sm text-muted-foreground">
                     {match.strengths.map((s: string) => (
                       <li key={s} className="flex gap-2">
@@ -85,7 +89,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
               )}
               {!!match.missing_skills?.length && (
                 <div>
-                  <p className="mb-2 text-sm font-medium">Skills to highlight or learn</p>
+                  <p className="mb-2 text-sm font-medium">{t("skillsToHighlight")}</p>
                   <ul className="space-y-1.5 text-sm text-muted-foreground">
                     {match.missing_skills.map((s: string) => (
                       <li key={s} className="flex gap-2">
@@ -103,13 +107,13 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
       <Card>
         <CardContent className="prose prose-sm max-w-none space-y-6 pt-6 dark:prose-invert">
           <div>
-            <h3 className="mb-2 text-base font-semibold">About this role</h3>
+            <h3 className="mb-2 text-base font-semibold">{tJobDetail("aboutRole")}</h3>
             <p className="whitespace-pre-line text-sm text-muted-foreground">{job.description}</p>
           </div>
 
           {!!job.responsibilities?.length && (
             <div>
-              <h3 className="mb-2 text-base font-semibold">Responsibilities</h3>
+              <h3 className="mb-2 text-base font-semibold">{tJobDetail("responsibilities")}</h3>
               <ul className="space-y-1.5 text-sm text-muted-foreground">
                 {job.responsibilities.map((r: string) => (
                   <li key={r} className="flex gap-2">
@@ -122,7 +126,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
 
           {!!job.requirements?.length && (
             <div>
-              <h3 className="mb-2 text-base font-semibold">Requirements</h3>
+              <h3 className="mb-2 text-base font-semibold">{tJobDetail("requirements")}</h3>
               <ul className="space-y-1.5 text-sm text-muted-foreground">
                 {job.requirements.map((r: string) => (
                   <li key={r} className="flex gap-2">
@@ -134,7 +138,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
           )}
 
           <div>
-            <h3 className="mb-2 text-base font-semibold">Required skills</h3>
+            <h3 className="mb-2 text-base font-semibold">{tJobDetail("requiredSkills")}</h3>
             <div className="flex flex-wrap gap-2">
               {job.required_skills.map((s: string) => (
                 <Badge key={s} variant="secondary">
@@ -146,7 +150,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
 
           {!!job.benefits?.length && (
             <div>
-              <h3 className="mb-2 text-base font-semibold">Benefits</h3>
+              <h3 className="mb-2 text-base font-semibold">{tJobDetail("benefits")}</h3>
               <ul className="space-y-1.5 text-sm text-muted-foreground">
                 {job.benefits.map((b: string) => (
                   <li key={b} className="flex gap-2">
@@ -161,7 +165,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
 
       <div className="text-center">
         <Link href="/candidate/jobs" className="text-sm text-muted-foreground hover:underline">
-          ← Back to all jobs
+          {tJobDetail("backToAllJobs")}
         </Link>
       </div>
     </div>

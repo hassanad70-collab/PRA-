@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { DashboardShell, type NavItem } from "@/components/shared/dashboard-shell";
+import { getRedirectLocale } from "@/i18n/get-redirect-locale";
 import { getCurrentUser } from "@/lib/queries/candidate";
 import { getRecruiterContext } from "@/lib/queries/jobs";
 
@@ -15,10 +16,14 @@ export default async function RecruiterLayout({ children }: { children: React.Re
   if (!user) redirect("/login");
 
   const recruiter = await getRecruiterContext(user.id);
-  if (!recruiter) redirect("/candidate/dashboard");
+  if (!recruiter) redirect(`/${await getRedirectLocale()}/candidate/dashboard`);
 
   return (
-    <DashboardShell navItems={NAV_ITEMS} user={{ full_name: user.full_name, email: user.email, role: "recruiter" }}>
+    <DashboardShell
+      navItems={NAV_ITEMS}
+      user={{ full_name: user.full_name, email: user.email, role: "recruiter" }}
+      settingsHref="/recruiter/settings"
+    >
       {children}
     </DashboardShell>
   );

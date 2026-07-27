@@ -15,13 +15,17 @@ export default function robots(): MetadataRoute.Robots {
 
   const allow = locales.flatMap((locale) => PUBLIC_PATHS.map((path) => `/${locale}${path}`));
   const disallowAuth = locales.flatMap((locale) => AUTH_PATHS.map((path) => `/${locale}${path}`));
+  // /candidate now lives under each locale (Candidate Portal Internationalization
+  // unit) -- disallow both the locale-prefixed paths and the bare legacy path,
+  // which still resolves via the temporary backward-compatibility redirect.
+  const disallowCandidate = locales.map((locale) => `/${locale}/candidate`);
 
   return {
     rules: [
       {
         userAgent: "*",
         allow,
-        disallow: ["/candidate", "/recruiter", "/admin", "/auth", ...disallowAuth],
+        disallow: ["/candidate", ...disallowCandidate, "/recruiter", "/admin", "/auth", ...disallowAuth],
       },
     ],
     sitemap: `${siteUrl}/sitemap.xml`,

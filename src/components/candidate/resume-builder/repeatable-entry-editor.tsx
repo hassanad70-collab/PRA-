@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { Plus, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,7 @@ export function RepeatableEntryEditor({
   entries: Entry[];
   onChange: (next: Entry[]) => void;
 }) {
+  const t = useTranslations("Candidate.SectionCard");
   const updateEntry = (index: number, key: string, value: unknown) => {
     const next = entries.map((e, i) => (i === index ? { ...e, [key]: value } : e));
     onChange(next);
@@ -46,7 +48,7 @@ export function RepeatableEntryEditor({
       {entries.map((entry, index) => (
         <div key={index} className="space-y-3 rounded-xl border border-border p-4">
           <div className="flex items-center justify-end">
-            <Button type="button" variant="ghost" size="icon" aria-label="Remove entry" onClick={() => removeEntry(index)}>
+            <Button type="button" variant="ghost" size="icon" aria-label={t("removeEntryAriaLabel")} onClick={() => removeEntry(index)}>
               <Trash2 className="h-4 w-4 text-muted-foreground" />
             </Button>
           </div>
@@ -97,7 +99,7 @@ export function RepeatableEntryEditor({
         </div>
       ))}
       <Button type="button" variant="outline" size="sm" onClick={addEntry}>
-        <Plus className="h-4 w-4" /> Add entry
+        <Plus className="h-4 w-4" /> {t("addEntry")}
       </Button>
     </div>
   );

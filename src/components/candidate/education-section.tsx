@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 
@@ -20,6 +21,8 @@ import { formatDate } from "@/lib/utils";
 import type { CandidateEducation } from "@/types/database";
 
 export function EducationSection({ items }: { items: CandidateEducation[] }) {
+  const t = useTranslations("Candidate.Education");
+  const tShared = useTranslations("Candidate.Shared");
   const [open, setOpen] = React.useState(false);
   const [isPending, startTransition] = React.useTransition();
 
@@ -27,10 +30,10 @@ export function EducationSection({ items }: { items: CandidateEducation[] }) {
     startTransition(async () => {
       const result = await addEducation(formData);
       if (result.success) {
-        toast.success("Education added");
+        toast.success(t("toastAdded"));
         setOpen(false);
       } else {
-        toast.error(result.error ?? "Failed to add education");
+        toast.error(result.error ?? t("toastAddFailed"));
       }
     });
   };
@@ -38,50 +41,50 @@ export function EducationSection({ items }: { items: CandidateEducation[] }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold">Education</h3>
+        <h3 className="font-semibold">{tShared("education")}</h3>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button size="sm" variant="outline">
-              <Plus className="h-4 w-4" /> Add
+              <Plus className="h-4 w-4" /> {tShared("add")}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add education</DialogTitle>
+              <DialogTitle>{t("addDialogTitle")}</DialogTitle>
             </DialogHeader>
             <form action={onSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="institution">Institution</Label>
+                <Label htmlFor="institution">{t("institution")}</Label>
                 <Input id="institution" name="institution" required />
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="degree">Degree</Label>
-                  <Input id="degree" name="degree" placeholder="Bachelor's" />
+                  <Label htmlFor="degree">{t("degree")}</Label>
+                  <Input id="degree" name="degree" placeholder={t("degreePlaceholder")} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="fieldOfStudy">Field of study</Label>
-                  <Input id="fieldOfStudy" name="fieldOfStudy" placeholder="Computer Science" />
+                  <Label htmlFor="fieldOfStudy">{t("fieldOfStudy")}</Label>
+                  <Input id="fieldOfStudy" name="fieldOfStudy" placeholder={t("fieldOfStudyPlaceholder")} />
                 </div>
               </div>
               <div className="grid gap-4 sm:grid-cols-3">
                 <div className="space-y-2">
-                  <Label htmlFor="startDate">Start date</Label>
+                  <Label htmlFor="startDate">{t("startDate")}</Label>
                   <Input id="startDate" name="startDate" type="date" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="endDate">End date</Label>
+                  <Label htmlFor="endDate">{t("endDate")}</Label>
                   <Input id="endDate" name="endDate" type="date" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="grade">Grade</Label>
-                  <Input id="grade" name="grade" placeholder="3.8 GPA" />
+                  <Label htmlFor="grade">{t("grade")}</Label>
+                  <Input id="grade" name="grade" placeholder={t("gradePlaceholder")} />
                 </div>
               </div>
               <DialogFooter>
                 <Button type="submit" variant="gradient" disabled={isPending}>
                   {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-                  Save
+                  {tShared("save")}
                 </Button>
               </DialogFooter>
             </form>
@@ -90,7 +93,7 @@ export function EducationSection({ items }: { items: CandidateEducation[] }) {
       </div>
 
       <div className="space-y-3">
-        {items.length === 0 && <p className="text-sm text-muted-foreground">No education added yet.</p>}
+        {items.length === 0 && <p className="text-sm text-muted-foreground">{t("empty")}</p>}
         {items.map((item) => (
           <div key={item.id} className="flex items-start justify-between rounded-xl border border-border p-4">
             <div>
@@ -111,17 +114,18 @@ export function EducationSection({ items }: { items: CandidateEducation[] }) {
 }
 
 function DeleteEducationButton({ id }: { id: string }) {
+  const t = useTranslations("Candidate.Education");
   const [isPending, startTransition] = React.useTransition();
   return (
     <Button
       variant="ghost"
       size="icon"
       disabled={isPending}
-      aria-label="Delete education entry"
+      aria-label={t("deleteAriaLabel")}
       onClick={() =>
         startTransition(async () => {
           const result = await deleteEducation(id);
-          if (!result.success) toast.error(result.error ?? "Failed to delete");
+          if (!result.success) toast.error(result.error ?? t("toastDeleteFailed"));
         })
       }
     >

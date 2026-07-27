@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { revalidateCandidatePath } from "@/lib/revalidate-candidate-path";
 import { generateEmbedding, toVectorLiteral } from "@/lib/ai/embeddings";
 import { generateJobDescriptionDraft, type JobDraft } from "@/lib/ai/job-description-writer";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -234,7 +235,7 @@ export async function publishJob(jobId: string): Promise<ActionResult> {
   if (error) return { success: false, error: error.message };
 
   revalidatePath("/recruiter/jobs");
-  revalidatePath("/candidate/jobs");
+  revalidateCandidatePath("/candidate/jobs");
 
   generateMatchesForJob(jobId).catch(() => {});
 

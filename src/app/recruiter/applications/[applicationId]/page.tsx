@@ -1,6 +1,8 @@
 import { notFound, redirect } from "next/navigation";
 import { CheckCircle2, MessageSquare, Sparkles, XCircle } from "lucide-react";
 
+import { getRedirectLocale } from "@/i18n/get-redirect-locale";
+
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,7 +24,7 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
   if (!user) redirect("/login");
 
   const recruiter = await getRecruiterContext(user.id);
-  if (!recruiter) redirect("/candidate/dashboard");
+  if (!recruiter) redirect(`/${await getRedirectLocale()}/candidate/dashboard`);
 
   const app = await getApplicationDetail(applicationId);
   if (!app || app.job?.company_id !== recruiter.company_id) notFound();

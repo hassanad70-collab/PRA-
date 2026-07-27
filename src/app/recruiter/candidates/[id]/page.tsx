@@ -1,6 +1,8 @@
 import { notFound, redirect } from "next/navigation";
 import { FileText } from "lucide-react";
 
+import { getRedirectLocale } from "@/i18n/get-redirect-locale";
+
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,7 +25,7 @@ export default async function RecruiterCandidateDetailPage({ params }: { params:
   if (!user) redirect("/login");
 
   const recruiter = await getRecruiterContext(user.id);
-  if (!recruiter) redirect("/candidate/dashboard");
+  if (!recruiter) redirect(`/${await getRedirectLocale()}/candidate/dashboard`);
 
   const { candidate, profile, experience, education, skills, resumes } = await getCandidateFullProfile(id);
   if (!candidate || !profile) notFound();

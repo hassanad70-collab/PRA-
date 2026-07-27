@@ -1,7 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-
+import { revalidateCandidatePath } from "@/lib/revalidate-candidate-path";
 import { extractTextFromFile } from "@/lib/ai/extract-text";
 import { generateEmbedding, toVectorLiteral } from "@/lib/ai/embeddings";
 import { parseResumeText } from "@/lib/ai/resume-parser";
@@ -108,15 +107,15 @@ export async function uploadResume(formData: FormData): Promise<UploadResumeResu
       .from("resumes")
       .update({ parse_status: "failed", parse_error: err instanceof Error ? err.message : "Unknown error" })
       .eq("id", resume.id);
-    revalidatePath("/candidate/resume");
-    revalidatePath("/candidate/profile");
-    revalidatePath("/candidate/dashboard");
+    revalidateCandidatePath("/candidate/resume");
+    revalidateCandidatePath("/candidate/profile");
+    revalidateCandidatePath("/candidate/dashboard");
     return { success: false, error: "Resume uploaded, but AI parsing failed. You can retry from your profile." };
   }
 
-  revalidatePath("/candidate/resume");
-  revalidatePath("/candidate/profile");
-  revalidatePath("/candidate/dashboard");
+  revalidateCandidatePath("/candidate/resume");
+  revalidateCandidatePath("/candidate/profile");
+  revalidateCandidatePath("/candidate/dashboard");
 
   return { success: true, resumeId: resume.id };
 }
@@ -310,7 +309,7 @@ export async function setPrimaryResume(resumeId: string): Promise<ActionResult> 
 
   await supabase.from("candidates").update({ primary_resume_id: resumeId }).eq("id", user.id);
 
-  revalidatePath("/candidate/resume");
+  revalidateCandidatePath("/candidate/resume");
   return { success: true };
 }
 

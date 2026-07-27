@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { defaultLocale, locales } from "@/i18n/routing";
 import { trackEvent } from "@/lib/analytics/track";
 import { readGuestSessionId } from "@/lib/guest/session";
 import { rateLimitByIp, rateLimitByIpAndTarget } from "@/lib/rate-limit";
@@ -87,7 +88,12 @@ export async function registerCandidate(formData: FormData): Promise<ActionResul
   }
 
   revalidatePath("/", "layout");
-  redirect("/candidate/dashboard");
+  const requestedLocale = formData.get("locale");
+  const locale =
+    typeof requestedLocale === "string" && (locales as readonly string[]).includes(requestedLocale)
+      ? requestedLocale
+      : defaultLocale;
+  redirect(`/${locale}/candidate/dashboard`);
 }
 
 export async function registerRecruiter(formData: FormData): Promise<ActionResult> {
@@ -212,12 +218,18 @@ export async function login(formData: FormData): Promise<ActionResult> {
 
   revalidatePath("/", "layout");
 
+  const requestedLocale = formData.get("locale");
+  const locale =
+    typeof requestedLocale === "string" && (locales as readonly string[]).includes(requestedLocale)
+      ? requestedLocale
+      : defaultLocale;
+
   const roleHome =
     profile?.role === "recruiter" || profile?.role === "hr_manager"
       ? "/recruiter/dashboard"
       : profile?.role === "super_admin"
       ? "/admin"
-      : "/candidate/dashboard";
+      : `/${locale}/candidate/dashboard`;
 
   // Honor a "redirect" target (e.g. from clicking "Sign in to apply" on a
   // public job posting, or middleware bouncing an unauthenticated visitor

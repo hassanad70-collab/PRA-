@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Loader2, UploadCloud } from "lucide-react";
 
@@ -10,6 +11,8 @@ import { uploadResume } from "@/actions/resume";
 import { cn } from "@/lib/utils";
 
 export function ResumeUpload() {
+  const t = useTranslations("Candidate.ResumeUpload");
+  const tAtsChecker = useTranslations("AtsChecker");
   const router = useRouter();
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [isPending, startTransition] = React.useTransition();
@@ -20,12 +23,12 @@ export function ResumeUpload() {
     formData.set("file", file);
 
     startTransition(async () => {
-      toast.info("Uploading resume and running AI analysis — this can take up to a minute…");
+      toast.info(t("uploading"));
       const result = await uploadResume(formData);
       if (result.success) {
-        toast.success("Resume processed! Your profile and ATS score are ready.");
+        toast.success(t("success"));
       } else {
-        toast.error(result.error ?? "Failed to upload resume.");
+        toast.error(result.error ?? t("failed"));
       }
       router.refresh();
     });
@@ -54,15 +57,15 @@ export function ResumeUpload() {
       ) : (
         <UploadCloud className="h-10 w-10 text-muted-foreground" />
       )}
-      <p className="mt-4 font-medium">{isPending ? "Processing your resume…" : "Drag & drop your resume here"}</p>
-      <p className="mt-1 text-sm text-muted-foreground">PDF or Word, up to 10MB</p>
+      <p className="mt-4 font-medium">{isPending ? t("processing") : t("dragDrop")}</p>
+      <p className="mt-1 text-sm text-muted-foreground">{t("hint")}</p>
       <Button
         variant="outline"
         className="mt-4"
         disabled={isPending}
         onClick={() => inputRef.current?.click()}
       >
-        Browse files
+        {tAtsChecker("browseFiles")}
       </Button>
       <input
         ref={inputRef}

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { DashboardShell, type NavItem } from "@/components/shared/dashboard-shell";
+import { getRedirectLocale } from "@/i18n/get-redirect-locale";
 import { getCurrentUser } from "@/lib/queries/candidate";
 
 const NAV_ITEMS: NavItem[] = [
@@ -21,11 +22,15 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   // every protected layout in this app double-checks role server-side too
   // (see RecruiterLayout / CandidateLayout).
   if (user.role !== "super_admin") {
-    redirect(user.role === "candidate" ? "/candidate/dashboard" : "/recruiter/dashboard");
+    redirect(user.role === "candidate" ? `/${await getRedirectLocale()}/candidate/dashboard` : "/recruiter/dashboard");
   }
 
   return (
-    <DashboardShell navItems={NAV_ITEMS} user={{ full_name: user.full_name, email: user.email, role: "super_admin" }}>
+    <DashboardShell
+      navItems={NAV_ITEMS}
+      user={{ full_name: user.full_name, email: user.email, role: "super_admin" }}
+      settingsHref="/admin/settings"
+    >
       {children}
     </DashboardShell>
   );

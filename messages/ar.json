@@ -299,5 +299,317 @@
       "submit": "تحديث كلمة المرور",
       "successToast": "تم تحديث كلمة المرور. يرجى تسجيل الدخول مرة أخرى."
     }
+  },
+  "Candidate": {
+    "Nav": {
+      "dashboard": "لوحة التحكم",
+      "profile": "الملف الشخصي",
+      "resumeAts": "السيرة الذاتية وتوافق ATS",
+      "applications": "طلباتي",
+      "settings": "الإعدادات",
+      "signOut": "تسجيل الخروج",
+      "openMenu": "فتح القائمة"
+    },
+    "Shared": {
+      "resume": "السيرة الذاتية",
+      "skills": "المهارات",
+      "experience": "الخبرة",
+      "education": "التعليم",
+      "atsScore": "نتيجة توافق ATS",
+      "aiSuggestions": "اقتراحات الذكاء الاصطناعي",
+      "profileCompletion": "اكتمال الملف الشخصي",
+      "save": "حفظ",
+      "saveChanges": "حفظ التغييرات",
+      "cancel": "إلغاء",
+      "add": "إضافة",
+      "edit": "تعديل",
+      "matchPercent": "توافق {percent}%",
+      "present": "حتى الآن",
+      "updated": "تم التحديث {time}",
+      "uploaded": "تم الرفع {time}"
+    },
+    "Dashboard": {
+      "welcomeBack": "مرحبًا بعودتك، {name}",
+      "subtitle": "إليك آخر مستجدات بحثك عن وظيفة.",
+      "activeApplications": "الطلبات النشطة",
+      "totalSubmitted": "{count} إجمالي الطلبات المُرسلة",
+      "resumesUploaded": "السير الذاتية المرفوعة",
+      "primaryResumeSet": "تم تعيين السيرة الذاتية الأساسية",
+      "noPrimaryResume": "لا توجد سيرة ذاتية أساسية",
+      "latestAtsScore": "أحدث نتيجة توافق ATS",
+      "uploadResumeTitle": "ارفع سيرتك الذاتية للبدء",
+      "uploadResumeSubtitle": "سيقوم الذكاء الاصطناعي لدينا بملء ملفك الشخصي تلقائيًا ومطابقتك مع الوظائف الشاغرة فورًا.",
+      "uploadResume": "رفع السيرة الذاتية",
+      "aiRecommendedJobs": "وظائف موصى بها بالذكاء الاصطناعي",
+      "viewAll": "عرض الكل",
+      "noRecommendations": "لا توجد توصيات بعد — ارفع سيرتك الذاتية ليتمكن الذكاء الاصطناعي من مطابقتك مع الوظائف الشاغرة.",
+      "recentApplications": "الطلبات الأخيرة",
+      "noApplications": "لم تتقدم لأي وظيفة بعد.",
+      "completeProfileHint": "أكمل ملفك الشخصي وارفع سيرتك الذاتية لتفعيل المطابقة الذكية وتقييم توافق ATS."
+    },
+    "Profile": {
+      "title": "ملفي الشخصي",
+      "subtitle": "حافظ على اكتمال ملفك الشخصي للحصول على أفضل مطابقات الذكاء الاصطناعي للوظائف.",
+      "tabs": {
+        "basicInfo": "المعلومات الأساسية",
+        "experience": "الخبرة",
+        "education": "التعليم",
+        "skills": "المهارات",
+        "more": "اللغات والمشاريع"
+      },
+      "languages": "اللغات",
+      "noLanguages": "لم تتم إضافة لغات بعد.",
+      "certificates": "الشهادات",
+      "noCertificates": "لم تتم إضافة شهادات بعد.",
+      "projects": "المشاريع",
+      "noProjects": "لم تتم إضافة مشاريع بعد."
+    },
+    "BasicInfoForm": {
+      "headline": "العنوان الوظيفي",
+      "headlinePlaceholder": "مصمم منتجات أول",
+      "currentPosition": "المنصب الحالي",
+      "professionalSummary": "الملخص المهني",
+      "currentCompany": "الشركة الحالية",
+      "yearsOfExperience": "سنوات الخبرة",
+      "noticePeriodDays": "فترة الإشعار (بالأيام)",
+      "location": "الموقع",
+      "locationPlaceholder": "القاهرة، مصر",
+      "city": "المدينة",
+      "country": "الدولة",
+      "expectedSalaryMin": "الراتب المتوقع (الحد الأدنى)",
+      "expectedSalaryMax": "الراتب المتوقع (الحد الأقصى)",
+      "willingToRelocate": "على استعداد للانتقال",
+      "linkedinUrl": "رابط LinkedIn",
+      "githubUrl": "رابط GitHub",
+      "portfolioUrl": "رابط معرض الأعمال",
+      "websiteUrl": "رابط الموقع الإلكتروني",
+      "toastUpdated": "تم تحديث الملف الشخصي",
+      "toastUpdateFailed": "فشل تحديث الملف الشخصي"
+    },
+    "Education": {
+      "addDialogTitle": "إضافة مؤهل تعليمي",
+      "institution": "المؤسسة التعليمية",
+      "degree": "الدرجة العلمية",
+      "degreePlaceholder": "بكالوريوس",
+      "fieldOfStudy": "مجال الدراسة",
+      "fieldOfStudyPlaceholder": "علوم الحاسب",
+      "startDate": "تاريخ البدء",
+      "endDate": "تاريخ الانتهاء",
+      "grade": "التقدير",
+      "gradePlaceholder": "3.8 من 4",
+      "empty": "لم تتم إضافة مؤهلات تعليمية بعد.",
+      "toastAdded": "تمت إضافة المؤهل التعليمي",
+      "toastAddFailed": "فشل إضافة المؤهل التعليمي",
+      "deleteAriaLabel": "حذف المؤهل التعليمي",
+      "toastDeleteFailed": "فشل الحذف"
+    },
+    "Experience": {
+      "heading": "الخبرة العملية",
+      "addDialogTitle": "إضافة خبرة عملية",
+      "jobTitle": "المسمى الوظيفي",
+      "companyName": "الشركة",
+      "location": "الموقع",
+      "startDate": "تاريخ البدء",
+      "endDate": "تاريخ الانتهاء",
+      "currentlyWorkHere": "أعمل هنا حاليًا",
+      "description": "الوصف",
+      "empty": "لم تتم إضافة خبرات عملية بعد.",
+      "toastAdded": "تمت إضافة الخبرة العملية",
+      "toastAddFailed": "فشل إضافة الخبرة العملية",
+      "deleteAriaLabel": "حذف الخبرة العملية",
+      "toastDeleteFailed": "فشل الحذف"
+    },
+    "Skills": {
+      "placeholder": "أضف مهارة واضغط Enter",
+      "empty": "لم تتم إضافة مهارات بعد.",
+      "toastAddFailed": "فشل إضافة المهارة",
+      "toastRemoveFailed": "فشل إزالة المهارة"
+    },
+    "OpenToWork": {
+      "label": "متاح لاكتشاف مسؤولي التوظيف لي",
+      "description": "عند التفعيل، يمكن لمسؤولي التوظيف في إحدى الشركات رؤية ملفك الشخصي للوظائف التي طابقها الذكاء الاصطناعي معك بالفعل — حتى لو لم تتقدم لها. الخيار متوقف افتراضيًا؛ ولن تظهر أبدًا لوظيفة لم تتم مطابقتك معها.",
+      "toastFailed": "فشل التحديث."
+    },
+    "Resume": {
+      "title": "السيرة الذاتية ونتيجة ATS",
+      "subtitle": "ارفع سيرتك الذاتية لتحليل فوري بالذكاء الاصطناعي، وتقييم توافق ATS، ومطابقة الوظائف.",
+      "builderTitle": "منشئ السيرة الذاتية بالذكاء الاصطناعي",
+      "builderSubtitle": "أنشئ سيرة ذاتية احترافية من ملفك الشخصي، وحسّنها بالذكاء الاصطناعي، وصدّرها بصيغة PDF أو Word.",
+      "openBuilder": "فتح المنشئ",
+      "yourResumes": "سيرك الذاتية",
+      "noResumes": "لم يتم رفع أي سيرة ذاتية بعد.",
+      "primary": "أساسية",
+      "setAsPrimary": "تعيين كأساسية",
+      "toastSetPrimaryFailed": "فشل التحديث.",
+      "noAtsScoreYet": "ستظهر نتيجة توافق ATS هنا بمجرد انتهاء الذكاء الاصطناعي من معالجة سيرتك الذاتية."
+    },
+    "ResumeUpload": {
+      "dragDrop": "اسحب وأفلت سيرتك الذاتية هنا",
+      "processing": "جارٍ معالجة سيرتك الذاتية…",
+      "hint": "PDF أو Word، حتى 10 ميجابايت",
+      "uploading": "جارٍ رفع السيرة الذاتية وتشغيل التحليل بالذكاء الاصطناعي — قد يستغرق هذا حتى دقيقة…",
+      "success": "تمت معالجة السيرة الذاتية! ملفك الشخصي ونتيجة ATS جاهزان الآن.",
+      "failed": "فشل رفع السيرة الذاتية."
+    },
+    "ImproveResume": {
+      "trigger": "حسّن سيرتي الذاتية",
+      "dialogTitle": "تحسينات السيرة الذاتية بالذكاء الاصطناعي",
+      "dialogDescription": "اقتراحات مولّدة من بيانات سيرتك الذاتية المحلّلة.",
+      "analyzing": "جارٍ تحليل سيرتك الذاتية…",
+      "improvedSummary": "الملخص المحسّن",
+      "improvedExperience": "نقاط الخبرة المحسّنة",
+      "suggestedSkills": "مهارات مقترحة للإضافة",
+      "atsKeywords": "كلمات مفتاحية لـ ATS للإضافة",
+      "achievementIdeas": "أفكار جديدة لبيانات الإنجازات",
+      "failed": "فشل توليد الاقتراحات."
+    },
+    "AtsScoreCard": {
+      "title": "نتيجة ATS بالذكاء الاصطناعي"
+    },
+    "ResumeBuilder": {
+      "title": "منشئ السيرة الذاتية بالذكاء الاصطناعي",
+      "subtitle": "أنشئ سيرة ذاتية من ملفك الشخصي، ودع الذكاء الاصطناعي يحسّن الصياغة، وصدّرها بصيغة PDF أو Word.",
+      "newDraft": "مسودة جديدة",
+      "emptyHint": "لا توجد مسودات سيرة ذاتية بعد. أنشئ واحدة وسنبدأها من ملفك الشخصي.",
+      "open": "فتح",
+      "createFailed": "فشل إنشاء مسودة جديدة."
+    },
+    "ResumeDraftEditor": {
+      "allDrafts": "كل المسودات",
+      "lastPdfDownload": "آخر تنزيل بصيغة PDF",
+      "lastWordDownload": "آخر تنزيل بصيغة Word"
+    },
+    "ImportResume": {
+      "trigger": "استيراد سيرة ذاتية",
+      "dialogTitle": "استيراد من سيرة ذاتية مرفوعة",
+      "dialogDescription": "راجع كل حقل قبل إضافته -- لن يتم استبدال أي شيء في ملفك الشخصي تلقائيًا.",
+      "readingResume": "جارٍ قراءة سيرتك الذاتية…",
+      "chooseFile": "اختر ملفًا",
+      "nothingFound": "لم يتم العثور على أي جديد في تلك السيرة الذاتية.",
+      "readFailed": "فشل قراءة تلك السيرة الذاتية.",
+      "replacesExisting": "يستبدل المحتوى الحالي",
+      "current": "الحالي",
+      "imported": "المستورد",
+      "empty": "(فارغ)",
+      "itemsCount": "{count} عنصر",
+      "applySelected": "تطبيق المحدد ({count})",
+      "appliedToast": "تم تطبيق الحقول المستوردة.",
+      "applyFailed": "فشل تطبيق الحقول المستوردة."
+    },
+    "FinalizeDraft": {
+      "trigger": "إنشاء السيرة الذاتية",
+      "dialogTitle": "إنشاء سيرتك الذاتية",
+      "dialogDescription": "اختر صيغة. يمكنك إعادة الإنشاء في أي وقت أثناء متابعة التعديل.",
+      "pdfOnly": "PDF فقط",
+      "docxOnly": "Word (.docx) فقط",
+      "both": "PDF + Word (.docx)",
+      "downloadPdf": "تنزيل PDF",
+      "downloadWord": "تنزيل مستند Word",
+      "generate": "إنشاء",
+      "generatedToast": "تم إنشاء السيرة الذاتية",
+      "failed": "فشل إنشاء سيرتك الذاتية."
+    },
+    "SectionCard": {
+      "regenerateWithAi": "إعادة التوليد بالذكاء الاصطناعي",
+      "aiSuggestionCompare": "اقتراح الذكاء الاصطناعي -- قارن واختر",
+      "current": "الحالي",
+      "suggested": "المقترح",
+      "accept": "قبول",
+      "reject": "رفض",
+      "savedToast": "تم حفظ {section}",
+      "saveFailed": "فشل الحفظ.",
+      "acceptFailed": "فشل قبول الاقتراح.",
+      "rejectFailed": "فشل رفض الاقتراح.",
+      "regenerateFailed": "فشل توليد اقتراح.",
+      "emptyHint": "لا يوجد شيء هنا بعد -- اضغط تعديل لإضافة محتوى.",
+      "removeEntryAriaLabel": "إزالة العنصر",
+      "addEntry": "إضافة عنصر",
+      "fields": {
+        "fullName": "الاسم الكامل",
+        "email": "البريد الإلكتروني",
+        "phone": "الهاتف",
+        "address": "العنوان",
+        "summary": "الملخص",
+        "skillsCommaSeparated": "المهارات (مفصولة بفواصل)",
+        "linkedin": "LinkedIn",
+        "github": "GitHub",
+        "portfolio": "معرض الأعمال",
+        "website": "الموقع الإلكتروني"
+      }
+    },
+    "SectionSchemas": {
+      "labels": {
+        "personalInfo": "المعلومات الشخصية",
+        "summary": "الملخص",
+        "experience": "الخبرة",
+        "education": "التعليم",
+        "skills": "المهارات",
+        "certifications": "الشهادات",
+        "languages": "اللغات",
+        "projects": "المشاريع",
+        "achievements": "الإنجازات",
+        "socialLinks": "الروابط الاجتماعية"
+      },
+      "fields": {
+        "jobTitle": "المسمى الوظيفي",
+        "company": "الشركة",
+        "location": "الموقع",
+        "startDate": "تاريخ البدء",
+        "endDate": "تاريخ الانتهاء",
+        "currentlyWorkHere": "أعمل هنا حاليًا",
+        "description": "الوصف",
+        "descriptionPlaceholder": "إنجاز واحد في كل سطر",
+        "institution": "المؤسسة التعليمية",
+        "degree": "الدرجة العلمية",
+        "fieldOfStudy": "مجال الدراسة",
+        "grade": "التقدير",
+        "name": "الاسم",
+        "issuingOrganization": "الجهة المانحة",
+        "issueDate": "تاريخ الإصدار",
+        "language": "اللغة",
+        "proficiency": "مستوى الإتقان",
+        "proficiencyPlaceholder": "أساسي / محادثة / طلاقة / لغة أم",
+        "technologies": "التقنيات (مفصولة بفواصل)",
+        "title": "العنوان"
+      }
+    },
+    "Jobs": {
+      "subtitle": "وظائف مطابقة بالذكاء الاصطناعي بناءً على ملفك الشخصي وسيرتك الذاتية."
+    },
+    "JobDetail": {
+      "applied": "تم التقديم — {status}",
+      "aiMatch": "توافق {score}% بالذكاء الاصطناعي — {summary}",
+      "yourStrengths": "نقاط قوتك",
+      "skillsToHighlight": "مهارات لإبرازها أو تعلّمها"
+    },
+    "Applications": {
+      "title": "طلباتي",
+      "subtitle": "تابع حالة كل وظيفة تقدّمت لها.",
+      "empty": "لم تتقدم لأي وظيفة بعد.",
+      "withdraw": "سحب الطلب",
+      "toastWithdrawn": "تم سحب الطلب",
+      "toastWithdrawFailed": "فشل سحب الطلب"
+    },
+    "SaveJob": {
+      "save": "حفظ الوظيفة",
+      "remove": "إزالة من الوظائف المحفوظة",
+      "toastFailed": "فشل حفظ الوظيفة"
+    },
+    "ApplyDialog": {
+      "uploadResumeToApply": "ارفع سيرة ذاتية للتقديم",
+      "applyNow": "قدّم الآن",
+      "dialogTitle": "أرسل طلبك",
+      "dialogDescription": "اختر السيرة الذاتية المراد إرسالها وأضف خطاب تقديم اختياريًا.",
+      "resumeLabel": "السيرة الذاتية",
+      "coverLetterLabel": "خطاب التقديم (اختياري)",
+      "coverLetterPlaceholder": "أخبر مسؤول التوظيف لماذا أنت الأنسب لهذه الوظيفة…",
+      "submit": "إرسال الطلب",
+      "selectResumeError": "يرجى اختيار سيرة ذاتية.",
+      "toastSubmitted": "تم إرسال الطلب! الفرز بالذكاء الاصطناعي قيد التشغيل الآن.",
+      "toastFailed": "فشل إرسال الطلب."
+    },
+    "RadioGroupResumes": {
+      "primary": "أساسية"
+    }
   }
 }

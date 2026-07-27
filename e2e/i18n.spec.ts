@@ -1,5 +1,8 @@
 import { test, expect } from "@playwright/test";
 
+import { login } from "./helpers/auth";
+import { TEST_USERS } from "./global-setup";
+
 test.describe("Internationalization (English / Arabic)", () => {
   test("homepage works in both languages with correct lang/dir", async ({ page }) => {
     await page.goto("/en");
@@ -128,5 +131,74 @@ test.describe("Internationalization (English / Arabic)", () => {
     await page.goto("/ar/login");
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", /\/ar\/login$/);
+  });
+});
+
+// Candidate Portal Internationalization unit: the entire authenticated
+// candidate experience moved from unprefixed /candidate/* to locale-prefixed
+// /{locale}/candidate/*, with a temporary backward-compatibility redirect
+// for legacy links (see the TODO(tech-debt) in src/middleware.ts).
+test.describe("Candidate portal internationalization", () => {
+  test("dashboard renders correctly in both locales with correct lang/dir", async ({ page }) => {
+    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
+    await expect(page).toHaveURL(/\/en\/candidate\/dashboard$/, { timeout: 15_000 });
+    await expect(page.getByRole("heading", { name: /welcome back/i })).toBeVisible();
+    expect(await page.locator("html").getAttribute("lang")).toBe("en");
+    expect(await page.locator("html").getAttribute("dir")).toBe("ltr");
+
+    await page.goto("/ar/candidate/dashboard");
+    await expect(page.getByRole("heading", { name: /مرحبًا بعودتك/ })).toBeVisible();
+    expect(await page.locator("html").getAttribute("lang")).toBe("ar");
+    expect(await page.locator("html").getAttribute("dir")).toBe("rtl");
+  });
+
+  test("legacy unprefixed candidate URLs redirect to the locale-prefixed equivalent", async ({ page }) => {
+    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
+    await expect(page).toHaveURL(/\/en\/candidate\/dashboard$/, { timeout: 15_000 });
+
+    await page.goto("/candidate/profile");
+    await expect(page).toHaveURL(/\/en\/candidate\/profile$/);
+  });
+
+  test("language switcher preserves the current candidate page and updates html lang/dir", async ({ page }) => {
+    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
+    await expect(page).toHaveURL(/\/en\/candidate\/dashboard$/, { timeout: 15_000 });
+
+    await page.getByRole("link", { name: "Profile" }).click();
+    await expect(page).toHaveURL(/\/en\/candidate\/profile$/);
+
+    await page.getByRole("button", { name: "Change language" }).click();
+    await page.getByRole("menuitem", { name: "العربية" }).click();
+    await expect(page).toHaveURL(/\/ar\/candidate\/profile$/);
+    await expect(page.getByRole("heading", { name: "ملفي الشخصي" })).toBeVisible();
+    await expect(page.locator("html")).toHaveAttribute("lang", "ar");
+    await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+  });
+
+  test("no internal candidate navigation link generates a legacy unprefixed URL", async ({ page }) => {
+    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
+    await expect(page).toHaveURL(/\/en\/candidate\/dashboard$/, { timeout: 15_000 });
+
+    for (const name of ["Dashboard", "Profile", "Resume & ATS", "Browse Jobs", "Applications"]) {
+      const href = await page.getByRole("link", { name }).getAttribute("href");
+      expect(href, `${name} nav link should be locale-prefixed`).toMatch(/^\/en\/candidate\//);
+    }
+  });
+
+  test("RTL layout renders correctly on the candidate dashboard, desktop and mobile", async ({ page }) => {
+    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
+    await expect(page).toHaveURL(/\/en\/candidate\/dashboard$/, { timeout: 15_000 });
+
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto("/ar/candidate/dashboard");
+    expect(await page.locator("html").getAttribute("dir")).toBe("rtl");
+    const desktopOverflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
+    expect(desktopOverflow, "no horizontal overflow on desktop RTL candidate dashboard").toBe(false);
+
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto("/ar/candidate/dashboard");
+    expect(await page.locator("html").getAttribute("dir")).toBe("rtl");
+    const mobileOverflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
+    expect(mobileOverflow, "no horizontal overflow on mobile RTL candidate dashboard").toBe(false);
   });
 });

@@ -34,7 +34,12 @@ test.describe("Public (unauthenticated) access", () => {
 
     await page.goto(`/jobs/${job!.id}`);
     await page.getByRole("link", { name: "Sign in to apply" }).click();
-    await expect(page).toHaveURL(new RegExp(`/login\\?redirect=(%2F|/)candidate(%2F|/)jobs(%2F|/)${job!.id}`));
+    // The redirect target is locale-prefixed (/en/candidate/jobs/...) since the
+    // Candidate Portal Internationalization unit -- no internal link is ever
+    // allowed to generate an unprefixed /candidate/... URL.
+    await expect(page).toHaveURL(
+      new RegExp(`/en/login\\?redirect=(%2F|/)en(%2F|/)candidate(%2F|/)jobs(%2F|/)${job!.id}`)
+    );
   });
 
   test("public company profile page is viewable without login", async ({ page }) => {

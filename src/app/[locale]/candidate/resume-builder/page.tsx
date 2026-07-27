@@ -1,5 +1,6 @@
-import { redirect } from "next/navigation";
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
+
+import { Link, redirect } from "@/i18n/navigation";
 import { FileEdit, Sparkles } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -10,22 +11,25 @@ import { getResumeDrafts } from "@/lib/queries/resume-builder";
 import { formatRelativeTime } from "@/lib/utils";
 import { CreateDraftButton } from "@/components/candidate/resume-builder/create-draft-button";
 
-export default async function ResumeBuilderPage() {
+export default async function ResumeBuilderPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
   const user = await getCurrentUser();
-  if (!user) redirect("/login");
+  if (!user) redirect({ href: "/login", locale });
 
-  const drafts = await getResumeDrafts(user.id);
+  const [drafts, t, tShared] = await Promise.all([
+    getResumeDrafts(user.id),
+    getTranslations("Candidate.ResumeBuilder"),
+    getTranslations("Candidate.Shared"),
+  ]);
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight">
-            <Sparkles className="h-5 w-5 text-primary" /> AI Resume Builder
+            <Sparkles className="h-5 w-5 text-primary" /> {t("title")}
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Build a resume from your profile, let AI polish the wording, and export it as PDF or Word.
-          </p>
+          <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
         </div>
         {drafts.length > 0 && <CreateDraftButton />}
       </div>
@@ -35,9 +39,7 @@ export default async function ResumeBuilderPage() {
           <Card>
             <CardContent className="flex flex-col items-center gap-3 py-16 text-center">
               <FileEdit className="h-8 w-8 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">
-                No resume drafts yet. Create one and we&apos;ll start it from your profile.
-              </p>
+              <p className="text-sm text-muted-foreground">{t("emptyHint")}</p>
               <CreateDraftButton />
             </CardContent>
           </Card>
@@ -53,10 +55,10 @@ export default async function ResumeBuilderPage() {
                       {draft.status}
                     </Badge>
                   </div>
-                  <p className="mt-1 text-xs text-muted-foreground">Updated {formatRelativeTime(draft.updated_at)}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{tShared("updated", { time: formatRelativeTime(draft.updated_at) })}</p>
                 </div>
                 <Button variant="outline" size="sm">
-                  Open
+                  {t("open")}
                 </Button>
               </CardContent>
             </Card>

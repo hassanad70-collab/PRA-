@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { revalidateCandidatePath } from "@/lib/revalidate-candidate-path";
 import { generateInterviewQuestions } from "@/lib/ai/interview-questions";
 import { createClient } from "@/lib/supabase/server";
 import { interviewFeedbackSchema, scheduleInterviewSchema } from "@/lib/validations/interview";
@@ -95,7 +96,7 @@ export async function scheduleInterview(applicationId: string, jobId: string, fo
 
   revalidatePath(`/recruiter/applications/${applicationId}`);
   revalidatePath(`/recruiter/jobs/${jobId}/candidates`);
-  revalidatePath("/candidate/applications");
+  revalidateCandidatePath("/candidate/applications");
   return { success: true };
 }
 
@@ -107,7 +108,7 @@ export async function updateInterviewStatus(interviewId: string, applicationId: 
   if (error) return { success: false, error: error.message };
 
   revalidatePath(`/recruiter/applications/${applicationId}`);
-  revalidatePath("/candidate/applications");
+  revalidateCandidatePath("/candidate/applications");
   return { success: true };
 }
 

@@ -2,6 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Plus, Users } from "lucide-react";
 
+import { getRedirectLocale } from "@/i18n/get-redirect-locale";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,7 +24,7 @@ export default async function RecruiterJobsPage() {
   if (!user) redirect("/login");
 
   const recruiter = await getRecruiterContext(user.id);
-  if (!recruiter) redirect("/candidate/dashboard");
+  if (!recruiter) redirect(`/${await getRedirectLocale()}/candidate/dashboard`);
 
   const jobs = await getRecruiterJobs(recruiter.company_id);
 

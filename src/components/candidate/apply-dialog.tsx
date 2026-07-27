@@ -1,12 +1,12 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Link, useRouter } from "@/i18n/navigation";
 import {
   Dialog,
   DialogContent,
@@ -23,6 +23,7 @@ import { applyToJob } from "@/actions/applications";
 import type { Resume } from "@/types/database";
 
 export function ApplyDialog({ jobId, resumes }: { jobId: string; resumes: Resume[] }) {
+  const t = useTranslations("Candidate.ApplyDialog");
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
   const [resumeId, setResumeId] = React.useState(resumes.find((r) => r.is_primary)?.id ?? resumes[0]?.id ?? "");
@@ -31,17 +32,17 @@ export function ApplyDialog({ jobId, resumes }: { jobId: string; resumes: Resume
 
   const submit = () => {
     if (!resumeId) {
-      toast.error("Please select a resume.");
+      toast.error(t("selectResumeError"));
       return;
     }
     startTransition(async () => {
       const result = await applyToJob(jobId, resumeId, coverLetter);
       if (result.success) {
-        toast.success("Application submitted! AI screening is running now.");
+        toast.success(t("toastSubmitted"));
         setOpen(false);
         router.refresh();
       } else {
-        toast.error(result.error ?? "Failed to submit application.");
+        toast.error(result.error ?? t("toastFailed"));
       }
     });
   };
@@ -49,7 +50,7 @@ export function ApplyDialog({ jobId, resumes }: { jobId: string; resumes: Resume
   if (resumes.length === 0) {
     return (
       <Button variant="gradient" asChild>
-        <Link href="/candidate/resume">Upload a resume to apply</Link>
+        <Link href="/candidate/resume">{t("uploadResumeToApply")}</Link>
       </Button>
     );
   }
@@ -58,28 +59,28 @@ export function ApplyDialog({ jobId, resumes }: { jobId: string; resumes: Resume
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="gradient" size="lg">
-          Apply now
+          {t("applyNow")}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Submit your application</DialogTitle>
-          <DialogDescription>Choose which resume to send and add an optional cover letter.</DialogDescription>
+          <DialogTitle>{t("dialogTitle")}</DialogTitle>
+          <DialogDescription>{t("dialogDescription")}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label>Resume</Label>
+            <Label>{t("resumeLabel")}</Label>
             <RadioGroupResumes resumes={resumes} value={resumeId} onChange={setResumeId} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="coverLetter">Cover letter (optional)</Label>
+            <Label htmlFor="coverLetter">{t("coverLetterLabel")}</Label>
             <Textarea
               id="coverLetter"
               rows={5}
               value={coverLetter}
               onChange={(e) => setCoverLetter(e.target.value)}
-              placeholder="Tell the recruiter why you're a great fit…"
+              placeholder={t("coverLetterPlaceholder")}
             />
           </div>
         </div>
@@ -87,7 +88,7 @@ export function ApplyDialog({ jobId, resumes }: { jobId: string; resumes: Resume
         <DialogFooter>
           <Button variant="gradient" onClick={submit} disabled={isPending}>
             {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-            Submit application
+            {t("submit")}
           </Button>
         </DialogFooter>
       </DialogContent>

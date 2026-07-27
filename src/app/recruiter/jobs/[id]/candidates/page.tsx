@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { CheckCircle2, Sparkles, Trophy, XCircle } from "lucide-react";
 
+import { getRedirectLocale } from "@/i18n/get-redirect-locale";
+
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -30,7 +32,7 @@ export default async function JobCandidatesPage({ params }: { params: Promise<{ 
   if (!user) redirect("/login");
 
   const recruiter = await getRecruiterContext(user.id);
-  if (!recruiter) redirect("/candidate/dashboard");
+  if (!recruiter) redirect(`/${await getRedirectLocale()}/candidate/dashboard`);
 
   const job = await getJobById(id);
   if (!job || job.company_id !== recruiter.company_id) notFound();

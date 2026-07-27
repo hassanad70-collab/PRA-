@@ -1,5 +1,6 @@
-import Link from "next/link";
-import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
+
+import { Link, redirect } from "@/i18n/navigation";
 import { ArrowUpRight, Briefcase, FileText, Sparkles, TrendingUp } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -15,15 +16,19 @@ import {
   getRecommendedJobsForCandidate,
 } from "@/lib/queries/candidate";
 
-export default async function CandidateDashboardPage() {
+export default async function CandidateDashboardPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
   const user = await getCurrentUser();
-  if (!user) redirect("/login");
+  if (!user) redirect({ href: "/login", locale });
 
-  const [{ candidate, resumes }, applications, recommendations, atsScore] = await Promise.all([
+  const [{ candidate, resumes }, applications, recommendations, atsScore, t, tShared, tCommon] = await Promise.all([
     getCandidateFullProfile(user.id),
     getCandidateApplications(user.id),
     getRecommendedJobsForCandidate(user.id, 5),
     getLatestAtsScore(user.id),
+    getTranslations("Candidate.Dashboard"),
+    getTranslations("Candidate.Shared"),
+    getTranslations("Common"),
   ]);
 
   const activeApplications = applications.filter((a) => !["rejected", "withdrawn"].includes(a.status));
@@ -31,15 +36,15 @@ export default async function CandidateDashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Welcome back, {user.full_name.split(" ")[0]}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Here&apos;s what&apos;s happening with your job search.</p>
+        <h1 className="text-2xl font-semibold tracking-tight">{t("welcomeBack", { name: user.full_name.split(" ")[0] })}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardContent className="flex items-center justify-between pt-6">
             <div>
-              <p className="text-sm text-muted-foreground">Profile completion</p>
+              <p className="text-sm text-muted-foreground">{tShared("profileCompletion")}</p>
               <p className="mt-1 text-2xl font-bold">{candidate?.profile_completion_percent ?? 0}%</p>
             </div>
           </CardContent>
@@ -50,18 +55,18 @@ export default async function CandidateDashboardPage() {
 
         <Card>
           <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground">Active applications</p>
+            <p className="text-sm text-muted-foreground">{t("activeApplications")}</p>
             <p className="mt-1 text-2xl font-bold">{activeApplications.length}</p>
-            <p className="mt-1 text-xs text-muted-foreground">{applications.length} total submitted</p>
+            <p className="mt-1 text-xs text-muted-foreground">{t("totalSubmitted", { count: applications.length })}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground">Resumes uploaded</p>
+            <p className="text-sm text-muted-foreground">{t("resumesUploaded")}</p>
             <p className="mt-1 text-2xl font-bold">{resumes.length}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              {resumes.find((r) => r.is_primary) ? "Primary resume set" : "No primary resume"}
+              {resumes.find((r) => r.is_primary) ? t("primaryResumeSet") : t("noPrimaryResume")}
             </p>
           </CardContent>
         </Card>
@@ -69,7 +74,7 @@ export default async function CandidateDashboardPage() {
         <Card>
           <CardContent className="flex items-center justify-between pt-6">
             <div>
-              <p className="text-sm text-muted-foreground">Latest ATS score</p>
+              <p className="text-sm text-muted-foreground">{t("latestAtsScore")}</p>
               <p className="mt-1 text-2xl font-bold">{atsScore?.overall_score ?? "—"}</p>
             </div>
             {atsScore && <ScoreRing score={atsScore.overall_score} size={56} strokeWidth={5} />}
@@ -83,14 +88,12 @@ export default async function CandidateDashboardPage() {
             <div className="flex items-center gap-3">
               <Sparkles className="h-8 w-8 text-primary" />
               <div>
-                <p className="font-medium">Upload your resume to get started</p>
-                <p className="text-sm text-muted-foreground">
-                  Our AI will auto-fill your profile and match you to open jobs instantly.
-                </p>
+                <p className="font-medium">{t("uploadResumeTitle")}</p>
+                <p className="text-sm text-muted-foreground">{t("uploadResumeSubtitle")}</p>
               </div>
             </div>
             <Button variant="gradient" asChild>
-              <Link href="/candidate/resume">Upload resume</Link>
+              <Link href="/candidate/resume">{t("uploadResume")}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -100,19 +103,17 @@ export default async function CandidateDashboardPage() {
         <Card className="lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="flex items-center gap-2 text-base">
-              <TrendingUp className="h-4 w-4" /> AI recommended jobs
+              <TrendingUp className="h-4 w-4" /> {t("aiRecommendedJobs")}
             </CardTitle>
             <Button variant="ghost" size="sm" asChild>
               <Link href="/candidate/jobs">
-                View all <ArrowUpRight className="h-3.5 w-3.5" />
+                {t("viewAll")} <ArrowUpRight className="h-3.5 w-3.5" />
               </Link>
             </Button>
           </CardHeader>
           <CardContent className="space-y-3">
             {recommendations.length === 0 && (
-              <p className="py-8 text-center text-sm text-muted-foreground">
-                No recommendations yet — upload a resume so our AI can match you to open roles.
-              </p>
+              <p className="py-8 text-center text-sm text-muted-foreground">{t("noRecommendations")}</p>
             )}
             {recommendations.map((match) => (
               <Link
@@ -123,11 +124,11 @@ export default async function CandidateDashboardPage() {
                 <div className="min-w-0">
                   <p className="truncate font-medium">{match.job?.title}</p>
                   <p className="truncate text-sm text-muted-foreground">
-                    {match.job?.company?.name} · {match.job?.location ?? "Remote"}
+                    {match.job?.company?.name} · {match.job?.location ?? tCommon("remote")}
                   </p>
                 </div>
                 <Badge variant={match.match_score >= 80 ? "success" : match.match_score >= 60 ? "warning" : "outline"}>
-                  {Math.round(match.match_score)}% match
+                  {tShared("matchPercent", { percent: Math.round(match.match_score) })}
                 </Badge>
               </Link>
             ))}
@@ -137,12 +138,12 @@ export default async function CandidateDashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <Briefcase className="h-4 w-4" /> Recent applications
+              <Briefcase className="h-4 w-4" /> {t("recentApplications")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {applications.length === 0 && (
-              <p className="py-8 text-center text-sm text-muted-foreground">You haven&apos;t applied to any jobs yet.</p>
+              <p className="py-8 text-center text-sm text-muted-foreground">{t("noApplications")}</p>
             )}
             {applications.slice(0, 5).map((app) => (
               <div key={app.id} className="flex items-center justify-between rounded-xl border border-border p-3">
@@ -163,7 +164,7 @@ export default async function CandidateDashboardPage() {
         <Card>
           <CardContent className="flex items-center gap-3 py-6 text-sm text-muted-foreground">
             <FileText className="h-4 w-4" />
-            Complete your profile and upload a resume to unlock AI job matching and ATS scoring.
+            {t("completeProfileHint")}
           </CardContent>
         </Card>
       )}

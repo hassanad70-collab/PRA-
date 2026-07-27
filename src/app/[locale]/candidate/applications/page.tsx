@@ -1,5 +1,6 @@
-import Link from "next/link";
-import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
+
+import { Link, redirect } from "@/i18n/navigation";
 import { Calendar, MapPin } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -20,22 +21,27 @@ const STATUS_VARIANT: Record<ApplicationStatus, "default" | "secondary" | "succe
   withdrawn: "outline",
 };
 
-export default async function ApplicationsPage() {
+export default async function ApplicationsPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
   const user = await getCurrentUser();
-  if (!user) redirect("/login");
+  if (!user) redirect({ href: "/login", locale });
 
-  const applications = await getCandidateApplications(user.id);
+  const [applications, t, tShared] = await Promise.all([
+    getCandidateApplications(user.id),
+    getTranslations("Candidate.Applications"),
+    getTranslations("Candidate.Shared"),
+  ]);
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">My Applications</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Track the status of every job you&apos;ve applied to.</p>
+        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
       </div>
 
       <div className="space-y-3">
         {applications.length === 0 && (
-          <p className="py-12 text-center text-sm text-muted-foreground">You haven&apos;t applied to any jobs yet.</p>
+          <p className="py-12 text-center text-sm text-muted-foreground">{t("empty")}</p>
         )}
         {applications.map((app) => {
           const upcomingInterview = app.interviews?.find((iv) => iv.status === "scheduled");
@@ -65,7 +71,7 @@ export default async function ApplicationsPage() {
               </div>
               <div className="flex items-center gap-3">
                 {app.job_match?.[0]?.match_score !== undefined && (
-                  <Badge variant="outline">{Math.round(app.job_match[0].match_score)}% match</Badge>
+                  <Badge variant="outline">{tShared("matchPercent", { percent: Math.round(app.job_match[0].match_score) })}</Badge>
                 )}
                 <Badge variant={STATUS_VARIANT[app.status as ApplicationStatus]} className="capitalize">
                   {app.status.replace("_", " ")}

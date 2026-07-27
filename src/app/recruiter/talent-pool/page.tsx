@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { Star } from "lucide-react";
 
+import { getRedirectLocale } from "@/i18n/get-redirect-locale";
+
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { getCurrentUser } from "@/lib/queries/candidate";
@@ -13,7 +15,7 @@ export default async function TalentPoolPage() {
   if (!user) redirect("/login");
 
   const recruiter = await getRecruiterContext(user.id);
-  if (!recruiter) redirect("/candidate/dashboard");
+  if (!recruiter) redirect(`/${await getRedirectLocale()}/candidate/dashboard`);
 
   const supabase = await createClient();
   const { data: pool } = await supabase

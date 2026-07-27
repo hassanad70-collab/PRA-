@@ -1,7 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-
+import { revalidateCandidatePath } from "@/lib/revalidate-candidate-path";
 import { createClient } from "@/lib/supabase/server";
 import { basicInfoSchema, educationSchema, experienceSchema, skillSchema } from "@/lib/validations/profile";
 import type { ActionResult } from "./auth";
@@ -57,8 +56,8 @@ export async function updateBasicInfo(formData: FormData): Promise<ActionResult>
 
   await ctx.supabase.rpc("recompute_profile_completion", { p_candidate_id: ctx.userId });
 
-  revalidatePath("/candidate/profile");
-  revalidatePath("/candidate/dashboard");
+  revalidateCandidatePath("/candidate/profile");
+  revalidateCandidatePath("/candidate/dashboard");
   return { success: true };
 }
 
@@ -83,7 +82,7 @@ export async function addExperience(formData: FormData): Promise<ActionResult> {
 
   if (error) return { success: false, error: error.message };
   await ctx.supabase.rpc("recompute_profile_completion", { p_candidate_id: ctx.userId });
-  revalidatePath("/candidate/profile");
+  revalidateCandidatePath("/candidate/profile");
   return { success: true };
 }
 
@@ -92,7 +91,7 @@ export async function deleteExperience(id: string): Promise<ActionResult> {
   if (!ctx) return { success: false, error: "You must be signed in." };
   const { error } = await ctx.supabase.from("candidate_experience").delete().eq("id", id).eq("candidate_id", ctx.userId);
   if (error) return { success: false, error: error.message };
-  revalidatePath("/candidate/profile");
+  revalidateCandidatePath("/candidate/profile");
   return { success: true };
 }
 
@@ -116,7 +115,7 @@ export async function addEducation(formData: FormData): Promise<ActionResult> {
 
   if (error) return { success: false, error: error.message };
   await ctx.supabase.rpc("recompute_profile_completion", { p_candidate_id: ctx.userId });
-  revalidatePath("/candidate/profile");
+  revalidateCandidatePath("/candidate/profile");
   return { success: true };
 }
 
@@ -125,7 +124,7 @@ export async function deleteEducation(id: string): Promise<ActionResult> {
   if (!ctx) return { success: false, error: "You must be signed in." };
   const { error } = await ctx.supabase.from("candidate_education").delete().eq("id", id).eq("candidate_id", ctx.userId);
   if (error) return { success: false, error: error.message };
-  revalidatePath("/candidate/profile");
+  revalidateCandidatePath("/candidate/profile");
   return { success: true };
 }
 
@@ -150,7 +149,7 @@ export async function addSkill(formData: FormData): Promise<ActionResult> {
 
   if (error) return { success: false, error: error.message };
   await ctx.supabase.rpc("recompute_profile_completion", { p_candidate_id: ctx.userId });
-  revalidatePath("/candidate/profile");
+  revalidateCandidatePath("/candidate/profile");
   return { success: true };
 }
 
@@ -159,7 +158,7 @@ export async function deleteSkill(id: string): Promise<ActionResult> {
   if (!ctx) return { success: false, error: "You must be signed in." };
   const { error } = await ctx.supabase.from("candidate_skills").delete().eq("id", id).eq("candidate_id", ctx.userId);
   if (error) return { success: false, error: error.message };
-  revalidatePath("/candidate/profile");
+  revalidateCandidatePath("/candidate/profile");
   return { success: true };
 }
 
@@ -170,7 +169,7 @@ export async function toggleOpenToWork(enabled: boolean): Promise<ActionResult> 
   const { error } = await ctx.supabase.from("candidates").update({ is_open_to_work: enabled }).eq("id", ctx.userId);
   if (error) return { success: false, error: error.message };
 
-  revalidatePath("/candidate/profile");
+  revalidateCandidatePath("/candidate/profile");
   return { success: true };
 }
 
@@ -187,11 +186,11 @@ export async function toggleSavedJob(jobId: string): Promise<ActionResult & { sa
 
   if (existing) {
     await ctx.supabase.from("saved_jobs").delete().eq("id", existing.id);
-    revalidatePath("/candidate/jobs");
+    revalidateCandidatePath("/candidate/jobs");
     return { success: true, saved: false };
   }
 
   await ctx.supabase.from("saved_jobs").insert({ candidate_id: ctx.userId, job_id: jobId });
-  revalidatePath("/candidate/jobs");
+  revalidateCandidatePath("/candidate/jobs");
   return { success: true, saved: true };
 }

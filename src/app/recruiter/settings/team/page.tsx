@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getRedirectLocale } from "@/i18n/get-redirect-locale";
 import { InviteMemberDialog } from "@/components/recruiter/invite-member-dialog";
 import { PendingInviteList } from "@/components/recruiter/pending-invite-list";
 import { TeamMemberList } from "@/components/recruiter/team-member-list";
@@ -13,7 +14,7 @@ export default async function TeamPage() {
   if (!user) redirect("/login");
 
   const recruiter = await getRecruiterContext(user.id);
-  if (!recruiter) redirect("/candidate/dashboard");
+  if (!recruiter) redirect(`/${await getRedirectLocale()}/candidate/dashboard`);
 
   const [members, invites, capabilities] = await Promise.all([
     getCompanyMembers(recruiter.company_id),

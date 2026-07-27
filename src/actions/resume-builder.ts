@@ -1,7 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-
+import { revalidateCandidatePath } from "@/lib/revalidate-candidate-path";
 import { generateExperienceSuggestion, generateSkillsSuggestion, generateSummarySuggestion } from "@/lib/ai/resume-builder";
 import { extractTextFromFile } from "@/lib/ai/extract-text";
 import { parseResumeText } from "@/lib/ai/resume-parser";
@@ -50,7 +49,7 @@ export async function createDraft(title?: string): Promise<CreateDraftResult> {
 
   try {
     const draft = await createDraftSeededFromProfile(user.id, title);
-    revalidatePath("/candidate/resume-builder");
+    revalidateCandidatePath("/candidate/resume-builder");
     return { success: true, draft };
   } catch (err) {
     console.error("createDraft failed", err);
@@ -63,7 +62,7 @@ export async function deleteDraft(draftId: string): Promise<ActionResult> {
   if (!user) return { success: false, error: "You must be signed in." };
 
   await deleteResumeDraft(draftId, user.id);
-  revalidatePath("/candidate/resume-builder");
+  revalidateCandidatePath("/candidate/resume-builder");
   return { success: true };
 }
 
@@ -110,7 +109,7 @@ export async function regenerateSection(draftId: string, sectionType: AiEligible
     .eq("id", section.id);
   if (error) return { success: false, error: error.message };
 
-  revalidatePath(`/candidate/resume-builder/${draftId}`);
+  revalidateCandidatePath(`/candidate/resume-builder/${draftId}`);
   return { success: true, suggestion };
 }
 
@@ -134,7 +133,7 @@ export async function acceptSectionSuggestion(sectionId: string): Promise<Action
     .eq("id", sectionId);
   if (error) return { success: false, error: error.message };
 
-  revalidatePath(`/candidate/resume-builder/${section.draft_id}`);
+  revalidateCandidatePath(`/candidate/resume-builder/${section.draft_id}`);
   return { success: true };
 }
 
@@ -157,7 +156,7 @@ export async function rejectSectionSuggestion(sectionId: string): Promise<Action
     .eq("id", sectionId);
   if (error) return { success: false, error: error.message };
 
-  revalidatePath(`/candidate/resume-builder/${section.draft_id}`);
+  revalidateCandidatePath(`/candidate/resume-builder/${section.draft_id}`);
   return { success: true };
 }
 
@@ -180,7 +179,7 @@ export async function updateSectionContent(sectionId: string, content: unknown):
     .eq("id", sectionId);
   if (error) return { success: false, error: error.message };
 
-  revalidatePath(`/candidate/resume-builder/${section.draft_id}`);
+  revalidateCandidatePath(`/candidate/resume-builder/${section.draft_id}`);
   return { success: true };
 }
 
@@ -247,7 +246,7 @@ export async function applyImportedFields(draftId: string, accepted: ImportField
     if (error) return { success: false, error: error.message };
   }
 
-  revalidatePath(`/candidate/resume-builder/${draftId}`);
+  revalidateCandidatePath(`/candidate/resume-builder/${draftId}`);
   return { success: true };
 }
 
@@ -285,7 +284,7 @@ export async function finalizeResumeDraft(draftId: string, format: "pdf" | "docx
       .eq("id", draftId);
     if (error) return { success: false, error: error.message };
 
-    revalidatePath(`/candidate/resume-builder/${draftId}`);
+    revalidateCandidatePath(`/candidate/resume-builder/${draftId}`);
     return { success: true, pdfUrl, docxUrl };
   } catch (err) {
     console.error("finalizeResumeDraft failed", err);

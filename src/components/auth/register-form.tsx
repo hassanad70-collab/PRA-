@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
@@ -22,6 +22,7 @@ import {
 
 function CandidateRegisterFields() {
   const t = useTranslations("Auth.Register");
+  const locale = useLocale();
   const [isPending, startTransition] = React.useTransition();
   const {
     register,
@@ -32,6 +33,7 @@ function CandidateRegisterFields() {
   const onSubmit = (values: CandidateRegisterInput) => {
     const formData = new FormData();
     Object.entries(values).forEach(([key, value]) => formData.set(key, value));
+    formData.set("locale", locale);
 
     startTransition(async () => {
       const result = await registerCandidate(formData);

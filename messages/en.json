@@ -299,5 +299,317 @@
       "submit": "Update password",
       "successToast": "Password updated. Please sign in again."
     }
+  },
+  "Candidate": {
+    "Nav": {
+      "dashboard": "Dashboard",
+      "profile": "Profile",
+      "resumeAts": "Resume & ATS",
+      "applications": "Applications",
+      "settings": "Settings",
+      "signOut": "Sign out",
+      "openMenu": "Open menu"
+    },
+    "Shared": {
+      "resume": "Resume",
+      "skills": "Skills",
+      "experience": "Experience",
+      "education": "Education",
+      "atsScore": "ATS Score",
+      "aiSuggestions": "AI Suggestions",
+      "profileCompletion": "Profile completion",
+      "save": "Save",
+      "saveChanges": "Save changes",
+      "cancel": "Cancel",
+      "add": "Add",
+      "edit": "Edit",
+      "matchPercent": "{percent}% match",
+      "present": "Present",
+      "updated": "Updated {time}",
+      "uploaded": "Uploaded {time}"
+    },
+    "Dashboard": {
+      "welcomeBack": "Welcome back, {name}",
+      "subtitle": "Here's what's happening with your job search.",
+      "activeApplications": "Active applications",
+      "totalSubmitted": "{count} total submitted",
+      "resumesUploaded": "Resumes uploaded",
+      "primaryResumeSet": "Primary resume set",
+      "noPrimaryResume": "No primary resume",
+      "latestAtsScore": "Latest ATS score",
+      "uploadResumeTitle": "Upload your resume to get started",
+      "uploadResumeSubtitle": "Our AI will auto-fill your profile and match you to open jobs instantly.",
+      "uploadResume": "Upload resume",
+      "aiRecommendedJobs": "AI recommended jobs",
+      "viewAll": "View all",
+      "noRecommendations": "No recommendations yet — upload a resume so our AI can match you to open roles.",
+      "recentApplications": "Recent applications",
+      "noApplications": "You haven't applied to any jobs yet.",
+      "completeProfileHint": "Complete your profile and upload a resume to unlock AI job matching and ATS scoring."
+    },
+    "Profile": {
+      "title": "My Profile",
+      "subtitle": "Keep your profile complete to get the best AI job matches.",
+      "tabs": {
+        "basicInfo": "Basic Info",
+        "experience": "Experience",
+        "education": "Education",
+        "skills": "Skills",
+        "more": "Languages & Projects"
+      },
+      "languages": "Languages",
+      "noLanguages": "No languages added yet.",
+      "certificates": "Certificates",
+      "noCertificates": "No certificates added yet.",
+      "projects": "Projects",
+      "noProjects": "No projects added yet."
+    },
+    "BasicInfoForm": {
+      "headline": "Headline",
+      "headlinePlaceholder": "Senior Product Designer",
+      "currentPosition": "Current position",
+      "professionalSummary": "Professional summary",
+      "currentCompany": "Current company",
+      "yearsOfExperience": "Years of experience",
+      "noticePeriodDays": "Notice period (days)",
+      "location": "Location",
+      "locationPlaceholder": "Cairo, Egypt",
+      "city": "City",
+      "country": "Country",
+      "expectedSalaryMin": "Expected salary (min)",
+      "expectedSalaryMax": "Expected salary (max)",
+      "willingToRelocate": "Willing to relocate",
+      "linkedinUrl": "LinkedIn URL",
+      "githubUrl": "GitHub URL",
+      "portfolioUrl": "Portfolio URL",
+      "websiteUrl": "Website URL",
+      "toastUpdated": "Profile updated",
+      "toastUpdateFailed": "Failed to update profile"
+    },
+    "Education": {
+      "addDialogTitle": "Add education",
+      "institution": "Institution",
+      "degree": "Degree",
+      "degreePlaceholder": "Bachelor's",
+      "fieldOfStudy": "Field of study",
+      "fieldOfStudyPlaceholder": "Computer Science",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "grade": "Grade",
+      "gradePlaceholder": "3.8 GPA",
+      "empty": "No education added yet.",
+      "toastAdded": "Education added",
+      "toastAddFailed": "Failed to add education",
+      "deleteAriaLabel": "Delete education entry",
+      "toastDeleteFailed": "Failed to delete"
+    },
+    "Experience": {
+      "heading": "Work experience",
+      "addDialogTitle": "Add work experience",
+      "jobTitle": "Job title",
+      "companyName": "Company",
+      "location": "Location",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "currentlyWorkHere": "I currently work here",
+      "description": "Description",
+      "empty": "No experience added yet.",
+      "toastAdded": "Experience added",
+      "toastAddFailed": "Failed to add experience",
+      "deleteAriaLabel": "Delete experience entry",
+      "toastDeleteFailed": "Failed to delete"
+    },
+    "Skills": {
+      "placeholder": "Add a skill and press Enter",
+      "empty": "No skills added yet.",
+      "toastAddFailed": "Failed to add skill",
+      "toastRemoveFailed": "Failed to remove skill"
+    },
+    "OpenToWork": {
+      "label": "Open to being discovered by recruiters",
+      "description": "When on, recruiters at a company can see your profile for roles our AI already matches you to — even if you haven't applied. Off by default; you're never shown for a job you weren't matched against.",
+      "toastFailed": "Failed to update."
+    },
+    "Resume": {
+      "title": "Resume & ATS Score",
+      "subtitle": "Upload your resume for instant AI parsing, ATS scoring, and job matching.",
+      "builderTitle": "AI Resume Builder",
+      "builderSubtitle": "Build a polished resume from your profile, refine it with AI, and export it as PDF or Word.",
+      "openBuilder": "Open builder",
+      "yourResumes": "Your resumes",
+      "noResumes": "No resumes uploaded yet.",
+      "primary": "Primary",
+      "setAsPrimary": "Set as primary",
+      "toastSetPrimaryFailed": "Failed to update.",
+      "noAtsScoreYet": "Your ATS score will appear here once a resume finishes AI processing."
+    },
+    "ResumeUpload": {
+      "dragDrop": "Drag & drop your resume here",
+      "processing": "Processing your resume…",
+      "hint": "PDF or Word, up to 10MB",
+      "uploading": "Uploading resume and running AI analysis — this can take up to a minute…",
+      "success": "Resume processed! Your profile and ATS score are ready.",
+      "failed": "Failed to upload resume."
+    },
+    "ImproveResume": {
+      "trigger": "Improve My Resume",
+      "dialogTitle": "AI Resume Improvements",
+      "dialogDescription": "Suggestions generated from your parsed resume data.",
+      "analyzing": "Analyzing your resume…",
+      "improvedSummary": "Improved summary",
+      "improvedExperience": "Improved experience bullets",
+      "suggestedSkills": "Suggested skills to add",
+      "atsKeywords": "ATS keywords to add",
+      "achievementIdeas": "New achievement statement ideas",
+      "failed": "Failed to generate suggestions."
+    },
+    "AtsScoreCard": {
+      "title": "AI ATS Score"
+    },
+    "ResumeBuilder": {
+      "title": "AI Resume Builder",
+      "subtitle": "Build a resume from your profile, let AI polish the wording, and export it as PDF or Word.",
+      "newDraft": "New draft",
+      "emptyHint": "No resume drafts yet. Create one and we'll start it from your profile.",
+      "open": "Open",
+      "createFailed": "Failed to create a new draft."
+    },
+    "ResumeDraftEditor": {
+      "allDrafts": "All drafts",
+      "lastPdfDownload": "Last PDF download",
+      "lastWordDownload": "Last Word download"
+    },
+    "ImportResume": {
+      "trigger": "Import resume",
+      "dialogTitle": "Import from an uploaded resume",
+      "dialogDescription": "Review each field before it's added -- nothing here overwrites your profile automatically.",
+      "readingResume": "Reading your resume…",
+      "chooseFile": "Choose file",
+      "nothingFound": "Nothing new found in that resume.",
+      "readFailed": "Failed to read that resume.",
+      "replacesExisting": "replaces existing content",
+      "current": "Current",
+      "imported": "Imported",
+      "empty": "(empty)",
+      "itemsCount": "{count} item(s)",
+      "applySelected": "Apply selected ({count})",
+      "appliedToast": "Imported fields applied.",
+      "applyFailed": "Failed to apply imported fields."
+    },
+    "FinalizeDraft": {
+      "trigger": "Generate resume",
+      "dialogTitle": "Generate your resume",
+      "dialogDescription": "Choose a format. You can regenerate anytime as you keep editing.",
+      "pdfOnly": "PDF only",
+      "docxOnly": "Word (.docx) only",
+      "both": "PDF + Word (.docx)",
+      "downloadPdf": "Download PDF",
+      "downloadWord": "Download Word document",
+      "generate": "Generate",
+      "generatedToast": "Resume generated",
+      "failed": "Failed to generate your resume."
+    },
+    "SectionCard": {
+      "regenerateWithAi": "Regenerate with AI",
+      "aiSuggestionCompare": "AI suggestion -- compare and choose",
+      "current": "Current",
+      "suggested": "Suggested",
+      "accept": "Accept",
+      "reject": "Reject",
+      "savedToast": "{section} saved",
+      "saveFailed": "Failed to save.",
+      "acceptFailed": "Failed to accept suggestion.",
+      "rejectFailed": "Failed to reject suggestion.",
+      "regenerateFailed": "Failed to generate a suggestion.",
+      "emptyHint": "Nothing here yet -- click Edit to add content.",
+      "removeEntryAriaLabel": "Remove entry",
+      "addEntry": "Add entry",
+      "fields": {
+        "fullName": "Full name",
+        "email": "Email",
+        "phone": "Phone",
+        "address": "Address",
+        "summary": "Summary",
+        "skillsCommaSeparated": "Skills (comma-separated)",
+        "linkedin": "LinkedIn",
+        "github": "GitHub",
+        "portfolio": "Portfolio",
+        "website": "Website"
+      }
+    },
+    "SectionSchemas": {
+      "labels": {
+        "personalInfo": "Personal Info",
+        "summary": "Summary",
+        "experience": "Experience",
+        "education": "Education",
+        "skills": "Skills",
+        "certifications": "Certifications",
+        "languages": "Languages",
+        "projects": "Projects",
+        "achievements": "Achievements",
+        "socialLinks": "Social Links"
+      },
+      "fields": {
+        "jobTitle": "Job title",
+        "company": "Company",
+        "location": "Location",
+        "startDate": "Start date",
+        "endDate": "End date",
+        "currentlyWorkHere": "I currently work here",
+        "description": "Description",
+        "descriptionPlaceholder": "One achievement per line",
+        "institution": "Institution",
+        "degree": "Degree",
+        "fieldOfStudy": "Field of study",
+        "grade": "Grade",
+        "name": "Name",
+        "issuingOrganization": "Issuing organization",
+        "issueDate": "Issue date",
+        "language": "Language",
+        "proficiency": "Proficiency",
+        "proficiencyPlaceholder": "basic / conversational / fluent / native",
+        "technologies": "Technologies (comma-separated)",
+        "title": "Title"
+      }
+    },
+    "Jobs": {
+      "subtitle": "AI-matched roles based on your profile and resume."
+    },
+    "JobDetail": {
+      "applied": "Applied — {status}",
+      "aiMatch": "{score}% AI Match — {summary}",
+      "yourStrengths": "Your strengths",
+      "skillsToHighlight": "Skills to highlight or learn"
+    },
+    "Applications": {
+      "title": "My Applications",
+      "subtitle": "Track the status of every job you've applied to.",
+      "empty": "You haven't applied to any jobs yet.",
+      "withdraw": "Withdraw",
+      "toastWithdrawn": "Application withdrawn",
+      "toastWithdrawFailed": "Failed to withdraw"
+    },
+    "SaveJob": {
+      "save": "Save job",
+      "remove": "Remove from saved jobs",
+      "toastFailed": "Failed to save job"
+    },
+    "ApplyDialog": {
+      "uploadResumeToApply": "Upload a resume to apply",
+      "applyNow": "Apply now",
+      "dialogTitle": "Submit your application",
+      "dialogDescription": "Choose which resume to send and add an optional cover letter.",
+      "resumeLabel": "Resume",
+      "coverLetterLabel": "Cover letter (optional)",
+      "coverLetterPlaceholder": "Tell the recruiter why you're a great fit…",
+      "submit": "Submit application",
+      "selectResumeError": "Please select a resume.",
+      "toastSubmitted": "Application submitted! AI screening is running now.",
+      "toastFailed": "Failed to submit application."
+    },
+    "RadioGroupResumes": {
+      "primary": "Primary"
+    }
   }
 }

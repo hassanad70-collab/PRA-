@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
@@ -18,6 +18,7 @@ import { loginSchema, type LoginInput } from "@/lib/validations/auth";
 export function LoginForm() {
   const t = useTranslations("Auth.Login");
   const tCommon = useTranslations("Common");
+  const locale = useLocale();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = React.useTransition();
 
@@ -31,6 +32,7 @@ export function LoginForm() {
     const formData = new FormData();
     formData.set("email", values.email);
     formData.set("password", values.password);
+    formData.set("locale", locale);
     const redirect = searchParams.get("redirect");
     if (redirect) formData.set("redirect", redirect);
 

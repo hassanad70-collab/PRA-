@@ -34,8 +34,8 @@ export async function generateMetadata({
 // (title, description, requirements) changes rarely after publish.
 export const revalidate = 300;
 
-export default async function PublicJobDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function PublicJobDetailPage({ params }: { params: Promise<{ id: string; locale: string }> }) {
+  const { id, locale } = await params;
   const job = await getJobById(id);
   if (!job || job.status !== "published") notFound();
 
@@ -72,7 +72,7 @@ export default async function PublicJobDetailPage({ params }: { params: Promise<
               </div>
             </div>
             <Button variant="gradient" size="lg" asChild>
-              <Link href={`/login?redirect=/candidate/jobs/${job.id}`}>{t("signInToApply")}</Link>
+              <Link href={`/login?redirect=/${locale}/candidate/jobs/${job.id}`}>{t("signInToApply")}</Link>
             </Button>
           </div>
         </CardContent>

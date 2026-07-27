@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 
+import { getRedirectLocale } from "@/i18n/get-redirect-locale";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/candidate/dashboard";
+  const next = searchParams.get("next") ?? `/${await getRedirectLocale()}/candidate/dashboard`;
 
   if (code) {
     const supabase = await createClient();

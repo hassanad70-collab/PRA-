@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { Briefcase, Star, TrendingUp, Users } from "lucide-react";
 
+import { getRedirectLocale } from "@/i18n/get-redirect-locale";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FunnelChart, TopSkillsChart, TrendChart } from "@/components/shared/dynamic-charts";
 import { getCurrentUser } from "@/lib/queries/candidate";
@@ -12,7 +14,7 @@ export default async function RecruiterDashboardPage() {
   if (!user) redirect("/login");
 
   const recruiter = await getRecruiterContext(user.id);
-  if (!recruiter) redirect("/candidate/dashboard");
+  if (!recruiter) redirect(`/${await getRedirectLocale()}/candidate/dashboard`);
 
   const [stats, trend, topSkills] = await Promise.all([
     getCompanyDashboardStats(recruiter.company_id),

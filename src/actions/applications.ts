@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { revalidateCandidatePath } from "@/lib/revalidate-candidate-path";
 import { runAIScreening } from "@/lib/ai/screening";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -74,7 +75,7 @@ export async function applyToJob(jobId: string, resumeId: string, coverLetterTex
 
   runScreeningPipeline(application.id, job as Job, resumeId, user.id).catch(() => {});
 
-  revalidatePath("/candidate/applications");
+  revalidateCandidatePath("/candidate/applications");
   revalidatePath(`/recruiter/jobs/${jobId}/candidates`);
 
   return { success: true, applicationId: application.id };
@@ -151,7 +152,7 @@ export async function withdrawApplication(applicationId: string): Promise<Action
 
   if (error) return { success: false, error: error.message };
 
-  revalidatePath("/candidate/applications");
+  revalidateCandidatePath("/candidate/applications");
   return { success: true };
 }
 

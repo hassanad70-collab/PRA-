@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Check, Loader2, Sparkles, X } from "lucide-react";
 
@@ -16,7 +17,7 @@ import {
   updateSectionContent,
 } from "@/actions/resume-builder";
 import { RepeatableEntryEditor } from "@/components/candidate/resume-builder/repeatable-entry-editor";
-import { ARRAY_SECTION_FIELDS, SECTION_LABELS, isArraySectionType } from "@/lib/resume-builder/section-schemas";
+import { getArraySectionFields, getSectionLabels, isArraySectionType } from "@/lib/resume-builder/section-schemas";
 import type {
   AiEligibleSectionType,
   ResumeDraftSection,
@@ -26,6 +27,11 @@ import type {
 const AI_ELIGIBLE = new Set<string>(["summary", "experience", "skills"]);
 
 export function SectionCard({ draftId, section }: { draftId: string; section: ResumeDraftSection }) {
+  const t = useTranslations("Candidate.SectionCard");
+  const tSchemas = useTranslations("Candidate.SectionSchemas");
+  const tShared = useTranslations("Candidate.Shared");
+  const sectionLabels = getSectionLabels(tSchemas);
+
   const [isEditing, setIsEditing] = React.useState(false);
   const [draftContent, setDraftContent] = React.useState<unknown>(section.content);
   const [isPending, startTransition] = React.useTransition();
@@ -39,21 +45,21 @@ export function SectionCard({ draftId, section }: { draftId: string; section: Re
   const handleRegenerate = () => {
     startTransition(async () => {
       const res = await regenerateSection(draftId, section.section_type as AiEligibleSectionType);
-      if (!res.success) toast.error(res.error ?? "Failed to generate a suggestion.");
+      if (!res.success) toast.error(res.error ?? t("regenerateFailed"));
     });
   };
 
   const handleAccept = () => {
     startTransition(async () => {
       const res = await acceptSectionSuggestion(section.id);
-      if (!res.success) toast.error(res.error ?? "Failed to accept suggestion.");
+      if (!res.success) toast.error(res.error ?? t("acceptFailed"));
     });
   };
 
   const handleReject = () => {
     startTransition(async () => {
       const res = await rejectSectionSuggestion(section.id);
-      if (!res.success) toast.error(res.error ?? "Failed to reject suggestion.");
+      if (!res.success) toast.error(res.error ?? t("rejectFailed"));
     });
   };
 
@@ -61,10 +67,10 @@ export function SectionCard({ draftId, section }: { draftId: string; section: Re
     startTransition(async () => {
       const res = await updateSectionContent(section.id, draftContent);
       if (res.success) {
-        toast.success(`${SECTION_LABELS[section.section_type]} saved`);
+        toast.success(t("savedToast", { section: sectionLabels[section.section_type] }));
         setIsEditing(false);
       } else {
-        toast.error(res.error ?? "Failed to save.");
+        toast.error(res.error ?? t("saveFailed"));
       }
     });
   };
@@ -72,17 +78,17 @@ export function SectionCard({ draftId, section }: { draftId: string; section: Re
   return (
     <Card data-testid={`section-${section.section_type}`}>
       <CardHeader className="flex flex-row items-center justify-between gap-2">
-        <CardTitle className="text-base">{SECTION_LABELS[section.section_type]}</CardTitle>
+        <CardTitle className="text-base">{sectionLabels[section.section_type]}</CardTitle>
         <div className="flex items-center gap-2">
           {isAiEligible && (
             <Button variant="outline" size="sm" disabled={isPending} onClick={handleRegenerate}>
               {isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
-              Regenerate with AI
+              {t("regenerateWithAi")}
             </Button>
           )}
           {!isEditing && (
             <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)}>
-              Edit
+              {tShared("edit")}
             </Button>
           )}
         </div>
@@ -105,7 +111,7 @@ export function SectionCard({ draftId, section }: { draftId: string; section: Re
             <div className="flex gap-2">
               <Button size="sm" variant="gradient" disabled={isPending} onClick={handleSave}>
                 {isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                Save
+                {tShared("save")}
               </Button>
               <Button
                 size="sm"
@@ -115,7 +121,7 @@ export function SectionCard({ draftId, section }: { draftId: string; section: Re
                   setIsEditing(false);
                 }}
               >
-                Cancel
+                {tShared("cancel")}
               </Button>
             </div>
           </div>
@@ -142,20 +148,21 @@ function SuggestionReview({
   onAccept: () => void;
   onReject: () => void;
 }) {
+  const t = useTranslations("Candidate.SectionCard");
   return (
     <div className="rounded-xl border border-primary/30 bg-primary/5 p-4">
       <p className="mb-3 flex items-center gap-2 text-sm font-medium text-primary">
-        <Sparkles className="h-4 w-4" /> AI suggestion -- compare and choose
+        <Sparkles className="h-4 w-4" /> {t("aiSuggestionCompare")}
       </p>
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <p className="mb-1.5 text-xs font-medium uppercase text-muted-foreground">Current</p>
+          <p className="mb-1.5 text-xs font-medium uppercase text-muted-foreground">{t("current")}</p>
           <div className="rounded-lg bg-background/70 p-3 text-sm">
             <SectionReadView sectionType={sectionType as ResumeDraftSection["section_type"]} content={current} />
           </div>
         </div>
         <div>
-          <p className="mb-1.5 text-xs font-medium uppercase text-muted-foreground">Suggested</p>
+          <p className="mb-1.5 text-xs font-medium uppercase text-muted-foreground">{t("suggested")}</p>
           <div className="rounded-lg bg-background/70 p-3 text-sm">
             <SectionReadView sectionType={sectionType as ResumeDraftSection["section_type"]} content={suggestion} />
           </div>
@@ -163,10 +170,10 @@ function SuggestionReview({
       </div>
       <div className="mt-3 flex gap-2">
         <Button size="sm" variant="gradient" disabled={isPending} onClick={onAccept}>
-          <Check className="h-3.5 w-3.5" /> Accept
+          <Check className="h-3.5 w-3.5" /> {t("accept")}
         </Button>
         <Button size="sm" variant="outline" disabled={isPending} onClick={onReject}>
-          <X className="h-3.5 w-3.5" /> Reject
+          <X className="h-3.5 w-3.5" /> {t("reject")}
         </Button>
       </div>
     </div>
@@ -233,7 +240,8 @@ function SectionReadView({
 }
 
 function EmptyHint() {
-  return <p className="text-sm text-muted-foreground">Nothing here yet -- click Edit to add content.</p>;
+  const t = useTranslations("Candidate.SectionCard");
+  return <p className="text-sm text-muted-foreground">{t("emptyHint")}</p>;
 }
 
 function SectionEditForm({
@@ -245,16 +253,20 @@ function SectionEditForm({
   content: unknown;
   onChange: (next: unknown) => void;
 }) {
+  const t = useTranslations("Candidate.SectionCard");
+  const tSchemas = useTranslations("Candidate.SectionSchemas");
+  const tBasicInfo = useTranslations("Candidate.BasicInfoForm");
+
   if (sectionType === "personal_info") {
     const c = (content as ResumeSectionContentMap["personal_info"]) ?? {};
     const update = (key: keyof typeof c, value: string) => onChange({ ...c, [key]: value });
     return (
       <div className="grid gap-3 sm:grid-cols-2">
-        <Field label="Full name" value={c.full_name} onChange={(v) => update("full_name", v)} />
-        <Field label="Current position" value={c.current_position} onChange={(v) => update("current_position", v)} />
-        <Field label="Email" value={c.email} onChange={(v) => update("email", v)} />
-        <Field label="Phone" value={c.phone} onChange={(v) => update("phone", v)} />
-        <Field label="Address" value={c.address} onChange={(v) => update("address", v)} />
+        <Field label={t("fields.fullName")} value={c.full_name} onChange={(v) => update("full_name", v)} />
+        <Field label={tBasicInfo("currentPosition")} value={c.current_position} onChange={(v) => update("current_position", v)} />
+        <Field label={t("fields.email")} value={c.email} onChange={(v) => update("email", v)} />
+        <Field label={t("fields.phone")} value={c.phone} onChange={(v) => update("phone", v)} />
+        <Field label={t("fields.address")} value={c.address} onChange={(v) => update("address", v)} />
       </div>
     );
   }
@@ -263,7 +275,7 @@ function SectionEditForm({
     const c = (content as ResumeSectionContentMap["summary"]) ?? {};
     return (
       <div className="space-y-2">
-        <Label htmlFor="summary-text">Summary</Label>
+        <Label htmlFor="summary-text">{t("fields.summary")}</Label>
         <Textarea
           id="summary-text"
           rows={4}
@@ -278,7 +290,7 @@ function SectionEditForm({
     const c = (content as ResumeSectionContentMap["skills"]) ?? { items: [] };
     return (
       <div className="space-y-2">
-        <Label htmlFor="skills-input">Skills (comma-separated)</Label>
+        <Label htmlFor="skills-input">{t("fields.skillsCommaSeparated")}</Label>
         <Input
           id="skills-input"
           value={(c.items ?? []).join(", ")}
@@ -293,17 +305,17 @@ function SectionEditForm({
     const update = (key: keyof typeof c, value: string) => onChange({ ...c, [key]: value });
     return (
       <div className="grid gap-3 sm:grid-cols-2">
-        <Field label="LinkedIn" value={c.linkedin_url} onChange={(v) => update("linkedin_url", v)} />
-        <Field label="GitHub" value={c.github_url} onChange={(v) => update("github_url", v)} />
-        <Field label="Portfolio" value={c.portfolio_url} onChange={(v) => update("portfolio_url", v)} />
-        <Field label="Website" value={c.website_url} onChange={(v) => update("website_url", v)} />
+        <Field label={t("fields.linkedin")} value={c.linkedin_url} onChange={(v) => update("linkedin_url", v)} />
+        <Field label={t("fields.github")} value={c.github_url} onChange={(v) => update("github_url", v)} />
+        <Field label={t("fields.portfolio")} value={c.portfolio_url} onChange={(v) => update("portfolio_url", v)} />
+        <Field label={t("fields.website")} value={c.website_url} onChange={(v) => update("website_url", v)} />
       </div>
     );
   }
 
   if (isArraySectionType(sectionType)) {
     const entries = (Array.isArray(content) ? content : []) as Record<string, unknown>[];
-    return <RepeatableEntryEditor fields={ARRAY_SECTION_FIELDS[sectionType]} entries={entries} onChange={onChange} />;
+    return <RepeatableEntryEditor fields={getArraySectionFields(tSchemas)[sectionType]} entries={entries} onChange={onChange} />;
   }
 
   return null;

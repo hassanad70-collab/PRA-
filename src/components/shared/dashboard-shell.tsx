@@ -66,9 +66,16 @@ interface DashboardShellProps {
   navItems: NavItem[];
   user: { full_name: string; email: string; role: string };
   children: React.ReactNode;
+  /** Locale-aware where needed -- each layout resolves its own destination (see CandidateLayout). */
+  settingsHref: string;
+  labels?: { settings: string; signOut: string; openMenu: string };
+  /** Rendered in the header next to the theme toggle (e.g. LanguageSwitcher for the localized candidate portal). */
+  headerExtra?: React.ReactNode;
 }
 
-export function DashboardShell({ navItems, user, children }: DashboardShellProps) {
+const DEFAULT_LABELS = { settings: "Settings", signOut: "Sign out", openMenu: "Open menu" };
+
+export function DashboardShell({ navItems, user, children, settingsHref, labels = DEFAULT_LABELS, headerExtra }: DashboardShellProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
@@ -119,21 +126,11 @@ export function DashboardShell({ navItems, user, children }: DashboardShellProps
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuItem asChild>
-              <Link
-                href={
-                  user.role === "candidate"
-                    ? "/candidate/profile"
-                    : user.role === "super_admin"
-                    ? "/admin/settings"
-                    : "/recruiter/settings"
-                }
-              >
-                Settings
-              </Link>
+              <Link href={settingsHref}>{labels.settings}</Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => logout()} className="text-destructive focus:text-destructive">
-              Sign out
+              {labels.signOut}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -158,12 +155,15 @@ export function DashboardShell({ navItems, user, children }: DashboardShellProps
             variant="ghost"
             size="icon"
             className="lg:hidden"
-            aria-label="Open menu"
+            aria-label={labels.openMenu}
             onClick={() => setMobileOpen(true)}
           >
             <Menu className="h-5 w-5" />
           </Button>
-          <ThemeToggle />
+          <div className="flex items-center gap-1">
+            {headerExtra}
+            <ThemeToggle />
+          </div>
         </header>
         <main className="flex-1 p-4 lg:p-8">{children}</main>
       </div>

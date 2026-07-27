@@ -10,22 +10,29 @@ const STAFF_ROLES: UserRole[] = ["recruiter", "hr_manager", "super_admin"];
 // system settings) is super_admin only. hr_manager's "limited administration"
 // is the existing /recruiter/* surface, already scoped to their own company.
 
-const ROLE_HOME: Record<UserRole, string> = {
-  candidate: "/candidate/dashboard",
+// /recruiter and /admin are deliberately kept outside the [locale] tree, so
+// these targets have no locale segment to preserve. /candidate moved inside
+// [locale] as of the Candidate Portal Internationalization unit -- its home
+// is resolved dynamically by roleHome() below instead of being a fixed
+// string here, since it needs the caller's locale threaded in.
+const ROLE_HOME: Record<Exclude<UserRole, "candidate">, string> = {
   recruiter: "/recruiter/dashboard",
   hr_manager: "/recruiter/dashboard",
   super_admin: "/admin",
 };
 
-// Dashboard routes (/candidate, /recruiter, /admin) are deliberately kept
-// outside the [locale] tree, so a redirect to login from one of them has no
-// locale segment to preserve. Falls back to the user's persisted preference
-// (the same NEXT_LOCALE cookie next-intl's own middleware sets) so the login
-// page they land on matches the language they were already using, and only
-// falls back further to the default locale if they have no preference yet.
+// Falls back to the user's persisted preference (the same NEXT_LOCALE
+// cookie next-intl's own middleware sets) so the page they land on matches
+// the language they were already using, and only falls back further to the
+// default locale if they have no preference yet.
 function resolveRedirectLocale(request: NextRequest): string {
   const cookieLocale = request.cookies.get("NEXT_LOCALE")?.value;
   return cookieLocale && (locales as readonly string[]).includes(cookieLocale) ? cookieLocale : defaultLocale;
+}
+
+function roleHome(role: UserRole, request: NextRequest): string {
+  if (role === "candidate") return `/${resolveRedirectLocale(request)}/candidate/dashboard`;
+  return ROLE_HOME[role];
 }
 
 export async function updateSession(request: NextRequest) {
@@ -56,18 +63,22 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  const isCandidateRoute = pathname.startsWith("/candidate");
+  // Login/register/forgot-password and (as of the Candidate Portal
+  // Internationalization unit) /candidate now live under the locale-prefixed
+  // [locale] tree ("/en/login", "/ar/candidate/dashboard"), unlike /recruiter
+  // and /admin, which are deliberately kept unprefixed. Strip a leading
+  // "/en"/"/ar" segment before comparing so these checks keep working
+  // regardless of which locale the user is on -- and so a bare, unprefixed
+  // legacy "/candidate/..." request (no locale match) is still correctly
+  // recognized as a candidate route, not silently left unprotected.
+  const localeMatch = pathname.match(/^\/(en|ar)(\/.*)?$/);
+  const pathWithoutLocale = localeMatch ? (localeMatch[2] ?? "/") : pathname;
+
+  const isCandidateRoute = pathWithoutLocale.startsWith("/candidate");
   const isRecruiterRoute = pathname.startsWith("/recruiter");
   const isAdminRoute = pathname.startsWith("/admin");
   const isProtectedRoute = isCandidateRoute || isRecruiterRoute || isAdminRoute;
 
-  // Login/register/forgot-password now live under the locale-prefixed
-  // [locale] tree ("/en/login", "/ar/login"), unlike the dashboard routes
-  // above, which are deliberately kept unprefixed. Strip a leading
-  // "/en"/"/ar" segment before comparing so this check keeps working
-  // regardless of which locale the user is on.
-  const localeMatch = pathname.match(/^\/(en|ar)(\/.*)?$/);
-  const pathWithoutLocale = localeMatch ? (localeMatch[2] ?? "/") : pathname;
   // "/reset-password" is deliberately excluded: a user completing a password
   // reset has a real session (via the /auth/callback code exchange) but must
   // still be allowed to reach this page instead of being bounced to their
@@ -104,18 +115,24 @@ export async function updateSession(request: NextRequest) {
     }
 
     if (isRecruiterRoute && !STAFF_ROLES.includes(role)) {
-      return NextResponse.redirect(new URL(ROLE_HOME[role], request.url));
+      return NextResponse.redirect(new URL(roleHome(role, request), request.url));
     }
     if (isAdminRoute && role !== "super_admin") {
-      return NextResponse.redirect(new URL(ROLE_HOME[role], request.url));
+      return NextResponse.redirect(new URL(roleHome(role, request), request.url));
     }
     if (isCandidateRoute && role !== "candidate") {
-      return NextResponse.redirect(new URL(ROLE_HOME[role], request.url));
+      return NextResponse.redirect(new URL(roleHome(role, request), request.url));
     }
   }
 
   if (user && isAuthRoute) {
-    return NextResponse.redirect(new URL("/candidate/dashboard", request.url));
+    // Was previously hardcoded to the candidate home regardless of actual
+    // role (harmless for candidates, but sent staff on an unnecessary extra
+    // hop through a second redirect) -- resolving the real role here also
+    // means the candidate case can be locale-aware via roleHome() instead of
+    // hardcoding a bare, unprefixed "/candidate/dashboard" string.
+    const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
+    return NextResponse.redirect(new URL(roleHome((profile?.role as UserRole | undefined) ?? "candidate", request), request.url));
   }
 
   return supabaseResponse;
