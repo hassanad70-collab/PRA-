@@ -4,6 +4,7 @@ import { redirect } from "@/i18n/navigation";
 
 import { DashboardShell, type NavItem } from "@/components/shared/dashboard-shell";
 import { LanguageSwitcher } from "@/components/shared/language-switcher";
+import { CopilotDialog } from "@/components/recruiter/copilot-dialog";
 import { getCurrentUser } from "@/lib/queries/candidate";
 import { getRecruiterContext } from "@/lib/queries/jobs";
 
@@ -21,7 +22,10 @@ export default async function RecruiterLayout({
   const recruiter = await getRecruiterContext(user.id);
   if (!recruiter) redirect({ href: "/candidate/dashboard", locale });
 
-  const tNav = await getTranslations("Recruiter.Nav");
+  const [tNav, tCopilot] = await Promise.all([
+    getTranslations("Recruiter.Nav"),
+    getTranslations("Recruiter.Copilot"),
+  ]);
 
   // DashboardShell renders these with plain next/link (shared with the
   // non-localized admin portal), so hrefs must carry the locale prefix
@@ -39,7 +43,29 @@ export default async function RecruiterLayout({
       user={{ full_name: user.full_name, email: user.email, role: "recruiter" }}
       settingsHref={`/${locale}/recruiter/settings`}
       labels={{ settings: tNav("settings"), signOut: tNav("signOut"), openMenu: tNav("openMenu") }}
-      headerExtra={<LanguageSwitcher />}
+      headerExtra={
+        <>
+          <CopilotDialog
+            labels={{
+              trigger: tCopilot("trigger"),
+              dialogTitle: tCopilot("dialogTitle"),
+              placeholder: tCopilot("placeholder"),
+              send: tCopilot("send"),
+              thinking: tCopilot("thinking"),
+              emptyState: tCopilot("emptyState"),
+              exampleQueries: [
+                tCopilot("exampleQuery1"),
+                tCopilot("exampleQuery2"),
+                tCopilot("exampleQuery3"),
+                tCopilot("exampleQuery4"),
+                tCopilot("exampleQuery5"),
+              ],
+              errorFallback: tCopilot("errorFallback"),
+            }}
+          />
+          <LanguageSwitcher />
+        </>
+      }
     >
       {children}
     </DashboardShell>

@@ -951,6 +951,20 @@
       "moveToInterview": "Move to interview",
       "actionSucceeded": "Application updated",
       "actionFailed": "Could not update this application right now."
+    },
+    "Copilot": {
+      "trigger": "Copilot",
+      "dialogTitle": "Recruiter Copilot",
+      "placeholder": "Ask about your candidates…",
+      "send": "Send",
+      "thinking": "Thinking…",
+      "emptyState": "Try asking:",
+      "exampleQuery1": "Show me the best Backend Engineer",
+      "exampleQuery2": "Who has leadership experience?",
+      "exampleQuery3": "Who should I interview first?",
+      "exampleQuery4": "What skills are missing in my pipeline?",
+      "exampleQuery5": "Summarize today's interviews",
+      "errorFallback": "Something went wrong answering that. Please try again."
     }
   }
 }

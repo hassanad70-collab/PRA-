@@ -951,6 +951,20 @@
       "moveToInterview": "نقل إلى مقابلة",
       "actionSucceeded": "تم تحديث الطلب",
       "actionFailed": "تعذّر تحديث هذا الطلب الآن."
+    },
+    "Copilot": {
+      "trigger": "المساعد الذكي",
+      "dialogTitle": "المساعد الذكي للتوظيف",
+      "placeholder": "اسأل عن مرشحيك…",
+      "send": "إرسال",
+      "thinking": "جارٍ التفكير…",
+      "emptyState": "جرّب أن تسأل:",
+      "exampleQuery1": "أرني أفضل مهندس Backend",
+      "exampleQuery2": "من لديه خبرة قيادية؟",
+      "exampleQuery3": "من يجب أن أقابله أولاً؟",
+      "exampleQuery4": "ما المهارات الناقصة في مسار التوظيف لدي؟",
+      "exampleQuery5": "لخّص مقابلات اليوم",
+      "errorFallback": "حدث خطأ أثناء الإجابة. يرجى المحاولة مرة أخرى."
     }
   }
 }
