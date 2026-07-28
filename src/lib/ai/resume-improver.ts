@@ -4,75 +4,98 @@ import { zodResponseFormat } from "openai/helpers/zod";
 import { z } from "zod";
 
 import { AI_MODELS, getOpenAI } from "./openai";
-import type { ParsedResumeData } from "@/types/database";
-
-const improvementSchema = z.object({
-  improved_summary: z.string(),
-  improved_experience: z.array(
-    z.object({
-      company_name: z.string(),
-      job_title: z.string(),
-      improved_bullets: z.array(z.string()).describe("Rewritten, achievement-driven bullet points"),
-    })
-  ),
-  suggested_missing_skills: z.array(z.string()),
-  ats_keywords_to_add: z.array(z.string()),
-  grammar_fixes: z.array(z.string()).describe("Notable grammar/clarity issues found and how they were fixed"),
-  generated_achievement_statements: z.array(z.string()).describe("New quantified achievement statements the candidate could add, based on their experience"),
-});
-
-export type ResumeImprovementResult = z.infer<typeof improvementSchema>;
-
-const SYSTEM_PROMPT = `You are an expert resume writer and ATS optimization specialist. Given a candidate's parsed resume, rewrite it to be more competitive:
-- Rewrite the professional summary to be punchy, specific, and keyword-rich.
-- Rewrite each role's bullet points to be achievement-driven (action verb + what was done + quantified impact where plausible).
-- Fix grammar and clarity issues.
-- Suggest ATS keywords relevant to the candidate's field that are currently missing.
-- Suggest skills the candidate is likely close to but doesn't list.
-- Generate 2-4 new achievement statement ideas grounded in their actual experience (label them clearly as suggestions, not fabricated facts to insert unverified).
-Never invent employers, titles, or dates that are not in the original data.`;
 
 /**
- * Powers the "Improve My Resume" feature: rewrites summary/experience,
- * suggests missing skills, ATS keywords, and generates achievement
- * statement ideas. Returns placeholder content if OpenAI is not available.
+ * Focused, single-purpose generators for the Resume Intelligence Hub's
+ * "Rewrite & Optimize" module -- the achievement and ATS-keyword
+ * counterparts to resume-builder.ts's generateSummarySuggestion /
+ * generateExperienceSuggestion / generateSkillsSuggestion (reused there
+ * unchanged for the Summary/Bullet/Skills tools instead of being
+ * reimplemented here, since they already produce exactly this shape from
+ * the same kind of profile data). This replaces the old bundled
+ * improveResume() call -- splitting it up means each tool can be
+ * regenerated and reviewed independently, matching the accept/reject
+ * workflow already proven by the Resume Builder's per-section suggestions.
  */
-export async function improveResume(parsed: ParsedResumeData): Promise<ResumeImprovementResult> {
-  const fallback: ResumeImprovementResult = {
-    improved_summary: "Enable OpenAI API key to get AI-powered resume improvements.",
-    improved_experience: (parsed.experience ?? []).map((exp) => ({
-      company_name: exp.company_name,
-      job_title: exp.job_title,
-      improved_bullets: ["Add OpenAI API key to enable resume rewriting suggestions"],
-    })),
-    suggested_missing_skills: [],
-    ats_keywords_to_add: [],
-    grammar_fixes: [],
-    generated_achievement_statements: [],
-  };
 
+interface ExperienceInput {
+  company_name: string;
+  job_title: string;
+  description?: string | null;
+}
+
+const achievementsSchema = z.object({
+  statements: z
+    .array(z.string())
+    .describe(
+      "2-4 new, quantified achievement statement ideas grounded in the candidate's actual experience -- suggestions only, never fabricated facts to insert unverified."
+    ),
+});
+
+export async function generateAchievementStatements(input: {
+  summary?: string | null;
+  experience: ExperienceInput[];
+}): Promise<string[]> {
   const openai = getOpenAI();
-  if (!openai) {
-    console.warn("OpenAI API not configured. Resume improvement unavailable.");
-    return fallback;
-  }
+  if (!openai) return [];
+  if (!input.experience.length) return [];
 
   try {
     const completion = await openai.beta.chat.completions.parse({
       model: AI_MODELS.reasoning,
       messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: `Candidate resume data:\n${JSON.stringify(parsed, null, 2).slice(0, 12000)}` },
+        {
+          role: "system",
+          content:
+            "You are an expert resume writer. Based on the candidate's summary and work experience, generate 2-4 new quantified achievement statement ideas they could add to their resume. Ground every idea in what's actually described -- never invent employers, numbers, or outcomes that aren't a plausible extension of the real experience given. These are ideas for the candidate to verify and adjust, not asserted facts.",
+        },
+        { role: "user", content: JSON.stringify(input, null, 2) },
       ],
-      response_format: zodResponseFormat(improvementSchema, "resume_improvement"),
-      temperature: 0.4,
+      response_format: zodResponseFormat(achievementsSchema, "achievement_statements"),
+      temperature: 0.5,
     });
-
     const result = completion.choices[0].message.parsed;
-    if (!result) throw new Error("AI resume improvement returned no structured output.");
-    return result;
+    if (!result) throw new Error("No structured output returned.");
+    return result.statements;
   } catch (err) {
-    console.error("improveResume: OpenAI call failed", err);
-    return fallback;
+    console.error("generateAchievementStatements failed", err);
+    return [];
+  }
+}
+
+const atsKeywordsSchema = z.object({
+  keywords: z
+    .array(z.string())
+    .describe("5-10 ATS keywords relevant to the candidate's field that are currently missing from their profile."),
+});
+
+export async function generateAtsKeywordSuggestions(input: {
+  currentPosition?: string | null;
+  skills: string[];
+  experience: ExperienceInput[];
+}): Promise<string[]> {
+  const openai = getOpenAI();
+  if (!openai) return [];
+
+  try {
+    const completion = await openai.beta.chat.completions.parse({
+      model: AI_MODELS.reasoning,
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are an ATS optimization specialist. Based on the candidate's target role, skills, and experience, suggest ATS keywords relevant to their field that are currently missing and would strengthen how their profile matches job descriptions. Only suggest keywords genuinely relevant to their demonstrated background.",
+        },
+        { role: "user", content: JSON.stringify(input, null, 2) },
+      ],
+      response_format: zodResponseFormat(atsKeywordsSchema, "ats_keyword_suggestions"),
+      temperature: 0.3,
+    });
+    const result = completion.choices[0].message.parsed;
+    if (!result) throw new Error("No structured output returned.");
+    return result.keywords;
+  } catch (err) {
+    console.error("generateAtsKeywordSuggestions failed", err);
+    return [];
   }
 }

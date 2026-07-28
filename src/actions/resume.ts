@@ -5,7 +5,8 @@ import { extractTextFromFile } from "@/lib/ai/extract-text";
 import { generateEmbedding, toVectorLiteral } from "@/lib/ai/embeddings";
 import { parseResumeText } from "@/lib/ai/resume-parser";
 import { scoreResumeATS } from "@/lib/ai/ats-scorer";
-import { improveResume } from "@/lib/ai/resume-improver";
+import { generateAchievementStatements, generateAtsKeywordSuggestions } from "@/lib/ai/resume-improver";
+import { generateExperienceSuggestion, generateSkillsSuggestion, generateSummarySuggestion } from "@/lib/ai/resume-builder";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import type { ParsedResumeData } from "@/types/database";
@@ -313,36 +314,108 @@ export async function setPrimaryResume(resumeId: string): Promise<ActionResult> 
   return { success: true };
 }
 
-export interface ImproveResumeResult extends ActionResult {
-  improvement?: Awaited<ReturnType<typeof improveResume>>;
+export interface ResumeExperienceSuggestion {
+  id: string;
+  jobTitle: string;
+  companyName: string;
+  current: string | null;
+  suggested: string;
 }
 
-/** Powers the "Improve My Resume" button. */
-export async function improveResumeAction(resumeId: string): Promise<ImproveResumeResult> {
+export interface ResumeSuggestions {
+  summary: { current: string | null; suggested: string };
+  experience: ResumeExperienceSuggestion[];
+  skillAdditions: string[];
+  achievements: string[];
+  atsKeywords: string[];
+}
+
+export interface GenerateResumeSuggestionsResult extends ActionResult {
+  suggestions?: ResumeSuggestions;
+}
+
+/**
+ * Powers the Resume Intelligence Hub's "Rewrite & Optimize" module. Runs
+ * every decomposed writing tool in parallel against the candidate's real
+ * profile data (not a resume's parsed snapshot) -- summary and experience
+ * bullets reuse the exact same functions the Resume Builder already uses
+ * for its per-section suggestions, so there's one rewriter/bullet-optimizer
+ * implementation, not two.
+ */
+export async function generateResumeSuggestions(): Promise<GenerateResumeSuggestionsResult> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { success: false, error: "You must be signed in." };
 
-  const { data: resume } = await supabase
-    .from("resumes")
-    .select("parsed_data, candidate_id")
-    .eq("id", resumeId)
-    .single();
+  const [{ data: candidate }, { data: experience }, { data: skills }] = await Promise.all([
+    supabase.from("candidates").select("summary, current_position, years_of_experience").eq("id", user.id).single(),
+    supabase
+      .from("candidate_experience")
+      .select("id, company_name, job_title, location, start_date, end_date, is_current, description")
+      .eq("candidate_id", user.id)
+      .order("start_date", { ascending: false }),
+    supabase.from("candidate_skills").select("skill_name").eq("candidate_id", user.id),
+  ]);
 
-  if (!resume || resume.candidate_id !== user.id) {
-    return { success: false, error: "Resume not found." };
-  }
-  if (!resume.parsed_data) {
-    return { success: false, error: "This resume hasn't finished AI parsing yet." };
-  }
+  const experienceRows = experience ?? [];
+  const skillNames = (skills ?? []).map((s) => s.skill_name);
+  const experienceForAi = experienceRows.map((e) => ({
+    company_name: e.company_name,
+    job_title: e.job_title,
+    location: e.location ?? undefined,
+    start_date: e.start_date ?? undefined,
+    end_date: e.end_date ?? undefined,
+    is_current: e.is_current,
+    description: e.description ?? undefined,
+  }));
 
   try {
-    const improvement = await improveResume(resume.parsed_data as ParsedResumeData);
-    return { success: true, improvement };
+    const [summaryResult, experienceResult, skillsResult, achievements, atsKeywords] = await Promise.all([
+      generateSummarySuggestion({
+        currentSummary: candidate?.summary ?? undefined,
+        currentPosition: candidate?.current_position ?? undefined,
+        yearsOfExperience: candidate?.years_of_experience ?? undefined,
+        topSkills: skillNames.slice(0, 5),
+      }),
+      generateExperienceSuggestion(experienceForAi),
+      generateSkillsSuggestion({ currentSkills: skillNames, experienceSummary: candidate?.summary ?? undefined }),
+      generateAchievementStatements({
+        summary: candidate?.summary,
+        experience: experienceRows.map((e) => ({ company_name: e.company_name, job_title: e.job_title, description: e.description })),
+      }),
+      generateAtsKeywordSuggestions({
+        currentPosition: candidate?.current_position,
+        skills: skillNames,
+        experience: experienceRows.map((e) => ({ company_name: e.company_name, job_title: e.job_title, description: e.description })),
+      }),
+    ]);
+
+    // generateExperienceSuggestion is order-preserving by contract, but
+    // matching on company+title (rather than array index) stays correct
+    // even if that contract ever loosens.
+    const suggestionByRole = new Map(experienceResult.map((e) => [`${e.company_name} ${e.job_title}`, e.description]));
+
+    const suggestions: ResumeSuggestions = {
+      summary: { current: candidate?.summary ?? null, suggested: summaryResult.text ?? "" },
+      experience: experienceRows.map((e) => ({
+        id: e.id,
+        jobTitle: e.job_title,
+        companyName: e.company_name,
+        current: e.description,
+        suggested: suggestionByRole.get(`${e.company_name} ${e.job_title}`) ?? e.description ?? "",
+      })),
+      skillAdditions: skillsResult.suggested_additions.filter(
+        (s) => !skillNames.some((existing) => existing.toLowerCase() === s.toLowerCase())
+      ),
+      achievements,
+      atsKeywords: atsKeywords.filter((k) => !skillNames.some((existing) => existing.toLowerCase() === k.toLowerCase())),
+    };
+
+    return { success: true, suggestions };
   } catch (err) {
-    console.error("improveResumeAction failed", err);
-    return { success: false, error: "Could not generate improvements right now. Please try again." };
+    console.error("generateResumeSuggestions failed", err);
+    return { success: false, error: "Could not generate suggestions right now. Please try again." };
   }
 }

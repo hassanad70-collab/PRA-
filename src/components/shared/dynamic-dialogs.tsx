@@ -11,10 +11,6 @@ import dynamic from "next/dynamic";
  */
 export const ApplyDialog = dynamic(() => import("@/components/candidate/apply-dialog").then((m) => m.ApplyDialog));
 
-export const ImproveResumeDialog = dynamic(() =>
-  import("@/components/candidate/improve-resume-dialog").then((m) => m.ImproveResumeDialog)
-);
-
 export const AssignCompanyDialog = dynamic(() =>
   import("@/components/admin/assign-company-dialog").then((m) => m.AssignCompanyDialog)
 );

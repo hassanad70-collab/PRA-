@@ -8,9 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AtsScoreCard } from "@/components/candidate/ats-score-card";
 import { ResumeHealthChecklist } from "@/components/candidate/resume-intelligence/health-checklist";
+import { RewriteOptimizePanel } from "@/components/candidate/resume-intelligence/rewrite-optimize-panel";
 import { ResumeUpload } from "@/components/candidate/resume-upload";
 import { SetPrimaryButton } from "@/components/candidate/set-primary-button";
-import { ImproveResumeDialog } from "@/components/shared/dynamic-dialogs";
 import { getCandidateFullProfile, getCurrentUser, getLatestAtsScore } from "@/lib/queries/candidate";
 import { runStructuralChecks } from "@/lib/resume-intelligence/structural-checks";
 import { formatRelativeTime } from "@/lib/utils";
@@ -28,7 +28,6 @@ export default async function ResumePage({ params }: { params: Promise<{ locale:
     getTranslations("Candidate.ResumeIntelligence"),
   ]);
 
-  const primaryResume = resumes.find((r) => r.is_primary) ?? resumes[0];
   const scoredResume = atsScore ? resumes.find((r) => r.id === atsScore.resume_id) : undefined;
   const structuralChecks = scoredResume?.raw_text ? runStructuralChecks(scoredResume.raw_text, scoredResume.parsed_data ?? {}) : null;
 
@@ -60,9 +59,8 @@ export default async function ResumePage({ params }: { params: Promise<{ locale:
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader>
             <CardTitle>{t("yourResumes")}</CardTitle>
-            {primaryResume?.parse_status === "completed" && <ImproveResumeDialog resumeId={primaryResume.id} />}
           </CardHeader>
           <CardContent className="space-y-3">
             {resumes.length === 0 && (
@@ -111,6 +109,8 @@ export default async function ResumePage({ params }: { params: Promise<{ locale:
           <ResumeHealthChecklist checks={structuralChecks} />
         </div>
       )}
+
+      <RewriteOptimizePanel />
     </div>
   );
 }

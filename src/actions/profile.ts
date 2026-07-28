@@ -61,6 +61,21 @@ export async function updateBasicInfo(formData: FormData): Promise<ActionResult>
   return { success: true };
 }
 
+/** Applies an accepted AI summary-rewrite suggestion (Resume Intelligence Hub). */
+export async function applySummaryRewrite(text: string): Promise<ActionResult> {
+  const ctx = await requireCandidate();
+  if (!ctx) return { success: false, error: "You must be signed in." };
+  if (!text.trim()) return { success: false, error: "Summary cannot be empty." };
+
+  const { error } = await ctx.supabase.from("candidates").update({ summary: text.trim() }).eq("id", ctx.userId);
+  if (error) return { success: false, error: error.message };
+
+  revalidateCandidatePath("/candidate/profile");
+  revalidateCandidatePath("/candidate/resume");
+  revalidateCandidatePath("/candidate/dashboard");
+  return { success: true };
+}
+
 export async function addExperience(formData: FormData): Promise<ActionResult> {
   const ctx = await requireCandidate();
   if (!ctx) return { success: false, error: "You must be signed in." };
@@ -92,6 +107,24 @@ export async function deleteExperience(id: string): Promise<ActionResult> {
   const { error } = await ctx.supabase.from("candidate_experience").delete().eq("id", id).eq("candidate_id", ctx.userId);
   if (error) return { success: false, error: error.message };
   revalidateCandidatePath("/candidate/profile");
+  return { success: true };
+}
+
+/** Applies an accepted AI bullet-rewrite suggestion (Resume Intelligence Hub) to one experience entry. */
+export async function updateExperienceDescription(id: string, description: string): Promise<ActionResult> {
+  const ctx = await requireCandidate();
+  if (!ctx) return { success: false, error: "You must be signed in." };
+  if (!description.trim()) return { success: false, error: "Description cannot be empty." };
+
+  const { error } = await ctx.supabase
+    .from("candidate_experience")
+    .update({ description: description.trim() })
+    .eq("id", id)
+    .eq("candidate_id", ctx.userId);
+  if (error) return { success: false, error: error.message };
+
+  revalidateCandidatePath("/candidate/profile");
+  revalidateCandidatePath("/candidate/resume");
   return { success: true };
 }
 
@@ -158,6 +191,23 @@ export async function deleteSkill(id: string): Promise<ActionResult> {
   if (!ctx) return { success: false, error: "You must be signed in." };
   const { error } = await ctx.supabase.from("candidate_skills").delete().eq("id", id).eq("candidate_id", ctx.userId);
   if (error) return { success: false, error: error.message };
+  revalidateCandidatePath("/candidate/profile");
+  return { success: true };
+}
+
+/** Adds an accepted AI-generated achievement statement idea (Resume Intelligence Hub) as a new achievement. */
+export async function addAchievement(title: string): Promise<ActionResult> {
+  const ctx = await requireCandidate();
+  if (!ctx) return { success: false, error: "You must be signed in." };
+  if (!title.trim()) return { success: false, error: "Achievement cannot be empty." };
+
+  const { error } = await ctx.supabase.from("candidate_achievements").insert({
+    candidate_id: ctx.userId,
+    title: title.trim(),
+  });
+  if (error) return { success: false, error: error.message };
+
+  await ctx.supabase.rpc("recompute_profile_completion", { p_candidate_id: ctx.userId });
   revalidateCandidatePath("/candidate/profile");
   return { success: true };
 }

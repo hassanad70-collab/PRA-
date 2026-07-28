@@ -666,7 +666,32 @@
           "pass": "لم يتم رصد عبارات عامة مبتذلة.",
           "warning": "تم رصد عبارة عامة (\"{phrase}\") — استبدلها بدليل محدد."
         }
-      }
+      },
+      "rewriteOptimizeTitle": "إعادة الصياغة والتحسين",
+      "rewriteOptimizeSubtitle": "اقتراحات مدعومة بالذكاء الاصطناعي لملخصك وخبراتك ومهاراتك وإنجازاتك — تتم مراجعتها واحدًا تلو الآخر.",
+      "generateSuggestions": "توليد اقتراحات",
+      "regenerate": "إعادة التوليد",
+      "noSuggestionsYet": "ولّد اقتراحات لرؤية أفكار إعادة الصياغة بالذكاء الاصطناعي لملفك الشخصي.",
+      "noSuggestionsFound": "لا توجد اقتراحات جديدة حاليًا — ملفك الشخصي جيد، أو جرّب إضافة المزيد من الخبرات والمهارات للحصول على أفكار أكثر ثراءً.",
+      "current": "الحالي",
+      "suggested": "المقترح",
+      "accept": "قبول",
+      "reject": "رفض",
+      "applied": "تم التطبيق",
+      "rejected": "مرفوض",
+      "batchApply": "تطبيق الكل ({count})",
+      "summaryLabel": "الملخص المهني",
+      "experienceLabel": "{role} في {company}",
+      "skillAdditionsLabel": "مهارات مقترحة للإضافة",
+      "achievementsLabel": "أفكار إنجازات جديدة",
+      "atsKeywordsLabel": "كلمات مفتاحية لـ ATS للإضافة",
+      "toastGenerateFailed": "تعذّر توليد الاقتراحات الآن. يرجى المحاولة مرة أخرى.",
+      "toastSummaryApplied": "تم تحديث الملخص",
+      "toastExperienceApplied": "تم تحديث الخبرة",
+      "toastSkillApplied": "تمت إضافة المهارة",
+      "toastAchievementApplied": "تمت إضافة الإنجاز",
+      "toastApplyFailed": "فشل تطبيق الاقتراح",
+      "toastBatchApplied": "تم تطبيق {count} اقتراحات"
     },
     "SaveJob": {
       "save": "حفظ الوظيفة",

@@ -666,7 +666,32 @@
           "pass": "No generic filler phrases detected.",
           "warning": "Generic phrase found (\"{phrase}\") — replace with specific evidence."
         }
-      }
+      },
+      "rewriteOptimizeTitle": "Rewrite & Optimize",
+      "rewriteOptimizeSubtitle": "AI-powered suggestions for your summary, experience, skills, and achievements — reviewed one at a time.",
+      "generateSuggestions": "Generate suggestions",
+      "regenerate": "Regenerate",
+      "noSuggestionsYet": "Generate suggestions to see AI rewrite ideas for your profile.",
+      "noSuggestionsFound": "No new suggestions right now — your profile looks solid, or try adding more experience and skills for richer ideas.",
+      "current": "Current",
+      "suggested": "Suggested",
+      "accept": "Accept",
+      "reject": "Reject",
+      "applied": "Applied",
+      "rejected": "Rejected",
+      "batchApply": "Apply all ({count})",
+      "summaryLabel": "Professional summary",
+      "experienceLabel": "{role} at {company}",
+      "skillAdditionsLabel": "Suggested skills to add",
+      "achievementsLabel": "New achievement ideas",
+      "atsKeywordsLabel": "ATS keywords to add",
+      "toastGenerateFailed": "Could not generate suggestions right now. Please try again.",
+      "toastSummaryApplied": "Summary updated",
+      "toastExperienceApplied": "Experience updated",
+      "toastSkillApplied": "Skill added",
+      "toastAchievementApplied": "Achievement added",
+      "toastApplyFailed": "Failed to apply suggestion",
+      "toastBatchApplied": "{count} suggestions applied"
     },
     "SaveJob": {
       "save": "Save job",
