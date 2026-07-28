@@ -923,6 +923,34 @@
       "salaryNotShared": "Not shared",
       "backToCandidates": "Back to candidates",
       "noneSelected": "Select 2 to {max} candidates from the applicants list to compare them here."
+    },
+    "Candidates": {
+      "pageTitle": "{job} — Candidates",
+      "subtitle": "Ranked automatically by AI screening score. {count} total applicants.",
+      "applicantsTab": "Applicants ({count})",
+      "recommendedTab": "AI Recommended ({count})",
+      "shortlistTab": "Shortlist (Top {count})",
+      "recommendedIntro": "Candidates our AI matched to this role who haven't applied. Only candidates who opted into being discovered appear here.",
+      "noRecommended": "No AI-recommended candidates yet.",
+      "topMatchingSkills": "Top matching skills",
+      "missingSkills": "Missing skills",
+      "percentMatch": "{percent}% match",
+      "shortlistEmpty": "No applicants to shortlist yet.",
+      "reasoning": "Reasoning",
+      "pros": "Pros",
+      "cons": "Cons",
+      "suggestedNextAction": "Suggested next action",
+      "actionScheduleInterview": "Schedule an interview",
+      "actionAwaitInterviewFeedback": "Awaiting interview feedback",
+      "actionAwaitingResponse": "Awaiting candidate's response to offer",
+      "actionReviewOrReject": "Review carefully, or reject",
+      "actionReviewProfile": "Review profile manually",
+      "actionNoActionNeeded": "No action needed — pipeline closed",
+      "approve": "Approve",
+      "reject": "Reject",
+      "moveToInterview": "Move to interview",
+      "actionSucceeded": "Application updated",
+      "actionFailed": "Could not update this application right now."
     }
   }
 }

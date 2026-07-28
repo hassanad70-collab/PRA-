@@ -923,6 +923,34 @@
       "salaryNotShared": "غير مُشارك",
       "backToCandidates": "العودة إلى المرشحين",
       "noneSelected": "اختر من 2 إلى {max} مرشحين من قائمة المتقدمين لمقارنتهم هنا."
+    },
+    "Candidates": {
+      "pageTitle": "{job} — المرشحون",
+      "subtitle": "مرتّبون تلقائيًا حسب نتيجة الفرز بالذكاء الاصطناعي. {count} إجمالي المتقدمين.",
+      "applicantsTab": "المتقدمون ({count})",
+      "recommendedTab": "موصى بهم بالذكاء الاصطناعي ({count})",
+      "shortlistTab": "القائمة المختصرة (أفضل {count})",
+      "recommendedIntro": "مرشحون طابقهم الذكاء الاصطناعي مع هذا الدور ولم يتقدموا بعد. يظهر هنا فقط من اختاروا أن يكونوا قابلين للاكتشاف.",
+      "noRecommended": "لا يوجد مرشحون موصى بهم بعد.",
+      "topMatchingSkills": "أفضل المهارات المطابقة",
+      "missingSkills": "المهارات الناقصة",
+      "percentMatch": "توافق {percent}%",
+      "shortlistEmpty": "لا يوجد متقدمون لإدراجهم في القائمة المختصرة بعد.",
+      "reasoning": "التبرير",
+      "pros": "الإيجابيات",
+      "cons": "السلبيات",
+      "suggestedNextAction": "الإجراء التالي المقترح",
+      "actionScheduleInterview": "جدولة مقابلة",
+      "actionAwaitInterviewFeedback": "بانتظار ملاحظات المقابلة",
+      "actionAwaitingResponse": "بانتظار رد المرشح على العرض",
+      "actionReviewOrReject": "راجع بعناية، أو ارفض",
+      "actionReviewProfile": "مراجعة الملف الشخصي يدويًا",
+      "actionNoActionNeeded": "لا حاجة لإجراء — تم إغلاق المسار",
+      "approve": "قبول",
+      "reject": "رفض",
+      "moveToInterview": "نقل إلى مقابلة",
+      "actionSucceeded": "تم تحديث الطلب",
+      "actionFailed": "تعذّر تحديث هذا الطلب الآن."
     }
   }
 }
