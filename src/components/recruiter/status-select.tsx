@@ -23,6 +23,7 @@ const STATUSES: ApplicationStatus[] = [
   "offer",
   "hired",
   "rejected",
+  "archived",
 ];
 
 export function StatusSelect({

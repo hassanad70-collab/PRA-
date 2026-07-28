@@ -19,6 +19,7 @@ const STATUS_VARIANT: Record<ApplicationStatus, "default" | "secondary" | "succe
   hired: "success",
   rejected: "destructive",
   withdrawn: "outline",
+  archived: "outline",
 };
 
 export default async function ApplicationsPage({ params }: { params: Promise<{ locale: string }> }) {

@@ -13,6 +13,7 @@ import { getApplicationsForJob } from "@/lib/queries/applications";
 import { getCurrentUser } from "@/lib/queries/candidate";
 import { getJobById, getRecruiterContext } from "@/lib/queries/jobs";
 import { getRecommendedCandidatesForJob } from "@/lib/queries/matching";
+import { getCompanyMembers } from "@/lib/queries/team";
 import { initials } from "@/lib/utils";
 import type { ApplicationStatus } from "@/types/database";
 
@@ -29,11 +30,28 @@ export default async function JobCandidatesPage({ params }: { params: Promise<{ 
   const job = await getJobById(id);
   if (!job || job.company_id !== recruiter.company_id) notFound();
 
-  const [applications, recommended, t] = await Promise.all([
+  const [applications, recommended, companyMembers, t, tShared, tBulk] = await Promise.all([
     getApplicationsForJob(id),
     getRecommendedCandidatesForJob(id),
+    getCompanyMembers(recruiter.company_id),
     getTranslations("Recruiter.Candidates"),
+    getTranslations("Recruiter.Shared"),
+    getTranslations("Recruiter.Bulk"),
   ]);
+
+  const statusLabels: Record<ApplicationStatus, string> = {
+    submitted: tShared("applicationStatus.submitted"),
+    screening: tShared("applicationStatus.screening"),
+    shortlisted: tShared("applicationStatus.shortlisted"),
+    interview: tShared("applicationStatus.interview"),
+    offer: tShared("applicationStatus.offer"),
+    hired: tShared("applicationStatus.hired"),
+    rejected: tShared("applicationStatus.rejected"),
+    withdrawn: tShared("applicationStatus.withdrawn"),
+    archived: tShared("applicationStatus.archived"),
+  };
+
+  const recruitersForAssign = companyMembers.map((m) => ({ id: m.id, name: m.profile?.full_name ?? m.profile?.email ?? "" }));
 
   const shortlistItems: ShortlistItem[] = applications.slice(0, SHORTLIST_SIZE).map((app) => {
     const match = app.job_match?.[0];
@@ -101,7 +119,56 @@ export default async function JobCandidatesPage({ params }: { params: Promise<{ 
         </TabsContent>
 
         <TabsContent value="applicants">
-          <ApplicantsPanel applications={applications} jobId={job.id} />
+          <ApplicantsPanel
+            applications={applications}
+            jobId={job.id}
+            recruiters={recruitersForAssign}
+            labels={{
+              list: t("listView"),
+              board: t("boardView"),
+              noApplications: t("noApplicationsYet"),
+              compare: t("compareLabel"),
+              matchLabel: t("matchLabel"),
+              atsLabel: t("atsLabel"),
+              screeningLabel: t("screeningLabel"),
+              statusLabels,
+              candidateFallback: tShared("candidateFallback"),
+              bulk: {
+                selectedCount: tBulk("selectedCount"),
+                moveTo: tBulk("moveTo"),
+                reject: tBulk("reject"),
+                archive: tBulk("archive"),
+                tag: tBulk("tag"),
+                tagPlaceholder: tBulk("tagPlaceholder"),
+                apply: tBulk("apply"),
+                assignRecruiter: tBulk("assignRecruiter"),
+                unassigned: tBulk("unassigned"),
+                scheduleInterviews: tBulk("scheduleInterviews"),
+                email: tBulk("email"),
+                export: tBulk("export"),
+                scheduleDialogTitle: tBulk("scheduleDialogTitle"),
+                scheduledAt: tBulk("scheduledAt"),
+                duration: tBulk("duration"),
+                interviewType: tBulk("interviewType"),
+                locationOrLink: tBulk("locationOrLink"),
+                scheduleSubmit: tBulk("scheduleSubmit"),
+                emailDialogTitle: tBulk("emailDialogTitle"),
+                messageType: tBulk("messageType"),
+                rejectionOption: tBulk("rejectionOption"),
+                offerOption: tBulk("offerOption"),
+                generateDraft: tBulk("generateDraft"),
+                copyMessage: tBulk("copyMessage"),
+                copyEmails: tBulk("copyEmails"),
+                copiedMessage: tBulk("copiedMessage"),
+                copiedEmails: tBulk("copiedEmails"),
+                subject: tBulk("subject"),
+                body: tBulk("body"),
+                toastSuccess: tBulk("toastSuccess"),
+                toastFailed: tBulk("toastFailed"),
+                statusOptions: statusLabels,
+              },
+            }}
+          />
         </TabsContent>
 
         <TabsContent value="recommended" className="space-y-3">

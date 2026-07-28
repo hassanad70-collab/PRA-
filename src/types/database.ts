@@ -15,7 +15,9 @@ export type ApplicationStatus =
   | "offer"
   | "hired"
   | "rejected"
-  | "withdrawn";
+  | "withdrawn"
+  /** Bulk Recruiter Actions (Recruiter Intelligence v2.0, Phase 7) -- migration 0024. "No longer actively considering", distinct from an explicit rejection or a candidate-initiated withdrawal. */
+  | "archived";
 export type InterviewType = "phone" | "video" | "onsite" | "technical" | "panel" | "final";
 export type InterviewStatus = "scheduled" | "completed" | "cancelled" | "no_show" | "rescheduled";
 export type HiringRecommendation = "strong_yes" | "yes" | "neutral" | "no" | "strong_no";

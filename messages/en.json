@@ -951,7 +951,15 @@
       "reject": "Reject",
       "moveToInterview": "Move to interview",
       "actionSucceeded": "Application updated",
-      "actionFailed": "Could not update this application right now."
+      "actionFailed": "Could not update this application right now.",
+      "listView": "List",
+      "boardView": "Board",
+      "noApplicationsYet": "No applications yet for this job.",
+      "compareLabel": "Compare",
+      "matchLabel": "Match",
+      "atsLabel": "ATS",
+      "screeningLabel": "Screening…",
+      "noCandidatesInColumn": "No candidates"
     },
     "Copilot": {
       "trigger": "Copilot",
@@ -990,6 +998,40 @@
         "agency": "Agency",
         "other": "Other"
       }
+    },
+    "Bulk": {
+      "selectedCount": "__COUNT__ selected",
+      "moveTo": "Move to…",
+      "reject": "Reject",
+      "archive": "Archive",
+      "tag": "Tag",
+      "tagPlaceholder": "Add tags, comma separated",
+      "apply": "Apply",
+      "assignRecruiter": "Assign recruiter…",
+      "unassigned": "Unassigned",
+      "scheduleInterviews": "Schedule interviews",
+      "email": "Email",
+      "export": "Export",
+      "scheduleDialogTitle": "Schedule interviews for __COUNT__ candidates",
+      "scheduledAt": "Date & time",
+      "duration": "Duration (minutes)",
+      "interviewType": "Interview type",
+      "locationOrLink": "Location or link",
+      "scheduleSubmit": "Schedule for all",
+      "emailDialogTitle": "Draft a message for __COUNT__ candidates",
+      "messageType": "Message type",
+      "rejectionOption": "Rejection",
+      "offerOption": "Offer",
+      "generateDraft": "Generate draft",
+      "copyMessage": "Copy message",
+      "copyEmails": "Copy emails (__COUNT__)",
+      "copiedMessage": "Message copied",
+      "copiedEmails": "Emails copied",
+      "subject": "Subject",
+      "body": "Body",
+      "toastSuccess": "Applied to __COUNT__ application(s)",
+      "toastFailed": "Bulk action failed",
+      "close": "Close"
     }
   }
 }

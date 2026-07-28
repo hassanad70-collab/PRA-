@@ -951,7 +951,15 @@
       "reject": "رفض",
       "moveToInterview": "نقل إلى مقابلة",
       "actionSucceeded": "تم تحديث الطلب",
-      "actionFailed": "تعذّر تحديث هذا الطلب الآن."
+      "actionFailed": "تعذّر تحديث هذا الطلب الآن.",
+      "listView": "قائمة",
+      "boardView": "لوحة",
+      "noApplicationsYet": "لا توجد طلبات لهذه الوظيفة بعد.",
+      "compareLabel": "مقارنة",
+      "matchLabel": "التوافق",
+      "atsLabel": "ATS",
+      "screeningLabel": "قيد الفرز…",
+      "noCandidatesInColumn": "لا يوجد مرشحون"
     },
     "Copilot": {
       "trigger": "المساعد الذكي",
@@ -990,6 +998,40 @@
         "agency": "وكالة",
         "other": "أخرى"
       }
+    },
+    "Bulk": {
+      "selectedCount": "تم تحديد __COUNT__",
+      "moveTo": "نقل إلى…",
+      "reject": "رفض",
+      "archive": "أرشفة",
+      "tag": "وسم",
+      "tagPlaceholder": "أضف وسومًا مفصولة بفواصل",
+      "apply": "تطبيق",
+      "assignRecruiter": "إسناد مسؤول توظيف…",
+      "unassigned": "غير مُسند",
+      "scheduleInterviews": "جدولة مقابلات",
+      "email": "بريد إلكتروني",
+      "export": "تصدير",
+      "scheduleDialogTitle": "جدولة مقابلات لـ __COUNT__ مرشحين",
+      "scheduledAt": "التاريخ والوقت",
+      "duration": "المدة (دقائق)",
+      "interviewType": "نوع المقابلة",
+      "locationOrLink": "الموقع أو الرابط",
+      "scheduleSubmit": "جدولة للجميع",
+      "emailDialogTitle": "صياغة رسالة لـ __COUNT__ مرشحين",
+      "messageType": "نوع الرسالة",
+      "rejectionOption": "رفض",
+      "offerOption": "عرض عمل",
+      "generateDraft": "توليد مسودة",
+      "copyMessage": "نسخ الرسالة",
+      "copyEmails": "نسخ البريد الإلكتروني (__COUNT__)",
+      "copiedMessage": "تم نسخ الرسالة",
+      "copiedEmails": "تم نسخ عناوين البريد الإلكتروني",
+      "subject": "الموضوع",
+      "body": "النص",
+      "toastSuccess": "تم التطبيق على __COUNT__ طلب/طلبات",
+      "toastFailed": "فشل الإجراء الجماعي",
+      "close": "إغلاق"
     }
   }
 }
