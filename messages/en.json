@@ -898,6 +898,31 @@
       "suggestedQuestionsLabel": "Suggested questions",
       "insightGeneratedAt": "Generated {time}",
       "insightGenerateFailed": "Could not generate an AI insight right now."
+    },
+    "Comparison": {
+      "title": "Candidate Comparison",
+      "subtitle": "Comparing {count} candidates for {job}",
+      "exportPdf": "Export to PDF",
+      "exporting": "Exporting…",
+      "exportFailed": "Could not generate the comparison PDF right now.",
+      "rowExperience": "Experience",
+      "rowEducation": "Education",
+      "rowSkills": "Skills",
+      "rowAtsScore": "ATS Score",
+      "rowAiScore": "AI Score",
+      "rowInterviewStatus": "Interview Status",
+      "rowLanguages": "Languages",
+      "rowCertifications": "Certifications",
+      "rowCareerProgression": "Career Progression",
+      "rowExpectedSalary": "Expected Salary",
+      "rowRecommendation": "Overall Recommendation",
+      "yearsExp": "{years} yrs",
+      "rolesCount": "{count} roles",
+      "noInterviewYet": "Not yet interviewed",
+      "noData": "—",
+      "salaryNotShared": "Not shared",
+      "backToCandidates": "Back to candidates",
+      "noneSelected": "Select 2 to {max} candidates from the applicants list to compare them here."
     }
   }
 }

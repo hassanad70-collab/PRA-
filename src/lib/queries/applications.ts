@@ -1,7 +1,8 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
-import type { ApplicationStatus, Company, Job, ParsedResumeData, ScreeningResult } from "@/types/database";
+import { getCandidateFullProfile } from "@/lib/queries/candidate";
+import type { ApplicationStatus, Company, InterviewStatus, Job, JobMatch, ParsedResumeData, ScreeningResult } from "@/types/database";
 
 // This project's Supabase client has no generated `Database` generic (see
 // src/types/database.ts's header), so narrowing an embedded relation's
@@ -163,6 +164,109 @@ export async function getApplicationDetail(applicationId: string) {
   ]);
 
   return { ...app, job_match: matches ?? [], ats_score: scores ?? [] };
+}
+
+export interface ComparisonCandidate {
+  applicationId: string;
+  status: ApplicationStatus;
+  jobTitle: string;
+  fullName: string;
+  profile: Awaited<ReturnType<typeof getCandidateFullProfile>>;
+  atsScore: number | null;
+  aiScore: number | null;
+  interviewRecommendation: ScreeningResult["interview_recommendation"];
+  jobMatch: JobMatch | null;
+  interviewStatus: InterviewStatus | null;
+  expectedSalary: { min: number | null; max: number | null; currency: string } | null;
+}
+
+/**
+ * Candidate Comparison (Recruiter Intelligence v2.0, Phase 3) -- reuses
+ * getCandidateFullProfile (experience/education/skills/languages/
+ * certificates, already built for the candidate profile page) rather than
+ * re-querying those tables, plus the same application-scoped AI data
+ * (screening_result, ats_score, job_match) as getApplicationDetail.
+ */
+export async function getApplicationsForComparison(applicationIds: string[]): Promise<ComparisonCandidate[]> {
+  const supabase = await createClient();
+
+  const results = await Promise.all(
+    applicationIds.map(async (applicationId) => {
+      const { data: app } = await supabase
+        .from("applications")
+        .select(
+          `id, job_id, candidate_id, resume_id, status,
+          job:jobs(title),
+          candidate:candidates(profile:profiles(full_name), expected_salary_min, expected_salary_max, salary_currency)`
+        )
+        .eq("id", applicationId)
+        .single()
+        .returns<{
+          id: string;
+          job_id: string;
+          candidate_id: string;
+          resume_id: string;
+          status: ApplicationStatus;
+          job: { title: string } | null;
+          candidate: {
+            profile: { full_name: string } | null;
+            expected_salary_min: number | null;
+            expected_salary_max: number | null;
+            salary_currency: string;
+          } | null;
+        }>();
+
+      if (!app) return null;
+
+      const [profile, { data: atsScore }, { data: screeningResult }, { data: jobMatch }, { data: interviews }] = await Promise.all([
+        getCandidateFullProfile(app.candidate_id),
+        supabase
+          .from("ats_scores")
+          .select("overall_score")
+          .eq("resume_id", app.resume_id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+        supabase.from("screening_results").select("overall_score, interview_recommendation").eq("application_id", applicationId).maybeSingle(),
+        supabase
+          .from("job_matches")
+          .select("*")
+          .eq("job_id", app.job_id)
+          .eq("candidate_id", app.candidate_id)
+          .maybeSingle(),
+        supabase
+          .from("interviews")
+          .select("status")
+          .eq("application_id", applicationId)
+          .order("scheduled_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+      ]);
+
+      const comparison: ComparisonCandidate = {
+        applicationId: app.id,
+        status: app.status,
+        jobTitle: app.job?.title ?? "",
+        fullName: app.candidate?.profile?.full_name ?? "",
+        profile,
+        atsScore: atsScore?.overall_score ?? null,
+        aiScore: screeningResult?.overall_score ?? null,
+        interviewRecommendation: screeningResult?.interview_recommendation ?? null,
+        jobMatch: (jobMatch as JobMatch | null) ?? null,
+        interviewStatus: interviews?.status ?? null,
+        expectedSalary: app.candidate
+          ? {
+              min: app.candidate.expected_salary_min,
+              max: app.candidate.expected_salary_max,
+              currency: app.candidate.salary_currency,
+            }
+          : null,
+      };
+      return comparison;
+    })
+  );
+
+  return results.filter((r): r is ComparisonCandidate => r !== null);
 }
 
 export async function getCompanyApplicationsCount(companyId: string) {

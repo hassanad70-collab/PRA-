@@ -47,7 +47,7 @@ export default async function JobCandidatesPage({ params }: { params: Promise<{ 
         </TabsList>
 
         <TabsContent value="applicants">
-          <ApplicantsPanel applications={applications} />
+          <ApplicantsPanel applications={applications} jobId={job.id} />
         </TabsContent>
 
         <TabsContent value="recommended" className="space-y-3">

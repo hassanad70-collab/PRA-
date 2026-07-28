@@ -898,6 +898,31 @@
       "suggestedQuestionsLabel": "الأسئلة المقترحة",
       "insightGeneratedAt": "تم التوليد {time}",
       "insightGenerateFailed": "تعذّر توليد رؤية بالذكاء الاصطناعي الآن."
+    },
+    "Comparison": {
+      "title": "مقارنة المرشحين",
+      "subtitle": "مقارنة {count} مرشحين لوظيفة {job}",
+      "exportPdf": "تصدير إلى PDF",
+      "exporting": "جارٍ التصدير…",
+      "exportFailed": "تعذّر توليد ملف PDF للمقارنة الآن.",
+      "rowExperience": "الخبرة",
+      "rowEducation": "التعليم",
+      "rowSkills": "المهارات",
+      "rowAtsScore": "نتيجة ATS",
+      "rowAiScore": "نتيجة الذكاء الاصطناعي",
+      "rowInterviewStatus": "حالة المقابلة",
+      "rowLanguages": "اللغات",
+      "rowCertifications": "الشهادات",
+      "rowCareerProgression": "المسار الوظيفي",
+      "rowExpectedSalary": "الراتب المتوقع",
+      "rowRecommendation": "التوصية العامة",
+      "yearsExp": "{years} سنة خبرة",
+      "rolesCount": "{count} أدوار",
+      "noInterviewYet": "لم تُجرَ مقابلة بعد",
+      "noData": "—",
+      "salaryNotShared": "غير مُشارك",
+      "backToCandidates": "العودة إلى المرشحين",
+      "noneSelected": "اختر من 2 إلى {max} مرشحين من قائمة المتقدمين لمقارنتهم هنا."
     }
   }
 }

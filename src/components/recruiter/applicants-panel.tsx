@@ -2,12 +2,13 @@
 
 import * as React from "react";
 
-import { Link } from "@/i18n/navigation";
-import { LayoutGrid, List, Trophy } from "lucide-react";
+import { Link, useRouter } from "@/i18n/navigation";
+import { LayoutGrid, List, Scale, Trophy } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ScoreRing } from "@/components/shared/score-ring";
 import { ApplicationKanbanBoard } from "@/components/recruiter/application-kanban-board";
 import type { getApplicationsForJob } from "@/lib/queries/applications";
@@ -27,36 +28,69 @@ const STATUS_VARIANT: Record<ApplicationStatus, "default" | "secondary" | "succe
   withdrawn: "outline",
 };
 
+const MAX_COMPARE = 4;
+
 /**
  * List view is the original AI-ranked flat view (kept as-is -- the #1/#2/#3
  * ranking it conveys is lost in a stage-grouped board). Board view is a
  * purely additive visualization added in Unit H: same data, same actions
- * (StatusSelect), no new query.
+ * (StatusSelect), no new query. Candidate Comparison selection (Recruiter
+ * Intelligence v2.0, Phase 3) is List-view-only -- Board view's per-column
+ * layout doesn't have a natural place for a selection checkbox, and bulk
+ * selection across the whole pipeline is Phase 7's dedicated toolbar, a
+ * separate concern from "pick 2-4 finalists to compare side by side".
  */
-export function ApplicantsPanel({ applications }: { applications: ApplicationRow[] }) {
+export function ApplicantsPanel({ applications, jobId }: { applications: ApplicationRow[]; jobId: string }) {
   const [view, setView] = React.useState<"list" | "board">("list");
+  const [selected, setSelected] = React.useState<Set<string>>(new Set());
+  const router = useRouter();
+
+  const toggleSelected = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else if (next.size < MAX_COMPARE) next.add(id);
+      return next;
+    });
+  };
+
+  const handleCompare = () => {
+    router.push(`/recruiter/jobs/${jobId}/compare?ids=${Array.from(selected).join(",")}`);
+  };
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end gap-1" role="group" aria-label="View">
-        <Button
-          type="button"
-          variant={view === "list" ? "default" : "outline"}
-          size="sm"
-          aria-pressed={view === "list"}
-          onClick={() => setView("list")}
-        >
-          <List className="h-4 w-4" /> List
-        </Button>
-        <Button
-          type="button"
-          variant={view === "board" ? "default" : "outline"}
-          size="sm"
-          aria-pressed={view === "board"}
-          onClick={() => setView("board")}
-        >
-          <LayoutGrid className="h-4 w-4" /> Board
-        </Button>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          {selected.size > 0 && (
+            <>
+              <span className="text-sm text-muted-foreground">{selected.size} selected</span>
+              <Button type="button" size="sm" variant="gradient" disabled={selected.size < 2} onClick={handleCompare}>
+                <Scale className="h-4 w-4" /> Compare ({selected.size})
+              </Button>
+            </>
+          )}
+        </div>
+        <div className="flex gap-1" role="group" aria-label="View">
+          <Button
+            type="button"
+            variant={view === "list" ? "default" : "outline"}
+            size="sm"
+            aria-pressed={view === "list"}
+            onClick={() => setView("list")}
+          >
+            <List className="h-4 w-4" /> List
+          </Button>
+          <Button
+            type="button"
+            variant={view === "board" ? "default" : "outline"}
+            size="sm"
+            aria-pressed={view === "board"}
+            onClick={() => setView("board")}
+          >
+            <LayoutGrid className="h-4 w-4" /> Board
+          </Button>
+        </div>
       </div>
 
       {view === "board" ? (
@@ -75,11 +109,19 @@ export function ApplicantsPanel({ applications }: { applications: ApplicationRow
             const match = app.job_match?.[0];
             const ats = app.ats_score?.[0];
             const candidateProfile = app.candidate?.profile;
+            const isSelected = selected.has(app.id);
+            const disableCheckbox = !isSelected && selected.size >= MAX_COMPARE;
 
             return (
-              <Link key={app.id} href={`/recruiter/applications/${app.id}`}>
-                <Card className="transition-shadow hover:shadow-md">
-                  <CardContent className="flex items-center gap-4 pt-6">
+              <Card key={app.id} className="transition-shadow hover:shadow-md">
+                <CardContent className="flex items-center gap-4 pt-6">
+                  <Checkbox
+                    checked={isSelected}
+                    disabled={disableCheckbox}
+                    onCheckedChange={() => toggleSelected(app.id)}
+                    aria-label={`Select ${candidateProfile?.full_name ?? "candidate"} for comparison`}
+                  />
+                  <Link href={`/recruiter/applications/${app.id}`} className="flex flex-1 items-center gap-4 min-w-0">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary text-sm font-semibold">
                       {index === 0 ? <Trophy className="h-4 w-4 text-warning" /> : `#${index + 1}`}
                     </div>
@@ -119,9 +161,9 @@ export function ApplicantsPanel({ applications }: { applications: ApplicationRow
                     <Badge variant={STATUS_VARIANT[app.status as ApplicationStatus]} className="shrink-0 capitalize">
                       {app.status.replace("_", " ")}
                     </Badge>
-                  </CardContent>
-                </Card>
-              </Link>
+                  </Link>
+                </CardContent>
+              </Card>
             );
           })}
         </div>
