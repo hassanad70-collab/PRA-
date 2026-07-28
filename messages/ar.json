@@ -735,6 +735,7 @@
       "jobs": "الوظائف",
       "interviews": "المقابلات",
       "talentPool": "مجموعة المواهب",
+      "analytics": "التحليلات",
       "settings": "الإعدادات",
       "signOut": "تسجيل الخروج",
       "openMenu": "فتح القائمة"
@@ -965,6 +966,30 @@
       "exampleQuery4": "ما المهارات الناقصة في مسار التوظيف لدي؟",
       "exampleQuery5": "لخّص مقابلات اليوم",
       "errorFallback": "حدث خطأ أثناء الإجابة. يرجى المحاولة مرة أخرى."
+    },
+    "Analytics": {
+      "title": "تحليلات التوظيف",
+      "subtitle": "مقاييس توظيف أعمق لـ {company}.",
+      "timeToHireTitle": "اتجاه وقت التوظيف",
+      "sourceBreakdownTitle": "مصدر التوظيف",
+      "funnelDropOffTitle": "تسرّب قمع التوظيف",
+      "interviewConversionTitle": "معدل تحويل المقابلات",
+      "recruiterProductivityTitle": "إنتاجية المسؤولين عن التوظيف",
+      "noTimeToHireData": "لا توجد تعيينات كافية بعد لرسم اتجاه.",
+      "noSourceData": "لا توجد بيانات مصدر بعد.",
+      "noFunnelData": "لا توجد طلبات بعد.",
+      "workloadRecruiter": "المسؤول عن التوظيف",
+      "productivityApplications": "الطلبات",
+      "productivityHires": "التعيينات",
+      "exportCsv": "تصدير CSV",
+      "source": {
+        "platform": "المنصة",
+        "referral": "ترشيح",
+        "linkedin": "لينكدإن",
+        "job_board": "لوحة وظائف",
+        "agency": "وكالة",
+        "other": "أخرى"
+      }
     }
   }
 }

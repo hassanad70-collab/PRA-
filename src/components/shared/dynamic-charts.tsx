@@ -39,3 +39,13 @@ export const DepartmentChart = dynamic(
   () => import("@/components/recruiter/charts/department-chart").then((m) => m.DepartmentChart),
   { ssr: false, loading: () => <ChartSkeleton /> }
 );
+
+export const TimeToHireChart = dynamic(
+  () => import("@/components/recruiter/charts/time-to-hire-chart").then((m) => m.TimeToHireChart),
+  { ssr: false, loading: () => <ChartSkeleton /> }
+);
+
+export const SourceBreakdownChart = dynamic(
+  () => import("@/components/recruiter/charts/source-breakdown-chart").then((m) => m.SourceBreakdownChart),
+  { ssr: false, loading: () => <ChartSkeleton /> }
+);

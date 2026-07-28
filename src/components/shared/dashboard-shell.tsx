@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  BarChart3,
   Bookmark,
   Briefcase,
   Building2,
@@ -54,6 +55,7 @@ const ICON_MAP = {
   ScrollText,
   Settings,
   Calendar,
+  BarChart3,
 } as const;
 
 export type IconName = keyof typeof ICON_MAP;

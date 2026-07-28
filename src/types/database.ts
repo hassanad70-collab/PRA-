@@ -314,6 +314,8 @@ export interface Application {
   cover_letter_id: string | null;
   status: ApplicationStatus;
   status_reason: string | null;
+  /** Source of Hire (Recruiter Intelligence v2.0, Phase 6) -- migration 0023. Plain text, not an enum; see src/lib/recruiter/analytics.ts for documented values. */
+  source: string;
   applied_at: string;
   updated_at: string;
 }

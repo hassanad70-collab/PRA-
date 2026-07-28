@@ -735,6 +735,7 @@
       "jobs": "Jobs",
       "interviews": "Interviews",
       "talentPool": "Talent Pool",
+      "analytics": "Analytics",
       "settings": "Settings",
       "signOut": "Sign out",
       "openMenu": "Open menu"
@@ -965,6 +966,30 @@
       "exampleQuery4": "What skills are missing in my pipeline?",
       "exampleQuery5": "Summarize today's interviews",
       "errorFallback": "Something went wrong answering that. Please try again."
+    },
+    "Analytics": {
+      "title": "Hiring Analytics",
+      "subtitle": "Deeper recruitment metrics for {company}.",
+      "timeToHireTitle": "Time to hire trend",
+      "sourceBreakdownTitle": "Source of hire",
+      "funnelDropOffTitle": "Recruitment funnel drop-off",
+      "interviewConversionTitle": "Interview conversion rate",
+      "recruiterProductivityTitle": "Recruiter productivity",
+      "noTimeToHireData": "Not enough hires yet to chart a trend.",
+      "noSourceData": "No source data yet.",
+      "noFunnelData": "No applications yet.",
+      "workloadRecruiter": "Recruiter",
+      "productivityApplications": "Applications",
+      "productivityHires": "Hires",
+      "exportCsv": "Export CSV",
+      "source": {
+        "platform": "Platform",
+        "referral": "Referral",
+        "linkedin": "LinkedIn",
+        "job_board": "Job board",
+        "agency": "Agency",
+        "other": "Other"
+      }
     }
   }
 }

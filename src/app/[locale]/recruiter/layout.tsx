@@ -35,6 +35,7 @@ export default async function RecruiterLayout({
     { href: `/${locale}/recruiter/jobs`, label: tNav("jobs"), icon: "Briefcase" },
     { href: `/${locale}/recruiter/interviews`, label: tNav("interviews"), icon: "Calendar" },
     { href: `/${locale}/recruiter/talent-pool`, label: tNav("talentPool"), icon: "Users" },
+    { href: `/${locale}/recruiter/analytics`, label: tNav("analytics"), icon: "BarChart3" },
   ];
 
   return (
