@@ -1,7 +1,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
-import type { ApplicationStatus, ScreeningResult } from "@/types/database";
+import type { ApplicationStatus, Company, Job, ParsedResumeData, ScreeningResult } from "@/types/database";
 
 // This project's Supabase client has no generated `Database` generic (see
 // src/types/database.ts's header), so narrowing an embedded relation's
@@ -9,6 +9,19 @@ import type { ApplicationStatus, ScreeningResult } from "@/types/database";
 // misinfer its cardinality. `.returns<T>()` declares the real shape
 // explicitly instead -- see the longer explanation in
 // src/lib/queries/jobs.ts's getPublishedJobs.
+//
+// screening_result specifically is a *to-one* embed, not to-many:
+// screening_results.application_id has a `unique` constraint (migration
+// 0007), so PostgREST always returns it as a single object or null, never
+// an array -- confirmed by direct testing against the live API while
+// building Recruiter Intelligence v2.0's Candidate Insight panel, after
+// finding this page's AI Score / AI Screening Summary cards were silently
+// never rendering. Every previous call site here (and in
+// application-kanban-board.tsx / applicants-panel.tsx / the application
+// detail page) read `screening_result?.[0]`, which is always undefined
+// against an object -- this was a real, pre-existing, silent regression
+// affecting every recruiter-facing AI score display on this data, not
+// something introduced by this fix.
 interface ApplicationListItem {
   id: string;
   status: ApplicationStatus;
@@ -19,7 +32,7 @@ interface ApplicationListItem {
     years_of_experience: number;
     profile: { full_name: string } | null;
   } | null;
-  screening_result: ScreeningResult[];
+  screening_result: ScreeningResult | null;
 }
 
 /**
@@ -91,10 +104,30 @@ export async function getApplicationsForJob(jobId: string) {
   }));
 
   return rows.sort((a, b) => {
-    const scoreA = a.screening_result?.[0]?.overall_score ?? -1;
-    const scoreB = b.screening_result?.[0]?.overall_score ?? -1;
+    const scoreA = a.screening_result?.overall_score ?? -1;
+    const scoreB = b.screening_result?.overall_score ?? -1;
     return scoreB - scoreA;
   });
+}
+
+interface ApplicationDetailRow {
+  id: string;
+  job_id: string;
+  candidate_id: string;
+  resume_id: string;
+  cover_letter_id: string | null;
+  status: ApplicationStatus;
+  status_reason: string | null;
+  applied_at: string;
+  updated_at: string;
+  job: (Job & { company: Company | null }) | null;
+  candidate: {
+    current_position: string | null;
+    years_of_experience: number;
+    profile: { full_name: string } | null;
+  } | null;
+  resume: { id: string; parsed_data: ParsedResumeData | null; raw_text: string | null } | null;
+  screening_result: ScreeningResult | null;
 }
 
 export async function getApplicationDetail(applicationId: string) {
@@ -102,14 +135,22 @@ export async function getApplicationDetail(applicationId: string) {
   const { data: app, error } = await supabase
     .from("applications")
     .select(
-      `*,
+      // A leading bare "*" here (rather than an explicit column list, as
+      // used everywhere else in this codebase for exactly this reason --
+      // see this file's header comment) made postgrest-js's type generic
+      // resolve to an Error-sentinel type once combined with
+      // `.single().returns<T>()`, confirmed while fixing the
+      // screening_result cardinality bug above -- explicit columns restore
+      // normal inference.
+      `id, job_id, candidate_id, resume_id, cover_letter_id, status, status_reason, applied_at, updated_at,
       job:jobs(*, company:companies(*)),
       candidate:candidates(*, profile:profiles(*)),
       resume:resumes(*),
       screening_result:screening_results(*)`
     )
     .eq("id", applicationId)
-    .single();
+    .single()
+    .returns<ApplicationDetailRow>();
 
   if (error || !app) {
     if (error) console.error("getApplicationDetail failed", error);

@@ -2,10 +2,12 @@
 
 import { revalidateCandidatePath } from "@/lib/revalidate-candidate-path";
 import { revalidateRecruiterPath } from "@/lib/revalidate-recruiter-path";
+import { generateCandidateInsight as generateCandidateInsightAI } from "@/lib/ai/candidate-insights";
 import { runAIScreening } from "@/lib/ai/screening";
+import { getApplicationDetail } from "@/lib/queries/applications";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import type { ApplicationStatus, Job, ParsedResumeData } from "@/types/database";
+import type { ApplicationStatus, Job, ParsedResumeData, ScreeningResult } from "@/types/database";
 import type { ActionResult } from "./auth";
 
 export interface ApplyResult extends ActionResult {
@@ -178,4 +180,61 @@ export async function updateApplicationStatus(applicationId: string, status: App
 
   revalidateRecruiterPath("", "layout");
   return { success: true };
+}
+
+export interface GenerateInsightResult extends ActionResult {
+  insight?: Pick<
+    ScreeningResult,
+    "risks" | "red_flags" | "hiring_confidence_score" | "suggested_interview_focus" | "suggested_questions" | "insight_generated_at"
+  >;
+}
+
+/**
+ * Generates the AI Insight panel's additive fields (Recruiter Intelligence
+ * v2.0, Phase 2) for a specific application, on demand -- not run
+ * automatically alongside the initial screening pass, since interview prep
+ * is only useful once a recruiter is actually about to review/interview this
+ * candidate. Persists into the same screening_results row rather than a new
+ * table (see migration 0022).
+ */
+export async function generateCandidateInsight(applicationId: string): Promise<GenerateInsightResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: "You must be signed in." };
+
+  const { data: recruiter } = await supabase.from("recruiters").select("id").eq("id", user.id).maybeSingle();
+  if (!recruiter) return { success: false, error: "Only recruiters can generate candidate insights." };
+
+  const app = await getApplicationDetail(applicationId);
+  if (!app || !app.resume?.parsed_data) {
+    return { success: false, error: "Application or parsed resume data not found." };
+  }
+  const screeningResult = app.screening_result;
+  if (!screeningResult) {
+    return { success: false, error: "AI screening hasn't finished for this application yet. Please try again shortly." };
+  }
+
+  const result = await generateCandidateInsightAI(
+    app.job as unknown as Job,
+    app.resume.parsed_data as ParsedResumeData,
+    app.candidate?.years_of_experience ?? 0,
+    screeningResult.ai_summary
+  );
+
+  const insightUpdate = {
+    risks: result.risks,
+    red_flags: result.red_flags,
+    hiring_confidence_score: Math.round(result.hiring_confidence_score),
+    suggested_interview_focus: result.suggested_interview_focus,
+    suggested_questions: result.suggested_questions,
+    insight_generated_at: new Date().toISOString(),
+  };
+
+  const { error } = await supabase.from("screening_results").update(insightUpdate).eq("application_id", applicationId);
+  if (error) return { success: false, error: error.message };
+
+  revalidateRecruiterPath(`/applications/${applicationId}`);
+  return { success: true, insight: insightUpdate };
 }

@@ -55,7 +55,7 @@ export function ApplicationKanbanBoard({ applications }: { applications: Applica
                 </p>
               )}
               {items.map((app) => {
-                const screening = app.screening_result?.[0];
+                const screening = app.screening_result;
                 const match = app.job_match?.[0];
                 const ats = app.ats_score?.[0];
                 const candidateProfile = app.candidate?.profile;

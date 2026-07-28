@@ -371,6 +371,13 @@ export interface ScreeningResult {
   rank_position: number | null;
   ai_model: string | null;
   created_at: string;
+  /** AI Candidate Insight (Recruiter Intelligence v2.0, Phase 2) -- migration 0022. Null until generated on demand. */
+  risks: string[] | null;
+  red_flags: string[] | null;
+  hiring_confidence_score: number | null;
+  suggested_interview_focus: string | null;
+  suggested_questions: string[] | null;
+  insight_generated_at: string | null;
 }
 
 export interface StarEvaluation {

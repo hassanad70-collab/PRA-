@@ -71,7 +71,7 @@ export function ApplicantsPanel({ applications }: { applications: ApplicationRow
             </Card>
           )}
           {applications.map((app, index) => {
-            const screening = app.screening_result?.[0];
+            const screening = app.screening_result;
             const match = app.job_match?.[0];
             const ats = app.ats_score?.[0];
             const candidateProfile = app.candidate?.profile;
