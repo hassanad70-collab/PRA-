@@ -1,8 +1,7 @@
-import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
-import { CheckCircle2, Sparkles, XCircle } from "lucide-react";
+import { notFound } from "next/navigation";
 
-import { getRedirectLocale } from "@/i18n/get-redirect-locale";
+import { Link, redirect } from "@/i18n/navigation";
+import { CheckCircle2, Sparkles, XCircle } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,13 +13,13 @@ import { getJobById, getRecruiterContext } from "@/lib/queries/jobs";
 import { getRecommendedCandidatesForJob } from "@/lib/queries/matching";
 import { initials } from "@/lib/utils";
 
-export default async function JobCandidatesPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function JobCandidatesPage({ params }: { params: Promise<{ id: string; locale: string }> }) {
+  const { id, locale } = await params;
   const user = await getCurrentUser();
-  if (!user) redirect("/login");
+  if (!user) redirect({ href: "/login", locale });
 
   const recruiter = await getRecruiterContext(user.id);
-  if (!recruiter) redirect(`/${await getRedirectLocale()}/candidate/dashboard`);
+  if (!recruiter) redirect({ href: "/candidate/dashboard", locale });
 
   const job = await getJobById(id);
   if (!job || job.company_id !== recruiter.company_id) notFound();

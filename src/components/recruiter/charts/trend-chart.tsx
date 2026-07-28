@@ -2,9 +2,9 @@
 
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
-export function TrendChart({ data }: { data: { month: string; applications: number }[] }) {
+export function TrendChart({ data, noDataLabel }: { data: { month: string; applications: number }[]; noDataLabel: string }) {
   if (!data.length) {
-    return <p className="flex h-64 items-center justify-center text-sm text-muted-foreground">No application data yet.</p>;
+    return <p className="flex h-64 items-center justify-center text-sm text-muted-foreground">{noDataLabel}</p>;
   }
 
   return (

@@ -10,14 +10,13 @@ const STAFF_ROLES: UserRole[] = ["recruiter", "hr_manager", "super_admin"];
 // system settings) is super_admin only. hr_manager's "limited administration"
 // is the existing /recruiter/* surface, already scoped to their own company.
 
-// /recruiter and /admin are deliberately kept outside the [locale] tree, so
-// these targets have no locale segment to preserve. /candidate moved inside
-// [locale] as of the Candidate Portal Internationalization unit -- its home
-// is resolved dynamically by roleHome() below instead of being a fixed
-// string here, since it needs the caller's locale threaded in.
-const ROLE_HOME: Record<Exclude<UserRole, "candidate">, string> = {
-  recruiter: "/recruiter/dashboard",
-  hr_manager: "/recruiter/dashboard",
+// Only /admin is deliberately kept outside the [locale] tree, so it's the
+// only target here with no locale segment to preserve. /candidate (Candidate
+// Portal Internationalization unit) and /recruiter (Recruiter Intelligence
+// v2.0's i18n prerequisite) both moved inside [locale] -- their homes are
+// resolved dynamically by roleHome() below instead of being fixed strings
+// here, since they need the caller's locale threaded in.
+const ROLE_HOME: Record<"super_admin", string> = {
   super_admin: "/admin",
 };
 
@@ -32,6 +31,7 @@ function resolveRedirectLocale(request: NextRequest): string {
 
 function roleHome(role: UserRole, request: NextRequest): string {
   if (role === "candidate") return `/${resolveRedirectLocale(request)}/candidate/dashboard`;
+  if (role === "recruiter" || role === "hr_manager") return `/${resolveRedirectLocale(request)}/recruiter/dashboard`;
   return ROLE_HOME[role];
 }
 
@@ -63,19 +63,21 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  // Login/register/forgot-password and (as of the Candidate Portal
-  // Internationalization unit) /candidate now live under the locale-prefixed
-  // [locale] tree ("/en/login", "/ar/candidate/dashboard"), unlike /recruiter
-  // and /admin, which are deliberately kept unprefixed. Strip a leading
+  // Login/register/forgot-password, /candidate (Candidate Portal
+  // Internationalization unit), and /recruiter (Recruiter Intelligence v2.0's
+  // i18n prerequisite) all live under the locale-prefixed [locale] tree
+  // ("/en/login", "/ar/candidate/dashboard", "/en/recruiter/dashboard"),
+  // unlike /admin, which is deliberately kept unprefixed. Strip a leading
   // "/en"/"/ar" segment before comparing so these checks keep working
   // regardless of which locale the user is on -- and so a bare, unprefixed
-  // legacy "/candidate/..." request (no locale match) is still correctly
-  // recognized as a candidate route, not silently left unprotected.
+  // legacy "/candidate/..." or "/recruiter/..." request (no locale match) is
+  // still correctly recognized as a protected route, not silently left
+  // unprotected.
   const localeMatch = pathname.match(/^\/(en|ar)(\/.*)?$/);
   const pathWithoutLocale = localeMatch ? (localeMatch[2] ?? "/") : pathname;
 
   const isCandidateRoute = pathWithoutLocale.startsWith("/candidate");
-  const isRecruiterRoute = pathname.startsWith("/recruiter");
+  const isRecruiterRoute = pathWithoutLocale.startsWith("/recruiter");
   const isAdminRoute = pathname.startsWith("/admin");
   const isProtectedRoute = isCandidateRoute || isRecruiterRoute || isAdminRoute;
 

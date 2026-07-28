@@ -728,5 +728,134 @@
     "RadioGroupResumes": {
       "primary": "Primary"
     }
+  },
+  "Recruiter": {
+    "Nav": {
+      "dashboard": "Dashboard",
+      "jobs": "Jobs",
+      "interviews": "Interviews",
+      "talentPool": "Talent Pool",
+      "settings": "Settings",
+      "signOut": "Sign out",
+      "openMenu": "Open menu"
+    },
+    "Dashboard": {
+      "title": "Hiring Command Center",
+      "subtitle": "{company} · Recruitment overview",
+      "kpiOpenJobs": "Open jobs",
+      "kpiActiveCandidates": "Active candidates",
+      "kpiInterviewsScheduled": "Interviews scheduled",
+      "kpiOffersPending": "Offers pending",
+      "kpiHiresThisMonth": "Hires this month",
+      "kpiTimeToHire": "Time to hire",
+      "kpiTimeToHireValue": "{days} days",
+      "kpiHiringVelocity": "Hiring velocity",
+      "kpiHiringVelocityValue": "{count} hires / 30 days",
+      "kpiOfferAcceptanceRate": "Offer acceptance rate",
+      "chartApplicationsOverTime": "Applications over time",
+      "chartHiringFunnel": "Hiring funnel",
+      "chartTopSkills": "Top candidate skills",
+      "chartDepartmentBreakdown": "Department breakdown",
+      "noApplicationData": "No application data yet.",
+      "noFunnelData": "No applications yet.",
+      "noSkillData": "No candidate skill data yet.",
+      "noDepartmentData": "No jobs yet.",
+      "unspecifiedDepartment": "Unspecified",
+      "recruiterWorkloadTitle": "Recruiter workload",
+      "workloadRecruiter": "Recruiter",
+      "workloadOpenJobs": "Open jobs",
+      "workloadActiveApplications": "Active applications",
+      "workloadUnassigned": "Unassigned",
+      "workloadEmpty": "No published jobs yet.",
+      "upcomingInterviewsTitle": "Upcoming interviews",
+      "upcomingInterviewsEmpty": "No upcoming interviews.",
+      "recentHiresTitle": "Recently hired",
+      "recentHiresEmpty": "No hires yet.",
+      "quickActionsTitle": "Quick actions",
+      "quickActionPostJob": "Post a job",
+      "quickActionViewCandidates": "View candidates",
+      "quickActionInterviews": "Interviews",
+      "quickActionInviteTeammate": "Invite teammate"
+    },
+    "Shared": {
+      "jobStatus": {
+        "draft": "Draft",
+        "published": "Published",
+        "closed": "Closed",
+        "archived": "Archived"
+      },
+      "interviewStatus": {
+        "scheduled": "Scheduled",
+        "completed": "Completed",
+        "cancelled": "Cancelled",
+        "no_show": "No show",
+        "rescheduled": "Rescheduled"
+      },
+      "candidateFallback": "Candidate",
+      "minutesShort": "{count} min",
+      "applicationStatus": {
+        "submitted": "Submitted",
+        "screening": "Screening",
+        "shortlisted": "Shortlisted",
+        "interview": "Interview",
+        "offer": "Offer",
+        "hired": "Hired",
+        "rejected": "Rejected",
+        "withdrawn": "Withdrawn",
+        "archived": "Archived"
+      }
+    },
+    "Jobs": {
+      "title": "Jobs",
+      "subtitle": "Manage every job posting for {company}.",
+      "newJob": "New job",
+      "noJobsYet": "No jobs yet. Create your first job posting to start hiring.",
+      "generalDepartment": "General",
+      "remoteLocation": "Remote"
+    },
+    "JobForm": {
+      "newJobTitle": "Create a new job",
+      "newJobSubtitle": "Jobs are saved as drafts. Publish when you're ready to start receiving applications."
+    },
+    "JobDetail": {
+      "applicationsAndViews": "{applications} applications · {views} views",
+      "viewCandidates": "View candidates",
+      "editJobTab": "Edit job",
+      "interviewQuestionsTab": "Interview Questions"
+    },
+    "Interviews": {
+      "title": "Interviews",
+      "subtitle": "Every interview scheduled across your company's open roles.",
+      "upcoming": "Upcoming ({count})",
+      "past": "Past ({count})",
+      "noUpcoming": "No upcoming interviews.",
+      "noPast": "No past interviews yet."
+    },
+    "TalentPool": {
+      "title": "Talent Pool",
+      "subtitle": "Candidates you've saved for future roles at {company}.",
+      "emptyState": "Your talent pool is empty. Save strong candidates from job applications to build your pipeline for future roles."
+    },
+    "Settings": {
+      "title": "Settings",
+      "subtitle": "Your account and company details.",
+      "accountTitle": "Account",
+      "fullName": "Full name",
+      "email": "Email",
+      "jobTitle": "Job title",
+      "role": "Role",
+      "companyTitle": "Company",
+      "companyName": "Company name",
+      "industry": "Industry",
+      "teamTitle": "Team",
+      "teamSubtitle": "Invite teammates and manage member roles.",
+      "manageTeam": "Manage team"
+    },
+    "Team": {
+      "title": "Team",
+      "subtitle": "Manage who has access to {company}.",
+      "membersTitle": "Members ({count})",
+      "pendingInvitesTitle": "Pending invites ({count})"
+    }
   }
 }

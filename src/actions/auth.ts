@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { getRedirectLocale } from "@/i18n/get-redirect-locale";
 import { defaultLocale, locales } from "@/i18n/routing";
 import { trackEvent } from "@/lib/analytics/track";
 import { readGuestSessionId } from "@/lib/guest/session";
@@ -163,7 +164,7 @@ export async function registerRecruiter(formData: FormData): Promise<ActionResul
   }
 
   revalidatePath("/", "layout");
-  redirect("/recruiter/dashboard");
+  redirect(`/${await getRedirectLocale()}/recruiter/dashboard`);
 }
 
 export async function login(formData: FormData): Promise<ActionResult> {
@@ -226,7 +227,7 @@ export async function login(formData: FormData): Promise<ActionResult> {
 
   const roleHome =
     profile?.role === "recruiter" || profile?.role === "hr_manager"
-      ? "/recruiter/dashboard"
+      ? `/${locale}/recruiter/dashboard`
       : profile?.role === "super_admin"
       ? "/admin"
       : `/${locale}/candidate/dashboard`;

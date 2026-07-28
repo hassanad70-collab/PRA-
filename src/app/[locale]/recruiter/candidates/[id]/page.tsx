@@ -1,7 +1,7 @@
-import { notFound, redirect } from "next/navigation";
-import { FileText } from "lucide-react";
+import { notFound } from "next/navigation";
 
-import { getRedirectLocale } from "@/i18n/get-redirect-locale";
+import { redirect } from "@/i18n/navigation";
+import { FileText } from "lucide-react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -19,13 +19,13 @@ import { formatDate, initials } from "@/lib/utils";
  * this company's jobs), which we treat as notFound() rather than rendering
  * an empty page.
  */
-export default async function RecruiterCandidateDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function RecruiterCandidateDetailPage({ params }: { params: Promise<{ id: string; locale: string }> }) {
+  const { id, locale } = await params;
   const user = await getCurrentUser();
-  if (!user) redirect("/login");
+  if (!user) redirect({ href: "/login", locale });
 
   const recruiter = await getRecruiterContext(user.id);
-  if (!recruiter) redirect(`/${await getRedirectLocale()}/candidate/dashboard`);
+  if (!recruiter) redirect({ href: "/candidate/dashboard", locale });
 
   const { candidate, profile, experience, education, skills, resumes } = await getCandidateFullProfile(id);
   if (!candidate || !profile) notFound();

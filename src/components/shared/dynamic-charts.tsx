@@ -34,3 +34,8 @@ export const TrendChart = dynamic(
   () => import("@/components/recruiter/charts/trend-chart").then((m) => m.TrendChart),
   { ssr: false, loading: () => <ChartSkeleton /> }
 );
+
+export const DepartmentChart = dynamic(
+  () => import("@/components/recruiter/charts/department-chart").then((m) => m.DepartmentChart),
+  { ssr: false, loading: () => <ChartSkeleton /> }
+);

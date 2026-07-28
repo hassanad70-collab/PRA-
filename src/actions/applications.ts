@@ -1,8 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-
 import { revalidateCandidatePath } from "@/lib/revalidate-candidate-path";
+import { revalidateRecruiterPath } from "@/lib/revalidate-recruiter-path";
 import { runAIScreening } from "@/lib/ai/screening";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -76,7 +75,7 @@ export async function applyToJob(jobId: string, resumeId: string, coverLetterTex
   runScreeningPipeline(application.id, job as Job, resumeId, user.id).catch(() => {});
 
   revalidateCandidatePath("/candidate/applications");
-  revalidatePath(`/recruiter/jobs/${jobId}/candidates`);
+  revalidateRecruiterPath(`/jobs/${jobId}/candidates`);
 
   return { success: true, applicationId: application.id };
 }
@@ -177,6 +176,6 @@ export async function updateApplicationStatus(applicationId: string, status: App
   if (error) return { success: false, error: error.message };
   if (!updated) return { success: false, error: "You don't have permission to update this application." };
 
-  revalidatePath("/recruiter", "layout");
+  revalidateRecruiterPath("", "layout");
   return { success: true };
 }

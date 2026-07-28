@@ -1,8 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-
 import { revalidateCandidatePath } from "@/lib/revalidate-candidate-path";
+import { revalidateRecruiterPath } from "@/lib/revalidate-recruiter-path";
 import { generateInterviewQuestions } from "@/lib/ai/interview-questions";
 import { createClient } from "@/lib/supabase/server";
 import { interviewFeedbackSchema, scheduleInterviewSchema } from "@/lib/validations/interview";
@@ -60,7 +59,7 @@ export async function generateInterviewQuestionsForJob(jobId: string): Promise<A
     if (insertError) return { success: false, error: insertError.message };
   }
 
-  revalidatePath(`/recruiter/jobs/${jobId}`);
+  revalidateRecruiterPath(`/jobs/${jobId}`);
   return { success: true };
 }
 
@@ -94,8 +93,8 @@ export async function scheduleInterview(applicationId: string, jobId: string, fo
   // Advance the pipeline stage, but don't clobber a later stage (offer/hired/rejected).
   await ctx.supabase.from("applications").update({ status: "interview" }).eq("id", applicationId).in("status", ADVANCEABLE_STATUSES);
 
-  revalidatePath(`/recruiter/applications/${applicationId}`);
-  revalidatePath(`/recruiter/jobs/${jobId}/candidates`);
+  revalidateRecruiterPath(`/applications/${applicationId}`);
+  revalidateRecruiterPath(`/jobs/${jobId}/candidates`);
   revalidateCandidatePath("/candidate/applications");
   return { success: true };
 }
@@ -107,7 +106,7 @@ export async function updateInterviewStatus(interviewId: string, applicationId: 
   const { error } = await ctx.supabase.from("interviews").update({ status }).eq("id", interviewId);
   if (error) return { success: false, error: error.message };
 
-  revalidatePath(`/recruiter/applications/${applicationId}`);
+  revalidateRecruiterPath(`/applications/${applicationId}`);
   revalidateCandidatePath("/candidate/applications");
   return { success: true };
 }
@@ -151,6 +150,6 @@ export async function submitInterviewFeedback(
 
   if (error) return { success: false, error: error.message };
 
-  revalidatePath(`/recruiter/applications/${applicationId}`);
+  revalidateRecruiterPath(`/applications/${applicationId}`);
   return { success: true };
 }

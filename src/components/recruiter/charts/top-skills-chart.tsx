@@ -2,9 +2,9 @@
 
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
-export function TopSkillsChart({ data }: { data: { name: string; count: number }[] }) {
+export function TopSkillsChart({ data, noDataLabel }: { data: { name: string; count: number }[]; noDataLabel: string }) {
   if (!data.length) {
-    return <p className="flex h-64 items-center justify-center text-sm text-muted-foreground">No candidate skill data yet.</p>;
+    return <p className="flex h-64 items-center justify-center text-sm text-muted-foreground">{noDataLabel}</p>;
   }
 
   return (

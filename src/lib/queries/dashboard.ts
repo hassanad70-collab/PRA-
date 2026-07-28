@@ -1,6 +1,14 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
+import type { RecruiterInterviewListItem } from "@/lib/queries/interviews";
+
+export interface RecruiterWorkloadRow {
+  recruiter_id: string;
+  recruiter_name: string | null;
+  open_jobs: number;
+  active_applications: number;
+}
 
 export interface CompanyDashboardStats {
   total_jobs: number;
@@ -12,6 +20,14 @@ export interface CompanyDashboardStats {
   average_ats_score: number | null;
   hiring_funnel: Record<string, number>;
   offer_acceptance_rate: number;
+  /** Recruiter Intelligence v2.0 (Phase 1) additions -- see migration 0021. */
+  offers_pending: number;
+  interviews_scheduled: number;
+  hires_this_month: number;
+  hires_last_30_days: number;
+  avg_time_to_hire_days: number | null;
+  department_breakdown: Record<string, number>;
+  recruiter_workload: RecruiterWorkloadRow[];
 }
 
 export async function getCompanyDashboardStats(companyId: string): Promise<CompanyDashboardStats | null> {
@@ -60,6 +76,65 @@ export async function getTopSkills(companyId: string, limit = 8) {
     .sort((a, b) => b[1] - a[1])
     .slice(0, limit)
     .map(([name, count]) => ({ name, count }));
+}
+
+/** Next N scheduled interviews across the company, soonest first -- reuses the same embed shape as getInterviewsForCompany (Unit H). */
+export async function getUpcomingInterviews(companyId: string, limit = 5) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("interviews")
+    .select(
+      `id, scheduled_at, duration_minutes, interview_type, location_or_link, status, application_id,
+      application:applications!inner(
+        job:jobs!inner(id, title, company_id),
+        candidate:candidates(profile:profiles(full_name))
+      )`
+    )
+    .eq("application.job.company_id", companyId)
+    .eq("status", "scheduled")
+    .gte("scheduled_at", new Date().toISOString())
+    .order("scheduled_at", { ascending: true })
+    .limit(limit)
+    .returns<RecruiterInterviewListItem[]>();
+
+  if (error) {
+    console.error("getUpcomingInterviews failed", error);
+    return [];
+  }
+  return data ?? [];
+}
+
+export interface RecentHireItem {
+  id: string;
+  updated_at: string;
+  job: { id: string; title: string } | null;
+  candidate: { profile: { full_name: string } | null } | null;
+}
+
+/** Most recently hired candidates across the company. `updated_at` doubles as
+ * the hire timestamp here -- applications have no dedicated hired_at column,
+ * and updated_at is bumped on every status change including the transition
+ * to 'hired', so it's an accurate proxy for "most recently hired" ordering. */
+export async function getRecentHires(companyId: string, limit = 5) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("applications")
+    .select(
+      `id, updated_at,
+      job:jobs!inner(id, title, company_id),
+      candidate:candidates(profile:profiles(full_name))`
+    )
+    .eq("job.company_id", companyId)
+    .eq("status", "hired")
+    .order("updated_at", { ascending: false })
+    .limit(limit)
+    .returns<RecentHireItem[]>();
+
+  if (error) {
+    console.error("getRecentHires failed", error);
+    return [];
+  }
+  return data ?? [];
 }
 
 export async function getMonthlyApplicationTrend(companyId: string, months = 6) {

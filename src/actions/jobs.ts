@@ -1,9 +1,10 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { getRedirectLocale } from "@/i18n/get-redirect-locale";
 import { revalidateCandidatePath } from "@/lib/revalidate-candidate-path";
+import { revalidateRecruiterPath } from "@/lib/revalidate-recruiter-path";
 import { generateEmbedding, toVectorLiteral } from "@/lib/ai/embeddings";
 import { generateJobDescriptionDraft, type JobDraft } from "@/lib/ai/job-description-writer";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -135,7 +136,7 @@ export async function createJob(formData: FormData): Promise<JobActionResult> {
 
   if (error || !job) return { success: false, error: error?.message ?? "Failed to create job." };
 
-  revalidatePath("/recruiter/jobs");
+  revalidateRecruiterPath("/jobs");
   return { success: true, jobId: job.id };
 }
 
@@ -192,8 +193,8 @@ export async function updateJob(jobId: string, formData: FormData): Promise<JobA
 
   if (error) return { success: false, error: error.message };
 
-  revalidatePath(`/recruiter/jobs/${jobId}`);
-  revalidatePath("/recruiter/jobs");
+  revalidateRecruiterPath(`/jobs/${jobId}`);
+  revalidateRecruiterPath("/jobs");
   return { success: true, jobId };
 }
 
@@ -234,7 +235,7 @@ export async function publishJob(jobId: string): Promise<ActionResult> {
 
   if (error) return { success: false, error: error.message };
 
-  revalidatePath("/recruiter/jobs");
+  revalidateRecruiterPath("/jobs");
   revalidateCandidatePath("/candidate/jobs");
 
   generateMatchesForJob(jobId).catch(() => {});
@@ -253,7 +254,7 @@ export async function closeJob(jobId: string): Promise<ActionResult> {
     .eq("company_id", ctx.companyId);
 
   if (error) return { success: false, error: error.message };
-  revalidatePath("/recruiter/jobs");
+  revalidateRecruiterPath("/jobs");
   return { success: true };
 }
 
@@ -268,7 +269,7 @@ export async function archiveJob(jobId: string): Promise<ActionResult> {
     .eq("company_id", ctx.companyId);
 
   if (error) return { success: false, error: error.message };
-  revalidatePath("/recruiter/jobs");
+  revalidateRecruiterPath("/jobs");
   return { success: true };
 }
 
@@ -318,13 +319,13 @@ export async function duplicateJob(jobId: string): Promise<JobActionResult> {
 
   if (error || !job) return { success: false, error: error?.message ?? "Failed to duplicate job." };
 
-  revalidatePath("/recruiter/jobs");
+  revalidateRecruiterPath("/jobs");
   return { success: true, jobId: job.id };
 }
 
 export async function createJobAndRedirect(formData: FormData) {
   const result = await createJob(formData);
   if (result.success && result.jobId) {
-    redirect(`/recruiter/jobs/${result.jobId}`);
+    redirect(`/${await getRedirectLocale()}/recruiter/jobs/${result.jobId}`);
   }
 }

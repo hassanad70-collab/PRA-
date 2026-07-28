@@ -1,8 +1,7 @@
-import Link from "next/link";
-import { redirect } from "next/navigation";
-import { Plus, Users } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
-import { getRedirectLocale } from "@/i18n/get-redirect-locale";
+import { Link, redirect } from "@/i18n/navigation";
+import { Plus, Users } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,25 +18,30 @@ const STATUS_VARIANT: Record<JobStatus, "default" | "secondary" | "success" | "w
   archived: "outline",
 };
 
-export default async function RecruiterJobsPage() {
+export default async function RecruiterJobsPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
   const user = await getCurrentUser();
-  if (!user) redirect("/login");
+  if (!user) redirect({ href: "/login", locale });
 
   const recruiter = await getRecruiterContext(user.id);
-  if (!recruiter) redirect(`/${await getRedirectLocale()}/candidate/dashboard`);
+  if (!recruiter) redirect({ href: "/candidate/dashboard", locale });
 
   const jobs = await getRecruiterJobs(recruiter.company_id);
+  const [t, tShared] = await Promise.all([
+    getTranslations("Recruiter.Jobs"),
+    getTranslations("Recruiter.Shared"),
+  ]);
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Jobs</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Manage every job posting for {recruiter.company?.name}.</p>
+          <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{t("subtitle", { company: recruiter.company?.name ?? "" })}</p>
         </div>
         <Button variant="gradient" asChild>
           <Link href="/recruiter/jobs/new">
-            <Plus className="h-4 w-4" /> New job
+            <Plus className="h-4 w-4" /> {t("newJob")}
           </Link>
         </Button>
       </div>
@@ -45,9 +49,7 @@ export default async function RecruiterJobsPage() {
       <div className="space-y-3">
         {jobs.length === 0 && (
           <Card>
-            <CardContent className="py-16 text-center text-sm text-muted-foreground">
-              No jobs yet. Create your first job posting to start hiring.
-            </CardContent>
+            <CardContent className="py-16 text-center text-sm text-muted-foreground">{t("noJobsYet")}</CardContent>
           </Card>
         )}
         {jobs.map((job) => (
@@ -57,11 +59,11 @@ export default async function RecruiterJobsPage() {
                 <div className="flex items-center gap-2">
                   <h3 className="font-semibold">{job.title}</h3>
                   <Badge variant={STATUS_VARIANT[job.status as JobStatus]} className="capitalize">
-                    {job.status}
+                    {tShared(`jobStatus.${job.status as JobStatus}`)}
                   </Badge>
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {job.department ?? "General"} · {job.location ?? "Remote"}
+                  {job.department ?? t("generalDepartment")} · {job.location ?? t("remoteLocation")}
                 </p>
               </Link>
               <Link

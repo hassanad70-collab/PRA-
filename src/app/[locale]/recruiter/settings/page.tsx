@@ -1,8 +1,7 @@
-import Link from "next/link";
-import { redirect } from "next/navigation";
-import { Users } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
-import { getRedirectLocale } from "@/i18n/get-redirect-locale";
+import { Link, redirect } from "@/i18n/navigation";
+import { Users } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,39 +11,42 @@ import { Label } from "@/components/ui/label";
 import { getCurrentUser } from "@/lib/queries/candidate";
 import { getRecruiterContext } from "@/lib/queries/jobs";
 
-export default async function RecruiterSettingsPage() {
+export default async function RecruiterSettingsPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
   const user = await getCurrentUser();
-  if (!user) redirect("/login");
+  if (!user) redirect({ href: "/login", locale });
 
   const recruiter = await getRecruiterContext(user.id);
-  if (!recruiter) redirect(`/${await getRedirectLocale()}/candidate/dashboard`);
+  if (!recruiter) redirect({ href: "/candidate/dashboard", locale });
+
+  const t = await getTranslations("Recruiter.Settings");
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Your account and company details.</p>
+        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Account</CardTitle>
+          <CardTitle className="text-base">{t("accountTitle")}</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label>Full name</Label>
+            <Label>{t("fullName")}</Label>
             <Input defaultValue={user.full_name} disabled />
           </div>
           <div className="space-y-2">
-            <Label>Email</Label>
+            <Label>{t("email")}</Label>
             <Input defaultValue={user.email} disabled />
           </div>
           <div className="space-y-2">
-            <Label>Job title</Label>
+            <Label>{t("jobTitle")}</Label>
             <Input defaultValue={recruiter.job_title ?? ""} disabled />
           </div>
           <div className="space-y-2">
-            <Label>Role</Label>
+            <Label>{t("role")}</Label>
             <div>
               <Badge variant="outline" className="capitalize">
                 {recruiter.role}
@@ -56,15 +58,15 @@ export default async function RecruiterSettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Company</CardTitle>
+          <CardTitle className="text-base">{t("companyTitle")}</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label>Company name</Label>
+            <Label>{t("companyName")}</Label>
             <Input defaultValue={recruiter.company?.name ?? ""} disabled />
           </div>
           <div className="space-y-2">
-            <Label>Industry</Label>
+            <Label>{t("industry")}</Label>
             <Input defaultValue={recruiter.company?.industry ?? ""} disabled />
           </div>
         </CardContent>
@@ -73,12 +75,12 @@ export default async function RecruiterSettingsPage() {
       <Card>
         <CardContent className="flex items-center justify-between gap-4 pt-6">
           <div>
-            <p className="font-medium">Team</p>
-            <p className="text-sm text-muted-foreground">Invite teammates and manage member roles.</p>
+            <p className="font-medium">{t("teamTitle")}</p>
+            <p className="text-sm text-muted-foreground">{t("teamSubtitle")}</p>
           </div>
           <Button variant="outline" asChild>
             <Link href="/recruiter/settings/team">
-              <Users className="h-4 w-4" /> Manage team
+              <Users className="h-4 w-4" /> {t("manageTeam")}
             </Link>
           </Button>
         </CardContent>

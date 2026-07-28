@@ -1,8 +1,9 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { getRedirectLocale } from "@/i18n/get-redirect-locale";
+import { revalidateRecruiterPath } from "@/lib/revalidate-recruiter-path";
 import { rateLimitByIp } from "@/lib/rate-limit";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -77,7 +78,7 @@ export async function createInvite(formData: FormData): Promise<CreateInviteResu
     return { success: false, error: error.message };
   }
 
-  revalidatePath("/recruiter/settings/team");
+  revalidateRecruiterPath("/settings/team");
   return { success: true, inviteUrl: `${getSiteUrl()}/invite/${invite.token}` };
 }
 
@@ -92,7 +93,7 @@ export async function revokeInvite(inviteId: string): Promise<ActionResult> {
     .eq("company_id", ctx.companyId);
   if (error) return { success: false, error: error.message };
 
-  revalidatePath("/recruiter/settings/team");
+  revalidateRecruiterPath("/settings/team");
   return { success: true };
 }
 
@@ -158,7 +159,7 @@ export async function acceptInvite(token: string, formData: FormData): Promise<A
     return { success: false, error: "Account created, but automatic sign-in failed. Please sign in manually." };
   }
 
-  redirect("/recruiter/dashboard");
+  redirect(`/${await getRedirectLocale()}/recruiter/dashboard`);
 }
 
 export async function changeMemberRole(recruiterId: string, newRole: RecruiterRole): Promise<ActionResult> {
@@ -177,7 +178,7 @@ export async function changeMemberRole(recruiterId: string, newRole: RecruiterRo
   const { error } = await admin.from("recruiters").update({ role: newRole }).eq("id", recruiterId);
   if (error) return { success: false, error: error.message };
 
-  revalidatePath("/recruiter/settings/team");
+  revalidateRecruiterPath("/settings/team");
   return { success: true };
 }
 
@@ -204,7 +205,7 @@ export async function removeMember(recruiterId: string): Promise<ActionResult> {
   // page that assumes data which no longer exists for them.
   await admin.from("candidates").upsert({ id: recruiterId }, { onConflict: "id" });
 
-  revalidatePath("/recruiter/settings/team");
+  revalidateRecruiterPath("/settings/team");
   return { success: true };
 }
 
@@ -229,7 +230,7 @@ export async function initiateOwnershipTransfer(newOwnerRecruiterId: string | nu
   const { error } = await supabase.from("companies").update({ pending_owner_id: newOwnerRecruiterId }).eq("id", recruiter.company_id);
   if (error) return { success: false, error: error.message };
 
-  revalidatePath("/recruiter/settings/team");
+  revalidateRecruiterPath("/settings/team");
   return { success: true };
 }
 
@@ -266,6 +267,6 @@ export async function acceptOwnershipTransfer(): Promise<ActionResult> {
   await admin.from("recruiters").update({ role: "owner" }).eq("id", user.id);
   await admin.from("companies").update({ pending_owner_id: null }).eq("id", recruiter.company_id);
 
-  revalidatePath("/recruiter/settings/team");
+  revalidateRecruiterPath("/settings/team");
   return { success: true };
 }

@@ -6,27 +6,27 @@ import { updateSession } from "@/lib/supabase/middleware";
 
 const intlMiddleware = createIntlMiddleware(routing);
 
-// Routes deliberately kept outside the [locale] tree (see src/i18n/routing.ts
-// and Phase 1D's approved scope): the recruiter/admin dashboards, the OAuth
-// callback route handler, API routes, and the invite-accept flow (added in
-// migration 0019 -- a recruiter-team-only page, styled like the English-only
-// dashboards, not the public marketing/auth surface) never get locale-prefixed
-// or redirected. /candidate is deliberately NOT in this list as of the
-// Candidate Portal Internationalization unit -- it now lives inside [locale]
-// like every public page. Leaving it out of this list is exactly what makes
-// a bare, unprefixed "/candidate/..." request (an old bookmark, a link in an
-// old email, a stale internal reference) fall through to intlMiddleware
-// below, which redirects it to add the missing locale prefix.
+// Routes deliberately kept outside the [locale] tree: the admin dashboard,
+// the OAuth callback route handler, API routes, and the invite-accept flow
+// (added in migration 0019 -- a recruiter-team-only page, styled like the
+// English-only admin dashboard, not the public marketing/auth surface) never
+// get locale-prefixed or redirected. Neither /candidate (Candidate Portal
+// Internationalization unit) nor /recruiter (Recruiter Intelligence v2.0's
+// i18n prerequisite) are in this list anymore -- both now live inside
+// [locale] like every public page. Leaving a route out of this list is
+// exactly what makes a bare, unprefixed request to it (an old bookmark, a
+// link in an old email, a stale internal reference) fall through to
+// intlMiddleware below, which redirects it to add the missing locale prefix.
 //
 // TODO(tech-debt): this bare->locale-prefixed redirect is a temporary
-// backward-compatibility layer for legacy candidate URLs only. No internal
-// code should ever generate an unprefixed "/candidate/..." link/redirect
-// going forward -- every internal reference uses the locale-aware Link/
-// redirect from "@/i18n/navigation" instead. Remove this reliance once
-// legacy traffic (old bookmarks/emails/external docs/any remaining
-// hardcoded test URLs) has fully aged out and nothing depends on the bare
-// form resolving anymore.
-const EXCLUDED_PREFIXES = ["/admin", "/recruiter", "/auth", "/api", "/invite"];
+// backward-compatibility layer for legacy candidate/recruiter URLs only. No
+// internal code should ever generate an unprefixed "/candidate/..." or
+// "/recruiter/..." link/redirect going forward -- every internal reference
+// uses the locale-aware Link/redirect from "@/i18n/navigation" instead.
+// Remove this reliance once legacy traffic (old bookmarks/emails/external
+// docs/any remaining hardcoded test URLs) has fully aged out and nothing
+// depends on the bare form resolving anymore.
+const EXCLUDED_PREFIXES = ["/admin", "/auth", "/api", "/invite"];
 // Root-level special file routes (src/app/robots.ts, sitemap.ts,
 // opengraph-image.tsx) -- exact top-level paths, not prefix trees. Without
 // this exclusion, next-intl's middleware treats them as pages missing a

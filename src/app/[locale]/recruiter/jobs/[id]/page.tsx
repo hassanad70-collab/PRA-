@@ -1,8 +1,8 @@
-import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
-import { Users } from "lucide-react";
+import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 
-import { getRedirectLocale } from "@/i18n/get-redirect-locale";
+import { Link, redirect } from "@/i18n/navigation";
+import { Users } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,18 +16,22 @@ import { getInterviewQuestionsForJob } from "@/lib/queries/interviews";
 import { getJobById, getRecruiterContext } from "@/lib/queries/jobs";
 import type { JobStatus } from "@/types/database";
 
-export default async function RecruiterJobDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function RecruiterJobDetailPage({ params }: { params: Promise<{ id: string; locale: string }> }) {
+  const { id, locale } = await params;
   const user = await getCurrentUser();
-  if (!user) redirect("/login");
+  if (!user) redirect({ href: "/login", locale });
 
   const recruiter = await getRecruiterContext(user.id);
-  if (!recruiter) redirect(`/${await getRedirectLocale()}/candidate/dashboard`);
+  if (!recruiter) redirect({ href: "/candidate/dashboard", locale });
 
   const job = await getJobById(id);
   if (!job || job.company_id !== recruiter.company_id) notFound();
 
   const questionGroups = await getInterviewQuestionsForJob(id);
+  const [t, tShared] = await Promise.all([
+    getTranslations("Recruiter.JobDetail"),
+    getTranslations("Recruiter.Shared"),
+  ]);
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -35,18 +39,16 @@ export default async function RecruiterJobDetailPage({ params }: { params: Promi
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-semibold tracking-tight">{job.title}</h1>
-            <Badge variant="outline" className="capitalize">
-              {job.status}
-            </Badge>
+            <Badge variant="outline">{tShared(`jobStatus.${job.status as JobStatus}`)}</Badge>
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
-            {job.applications_count} applications · {job.views_count} views
+            {t("applicationsAndViews", { applications: job.applications_count, views: job.views_count })}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" asChild>
             <Link href={`/recruiter/jobs/${job.id}/candidates`}>
-              <Users className="h-4 w-4" /> View candidates
+              <Users className="h-4 w-4" /> {t("viewCandidates")}
             </Link>
           </Button>
           <JobActionsMenu jobId={job.id} status={job.status as JobStatus} />
@@ -55,8 +57,8 @@ export default async function RecruiterJobDetailPage({ params }: { params: Promi
 
       <Tabs defaultValue="edit">
         <TabsList>
-          <TabsTrigger value="edit">Edit job</TabsTrigger>
-          <TabsTrigger value="interview-questions">Interview Questions</TabsTrigger>
+          <TabsTrigger value="edit">{t("editJobTab")}</TabsTrigger>
+          <TabsTrigger value="interview-questions">{t("interviewQuestionsTab")}</TabsTrigger>
         </TabsList>
         <TabsContent value="edit">
           <Card>

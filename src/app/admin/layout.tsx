@@ -22,7 +22,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   // every protected layout in this app double-checks role server-side too
   // (see RecruiterLayout / CandidateLayout).
   if (user.role !== "super_admin") {
-    redirect(user.role === "candidate" ? `/${await getRedirectLocale()}/candidate/dashboard` : "/recruiter/dashboard");
+    const locale = await getRedirectLocale();
+    redirect(user.role === "candidate" ? `/${locale}/candidate/dashboard` : `/${locale}/recruiter/dashboard`);
   }
 
   return (

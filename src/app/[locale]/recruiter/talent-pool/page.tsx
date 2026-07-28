@@ -1,7 +1,7 @@
-import { redirect } from "next/navigation";
-import { Star } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
-import { getRedirectLocale } from "@/i18n/get-redirect-locale";
+import { redirect } from "@/i18n/navigation";
+import { Star } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,12 +10,15 @@ import { getRecruiterContext } from "@/lib/queries/jobs";
 import { createClient } from "@/lib/supabase/server";
 import { initials } from "@/lib/utils";
 
-export default async function TalentPoolPage() {
+export default async function TalentPoolPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
   const user = await getCurrentUser();
-  if (!user) redirect("/login");
+  if (!user) redirect({ href: "/login", locale });
 
   const recruiter = await getRecruiterContext(user.id);
-  if (!recruiter) redirect(`/${await getRedirectLocale()}/candidate/dashboard`);
+  if (!recruiter) redirect({ href: "/candidate/dashboard", locale });
+
+  const t = await getTranslations("Recruiter.TalentPool");
 
   const supabase = await createClient();
   const { data: pool } = await supabase
@@ -31,18 +34,14 @@ export default async function TalentPoolPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Talent Pool</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Candidates you&apos;ve saved for future roles at {recruiter.company?.name}.
-        </p>
+        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t("subtitle", { company: recruiter.company?.name ?? "" })}</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {(!pool || pool.length === 0) && (
           <Card className="sm:col-span-2 lg:col-span-3">
-            <CardContent className="py-16 text-center text-sm text-muted-foreground">
-              Your talent pool is empty. Save strong candidates from job applications to build your pipeline for future roles.
-            </CardContent>
+            <CardContent className="py-16 text-center text-sm text-muted-foreground">{t("emptyState")}</CardContent>
           </Card>
         )}
         {pool?.map((entry) => (
@@ -56,7 +55,7 @@ export default async function TalentPoolPage() {
                   <p className="truncate font-medium">{entry.candidate?.profile?.full_name}</p>
                   <p className="truncate text-xs text-muted-foreground">{entry.candidate?.current_position}</p>
                 </div>
-                {entry.is_favorite && <Star className="ml-auto h-4 w-4 shrink-0 fill-warning text-warning" />}
+                {entry.is_favorite && <Star className="ms-auto h-4 w-4 shrink-0 fill-warning text-warning" />}
               </div>
               {!!entry.tags?.length && (
                 <div className="mt-3 flex flex-wrap gap-1.5">

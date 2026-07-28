@@ -108,7 +108,18 @@ export default async function AdminDashboardPage() {
             <CardTitle className="text-base">Hiring funnel (platform-wide)</CardTitle>
           </CardHeader>
           <CardContent>
-            <FunnelChart funnel={stats?.hiring_funnel ?? {}} />
+            <FunnelChart
+              funnel={stats?.hiring_funnel ?? {}}
+              stageLabels={{
+                submitted: "Submitted",
+                screening: "Screening",
+                shortlisted: "Shortlisted",
+                interview: "Interview",
+                offer: "Offer",
+                hired: "Hired",
+              }}
+              noDataLabel="No applications yet."
+            />
           </CardContent>
         </Card>
 
@@ -117,7 +128,10 @@ export default async function AdminDashboardPage() {
             <CardTitle className="text-base">Top companies by applications</CardTitle>
           </CardHeader>
           <CardContent>
-            <TopSkillsChart data={topCompanies.map((c) => ({ name: c.company_name, count: c.applications_count }))} />
+            <TopSkillsChart
+              data={topCompanies.map((c) => ({ name: c.company_name, count: c.applications_count }))}
+              noDataLabel="No application data yet."
+            />
           </CardContent>
         </Card>
 
@@ -126,7 +140,10 @@ export default async function AdminDashboardPage() {
             <CardTitle className="text-base">Top recruiters by applications</CardTitle>
           </CardHeader>
           <CardContent>
-            <TopSkillsChart data={topRecruiters.map((r) => ({ name: r.full_name, count: r.applications_count }))} />
+            <TopSkillsChart
+              data={topRecruiters.map((r) => ({ name: r.full_name, count: r.applications_count }))}
+              noDataLabel="No application data yet."
+            />
           </CardContent>
         </Card>
       </div>

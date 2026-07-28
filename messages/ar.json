@@ -728,5 +728,134 @@
     "RadioGroupResumes": {
       "primary": "أساسية"
     }
+  },
+  "Recruiter": {
+    "Nav": {
+      "dashboard": "لوحة التحكم",
+      "jobs": "الوظائف",
+      "interviews": "المقابلات",
+      "talentPool": "مجموعة المواهب",
+      "settings": "الإعدادات",
+      "signOut": "تسجيل الخروج",
+      "openMenu": "فتح القائمة"
+    },
+    "Dashboard": {
+      "title": "مركز قيادة التوظيف",
+      "subtitle": "{company} · نظرة عامة على التوظيف",
+      "kpiOpenJobs": "الوظائف المفتوحة",
+      "kpiActiveCandidates": "المرشحون النشطون",
+      "kpiInterviewsScheduled": "المقابلات المجدولة",
+      "kpiOffersPending": "العروض المعلقة",
+      "kpiHiresThisMonth": "التعيينات هذا الشهر",
+      "kpiTimeToHire": "وقت التوظيف",
+      "kpiTimeToHireValue": "{days} يوم",
+      "kpiHiringVelocity": "سرعة التوظيف",
+      "kpiHiringVelocityValue": "{count} تعيين / 30 يومًا",
+      "kpiOfferAcceptanceRate": "معدل قبول العروض",
+      "chartApplicationsOverTime": "الطلبات عبر الزمن",
+      "chartHiringFunnel": "قمع التوظيف",
+      "chartTopSkills": "أفضل مهارات المرشحين",
+      "chartDepartmentBreakdown": "التوزيع حسب القسم",
+      "noApplicationData": "لا توجد بيانات طلبات بعد.",
+      "noFunnelData": "لا توجد طلبات بعد.",
+      "noSkillData": "لا توجد بيانات مهارات مرشحين بعد.",
+      "noDepartmentData": "لا توجد وظائف بعد.",
+      "unspecifiedDepartment": "غير محدد",
+      "recruiterWorkloadTitle": "عبء عمل المسؤولين عن التوظيف",
+      "workloadRecruiter": "المسؤول عن التوظيف",
+      "workloadOpenJobs": "الوظائف المفتوحة",
+      "workloadActiveApplications": "الطلبات النشطة",
+      "workloadUnassigned": "غير مُسند",
+      "workloadEmpty": "لا توجد وظائف منشورة بعد.",
+      "upcomingInterviewsTitle": "المقابلات القادمة",
+      "upcomingInterviewsEmpty": "لا توجد مقابلات قادمة.",
+      "recentHiresTitle": "المعيّنون مؤخرًا",
+      "recentHiresEmpty": "لا توجد تعيينات بعد.",
+      "quickActionsTitle": "إجراءات سريعة",
+      "quickActionPostJob": "نشر وظيفة",
+      "quickActionViewCandidates": "عرض المرشحين",
+      "quickActionInterviews": "المقابلات",
+      "quickActionInviteTeammate": "دعوة زميل"
+    },
+    "Shared": {
+      "jobStatus": {
+        "draft": "مسودة",
+        "published": "منشورة",
+        "closed": "مغلقة",
+        "archived": "مؤرشفة"
+      },
+      "interviewStatus": {
+        "scheduled": "مجدولة",
+        "completed": "مكتملة",
+        "cancelled": "ملغاة",
+        "no_show": "لم يحضر",
+        "rescheduled": "أعيدت جدولتها"
+      },
+      "candidateFallback": "مرشح",
+      "minutesShort": "{count} د",
+      "applicationStatus": {
+        "submitted": "مُرسل",
+        "screening": "قيد الفرز",
+        "shortlisted": "ضمن القائمة المختصرة",
+        "interview": "مقابلة",
+        "offer": "عرض عمل",
+        "hired": "تم التوظيف",
+        "rejected": "مرفوض",
+        "withdrawn": "مسحوب",
+        "archived": "مؤرشف"
+      }
+    },
+    "Jobs": {
+      "title": "الوظائف",
+      "subtitle": "إدارة كل إعلانات الوظائف لدى {company}.",
+      "newJob": "وظيفة جديدة",
+      "noJobsYet": "لا توجد وظائف بعد. أنشئ أول إعلان وظيفة لبدء التوظيف.",
+      "generalDepartment": "عام",
+      "remoteLocation": "عن بُعد"
+    },
+    "JobForm": {
+      "newJobTitle": "إنشاء وظيفة جديدة",
+      "newJobSubtitle": "يتم حفظ الوظائف كمسودات. انشرها عندما تكون مستعدًا لاستقبال الطلبات."
+    },
+    "JobDetail": {
+      "applicationsAndViews": "{applications} طلب · {views} مشاهدة",
+      "viewCandidates": "عرض المرشحين",
+      "editJobTab": "تعديل الوظيفة",
+      "interviewQuestionsTab": "أسئلة المقابلة"
+    },
+    "Interviews": {
+      "title": "المقابلات",
+      "subtitle": "كل مقابلة مجدولة عبر الأدوار المفتوحة في شركتك.",
+      "upcoming": "القادمة ({count})",
+      "past": "السابقة ({count})",
+      "noUpcoming": "لا توجد مقابلات قادمة.",
+      "noPast": "لا توجد مقابلات سابقة بعد."
+    },
+    "TalentPool": {
+      "title": "مجموعة المواهب",
+      "subtitle": "المرشحون الذين حفظتهم لأدوار مستقبلية في {company}.",
+      "emptyState": "مجموعة المواهب لديك فارغة. احفظ المرشحين الأقوياء من طلبات التوظيف لبناء خط أنابيبك للأدوار المستقبلية."
+    },
+    "Settings": {
+      "title": "الإعدادات",
+      "subtitle": "تفاصيل حسابك وشركتك.",
+      "accountTitle": "الحساب",
+      "fullName": "الاسم الكامل",
+      "email": "البريد الإلكتروني",
+      "jobTitle": "المسمى الوظيفي",
+      "role": "الدور",
+      "companyTitle": "الشركة",
+      "companyName": "اسم الشركة",
+      "industry": "المجال",
+      "teamTitle": "الفريق",
+      "teamSubtitle": "دعوة زملاء الفريق وإدارة أدوار الأعضاء.",
+      "manageTeam": "إدارة الفريق"
+    },
+    "Team": {
+      "title": "الفريق",
+      "subtitle": "إدارة من يملك صلاحية الوصول إلى {company}.",
+      "membersTitle": "الأعضاء ({count})",
+      "pendingInvitesTitle": "الدعوات المعلقة ({count})"
+    }
   }
 }
