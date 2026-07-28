@@ -65,6 +65,7 @@ export default async function RecruiterInterviewsPage({ params }: { params: Prom
             candidateFallback={tShared("candidateFallback")}
             statusLabel={tShared(`interviewStatus.${iv.status}`)}
             minutesLabel={tShared("minutesShort", { count: iv.duration_minutes })}
+            typeLabel={tShared(`interviewType.${iv.interview_type}`)}
           />
         ))}
       </section>
@@ -83,6 +84,7 @@ export default async function RecruiterInterviewsPage({ params }: { params: Prom
             candidateFallback={tShared("candidateFallback")}
             statusLabel={tShared(`interviewStatus.${iv.status}`)}
             minutesLabel={tShared("minutesShort", { count: iv.duration_minutes })}
+            typeLabel={tShared(`interviewType.${iv.interview_type}`)}
           />
         ))}
       </section>
@@ -95,11 +97,13 @@ function InterviewCard({
   candidateFallback,
   statusLabel,
   minutesLabel,
+  typeLabel,
 }: {
   interview: InterviewRow;
   candidateFallback: string;
   statusLabel: string;
   minutesLabel: string;
+  typeLabel: string;
 }) {
   return (
     <Link href={`/recruiter/applications/${interview.application_id}`}>
@@ -109,8 +113,7 @@ function InterviewCard({
             <p className="truncate font-medium">{interview.application?.candidate?.profile?.full_name ?? candidateFallback}</p>
             <p className="truncate text-sm text-muted-foreground">{interview.application?.job?.title}</p>
             <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Calendar className="h-3.5 w-3.5" /> {formatDate(interview.scheduled_at)} · {minutesLabel} ·{" "}
-              <span className="capitalize">{interview.interview_type}</span>
+              <Calendar className="h-3.5 w-3.5" /> {formatDate(interview.scheduled_at)} · {minutesLabel} · {typeLabel}
             </p>
             {interview.location_or_link && (
               <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">

@@ -9,6 +9,8 @@ import { TeamMemberList } from "@/components/recruiter/team-member-list";
 import { getCurrentUser } from "@/lib/queries/candidate";
 import { getRecruiterContext } from "@/lib/queries/jobs";
 import { getCompanyMembers, getMyCapabilities, getPendingInvites } from "@/lib/queries/team";
+import { formatDate } from "@/lib/utils";
+import type { RecruiterRole } from "@/types/database";
 
 export default async function TeamPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -18,7 +20,7 @@ export default async function TeamPage({ params }: { params: Promise<{ locale: s
   const recruiter = await getRecruiterContext(user.id);
   if (!recruiter) redirect({ href: "/candidate/dashboard", locale });
 
-  const t = await getTranslations("Recruiter.Team");
+  const [t, tShared] = await Promise.all([getTranslations("Recruiter.Team"), getTranslations("Recruiter.Shared")]);
 
   const [members, invites, capabilities] = await Promise.all([
     getCompanyMembers(recruiter.company_id),
@@ -30,6 +32,13 @@ export default async function TeamPage({ params }: { params: Promise<{ locale: s
   const canChangeRoles = capabilities.has("change_member_roles");
   const canRemove = capabilities.has("remove_members");
 
+  const roleLabels: Record<RecruiterRole, string> = {
+    owner: tShared("role.owner"),
+    admin: tShared("role.admin"),
+    recruiter: tShared("role.recruiter"),
+    viewer: tShared("role.viewer"),
+  };
+
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -37,7 +46,24 @@ export default async function TeamPage({ params }: { params: Promise<{ locale: s
           <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">{t("subtitle", { company: recruiter.company?.name ?? "" })}</p>
         </div>
-        {canInvite && <InviteMemberDialog />}
+        {canInvite && (
+          <InviteMemberDialog
+            labels={{
+              trigger: t("inviteTeammate"),
+              title: t("inviteDialogTitle"),
+              description: t("inviteDialogDescription"),
+              emailLabel: t("emailLabel"),
+              roleLabel: t("roleLabel"),
+              roleLabels,
+              generateInviteLink: t("generateInviteLink"),
+              expiresNote: t("inviteExpiresNote"),
+              done: t("done"),
+              copy: t("copy"),
+              toastCopied: t("toastInviteCopied"),
+              toastFailed: t("toastInviteFailed"),
+            }}
+          />
+        )}
       </div>
 
       <Card>
@@ -45,7 +71,21 @@ export default async function TeamPage({ params }: { params: Promise<{ locale: s
           <CardTitle className="text-base">{t("membersTitle", { count: members.length })}</CardTitle>
         </CardHeader>
         <CardContent>
-          <TeamMemberList members={members} currentUserId={user.id} canChangeRoles={canChangeRoles} canRemove={canRemove} />
+          <TeamMemberList
+            members={members}
+            currentUserId={user.id}
+            canChangeRoles={canChangeRoles}
+            canRemove={canRemove}
+            labels={{
+              roleLabels,
+              youBadge: t("youBadge"),
+              removeMemberAria: t("removeMemberAria"),
+              toastRoleUpdated: t("toastRoleUpdated"),
+              toastRoleUpdateFailed: t("toastRoleUpdateFailed"),
+              toastMemberRemoved: t("toastMemberRemoved"),
+              toastMemberRemoveFailed: t("toastMemberRemoveFailed"),
+            }}
+          />
         </CardContent>
       </Card>
 
@@ -55,7 +95,15 @@ export default async function TeamPage({ params }: { params: Promise<{ locale: s
             <CardTitle className="text-base">{t("pendingInvitesTitle", { count: invites.length })}</CardTitle>
           </CardHeader>
           <CardContent>
-            <PendingInviteList invites={invites} />
+            <PendingInviteList
+              invites={invites}
+              labels={{
+                roleLabels,
+                expiresLabels: Object.fromEntries(invites.map((i) => [i.id, t("expiresLabel", { date: formatDate(i.expires_at) })])),
+                toastRevoked: t("toastInviteRevoked"),
+                toastRevokeFailed: t("toastInviteRevokeFailed"),
+              }}
+            />
           </CardContent>
         </Card>
       )}

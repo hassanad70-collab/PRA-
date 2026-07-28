@@ -28,9 +28,11 @@ export default async function RecruiterJobDetailPage({ params }: { params: Promi
   if (!job || job.company_id !== recruiter.company_id) notFound();
 
   const questionGroups = await getInterviewQuestionsForJob(id);
-  const [t, tShared] = await Promise.all([
+  const [t, tShared, tJobForm, tActions] = await Promise.all([
     getTranslations("Recruiter.JobDetail"),
     getTranslations("Recruiter.Shared"),
+    getTranslations("Recruiter.JobForm"),
+    getTranslations("Recruiter.JobActionsMenu"),
   ]);
 
   return (
@@ -51,7 +53,22 @@ export default async function RecruiterJobDetailPage({ params }: { params: Promi
               <Users className="h-4 w-4" /> {t("viewCandidates")}
             </Link>
           </Button>
-          <JobActionsMenu jobId={job.id} status={job.status as JobStatus} />
+          <JobActionsMenu
+            jobId={job.id}
+            status={job.status as JobStatus}
+            labels={{
+              menuAria: tActions("menuAria"),
+              publish: tActions("publish"),
+              toastPublished: tActions("toastPublished"),
+              closeJob: tActions("closeJob"),
+              toastClosed: tActions("toastClosed"),
+              duplicate: tActions("duplicate"),
+              toastDuplicated: tActions("toastDuplicated"),
+              archive: tActions("archive"),
+              toastArchived: tActions("toastArchived"),
+              toastFailed: tActions("toastFailed"),
+            }}
+          />
         </div>
       </div>
 
@@ -63,7 +80,62 @@ export default async function RecruiterJobDetailPage({ params }: { params: Promi
         <TabsContent value="edit">
           <Card>
             <CardContent className="pt-6">
-              <JobForm job={job} />
+              <JobForm
+                job={job}
+                labels={{
+                  jobTitleLabel: tJobForm("jobTitleLabel"),
+                  jobTitlePlaceholder: tJobForm("jobTitlePlaceholder"),
+                  departmentLabel: tJobForm("departmentLabel"),
+                  departmentPlaceholder: tJobForm("departmentPlaceholder"),
+                  aiAssistantLabel: tJobForm("aiAssistantLabel"),
+                  aiAssistantDescription: tJobForm("aiAssistantDescription"),
+                  keyPointsPlaceholder: tJobForm("keyPointsPlaceholder"),
+                  draftWithAi: tJobForm("draftWithAi"),
+                  descriptionLabel: tJobForm("descriptionLabel"),
+                  responsibilitiesLabel: tJobForm("responsibilitiesLabel"),
+                  requirementsLabel: tJobForm("requirementsLabel"),
+                  benefitsLabel: tJobForm("benefitsLabel"),
+                  employmentTypeLabel: tJobForm("employmentTypeLabel"),
+                  employmentTypeLabels: {
+                    full_time: tJobForm("employmentTypeLabels.full_time"),
+                    part_time: tJobForm("employmentTypeLabels.part_time"),
+                    contract: tJobForm("employmentTypeLabels.contract"),
+                    internship: tJobForm("employmentTypeLabels.internship"),
+                    temporary: tJobForm("employmentTypeLabels.temporary"),
+                  },
+                  experienceLevelLabel: tJobForm("experienceLevelLabel"),
+                  experienceLevelLabels: {
+                    entry: tJobForm("experienceLevelLabels.entry"),
+                    junior: tJobForm("experienceLevelLabels.junior"),
+                    mid: tJobForm("experienceLevelLabels.mid"),
+                    senior: tJobForm("experienceLevelLabels.senior"),
+                    lead: tJobForm("experienceLevelLabels.lead"),
+                    manager: tJobForm("experienceLevelLabels.manager"),
+                    director: tJobForm("experienceLevelLabels.director"),
+                    executive: tJobForm("experienceLevelLabels.executive"),
+                  },
+                  minExperienceYearsLabel: tJobForm("minExperienceYearsLabel"),
+                  educationRequirementLabel: tJobForm("educationRequirementLabel"),
+                  educationRequirementPlaceholder: tJobForm("educationRequirementPlaceholder"),
+                  headcountLabel: tJobForm("headcountLabel"),
+                  requiredSkillsLabel: tJobForm("requiredSkillsLabel"),
+                  niceToHaveSkillsLabel: tJobForm("niceToHaveSkillsLabel"),
+                  locationLabel: tJobForm("locationLabel"),
+                  locationPlaceholder: tJobForm("locationPlaceholder"),
+                  remotePositionLabel: tJobForm("remotePositionLabel"),
+                  salaryMinLabel: tJobForm("salaryMinLabel"),
+                  salaryMaxLabel: tJobForm("salaryMaxLabel"),
+                  currencyLabel: tJobForm("currencyLabel"),
+                  saveChanges: tJobForm("saveChanges"),
+                  createJobDraft: tJobForm("createJobDraft"),
+                  toastJobUpdated: tJobForm("toastJobUpdated"),
+                  toastJobCreated: tJobForm("toastJobCreated"),
+                  toastFormErrors: tJobForm("toastFormErrors"),
+                  toastAddTitleFirst: tJobForm("toastAddTitleFirst"),
+                  toastDraftGenerated: tJobForm("toastDraftGenerated"),
+                  toastDraftFailed: tJobForm("toastDraftFailed"),
+                }}
+              />
             </CardContent>
           </Card>
         </TabsContent>

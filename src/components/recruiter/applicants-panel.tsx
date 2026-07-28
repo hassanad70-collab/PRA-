@@ -33,6 +33,7 @@ const STATUS_VARIANT: Record<ApplicationStatus, "default" | "secondary" | "succe
 export interface ApplicantsPanelLabels {
   list: string;
   board: string;
+  viewToggleAria: string;
   noApplications: string;
   compare: string;
   matchLabel: string;
@@ -40,6 +41,8 @@ export interface ApplicantsPanelLabels {
   screeningLabel: string;
   statusLabels: Record<ApplicationStatus, string>;
   candidateFallback: string;
+  statusUpdated: string;
+  statusUpdateFailed: string;
   bulk: BulkToolbarLabels;
 }
 
@@ -92,7 +95,7 @@ export function ApplicantsPanel({
             </Button>
           )}
         </div>
-        <div className="flex gap-1" role="group" aria-label="View">
+        <div className="flex gap-1" role="group" aria-label={labels.viewToggleAria}>
           <Button
             type="button"
             variant={view === "list" ? "default" : "outline"}
@@ -139,6 +142,8 @@ export function ApplicantsPanel({
             matchLabel: labels.matchLabel,
             atsLabel: labels.atsLabel,
             screenLabel: labels.screeningLabel,
+            statusUpdated: labels.statusUpdated,
+            statusUpdateFailed: labels.statusUpdateFailed,
           }}
         />
       ) : (

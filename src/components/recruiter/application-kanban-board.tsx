@@ -31,6 +31,8 @@ export interface KanbanLabels {
   matchLabel: string;
   atsLabel: string;
   screenLabel: string;
+  statusUpdated: string;
+  statusUpdateFailed: string;
 }
 
 export function ApplicationKanbanBoard({ applications, labels }: { applications: ApplicationRow[]; labels: KanbanLabels }) {
@@ -100,7 +102,16 @@ export function ApplicationKanbanBoard({ applications, labels }: { applications:
                       )}
 
                       {status !== "withdrawn" && (
-                        <StatusSelect applicationId={app.id} status={app.status as ApplicationStatus} className="w-full" />
+                        <StatusSelect
+                          applicationId={app.id}
+                          status={app.status as ApplicationStatus}
+                          className="w-full"
+                          labels={{
+                            statusLabels: labels.statusLabels,
+                            updated: labels.statusUpdated,
+                            updateFailed: labels.statusUpdateFailed,
+                          }}
+                        />
                       )}
                     </CardContent>
                   </Card>

@@ -18,13 +18,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { draftCandidateMessage } from "@/actions/candidate-messages";
 import type { CandidateMessageType } from "@/lib/ai/candidate-message-drafter";
 
-const MESSAGE_TYPES: { value: CandidateMessageType; label: string }[] = [
-  { value: "interview_invite", label: "Interview invite" },
-  { value: "rejection", label: "Rejection" },
-  { value: "offer", label: "Offer" },
-];
+const MESSAGE_TYPES: CandidateMessageType[] = ["interview_invite", "rejection", "offer"];
 
-export function DraftMessageDialog({ applicationId }: { applicationId: string }) {
+export interface DraftMessageDialogLabels {
+  trigger: string;
+  title: string;
+  description: string;
+  messageTypeLabels: Record<CandidateMessageType, string>;
+  subjectLabel: string;
+  generateDraft: string;
+  regenerateDraft: string;
+  copy: string;
+  toastCopied: string;
+  toastFailed: string;
+}
+
+export function DraftMessageDialog({ applicationId, labels }: { applicationId: string; labels: DraftMessageDialogLabels }) {
   const [open, setOpen] = React.useState(false);
   const [messageType, setMessageType] = React.useState<CandidateMessageType>("interview_invite");
   const [isPending, startTransition] = React.useTransition();
@@ -37,15 +46,15 @@ export function DraftMessageDialog({ applicationId }: { applicationId: string })
       if (result.success && result.draft) {
         setDraft(result.draft);
       } else {
-        toast.error(result.error ?? "Failed to generate a draft.");
+        toast.error(result.error ?? labels.toastFailed);
       }
     });
   };
 
   const handleCopy = () => {
     if (!draft) return;
-    navigator.clipboard.writeText(`Subject: ${draft.subject}\n\n${draft.body}`);
-    toast.success("Copied to clipboard");
+    navigator.clipboard.writeText(`${labels.subjectLabel} ${draft.subject}\n\n${draft.body}`);
+    toast.success(labels.toastCopied);
   };
 
   return (
@@ -58,16 +67,13 @@ export function DraftMessageDialog({ applicationId }: { applicationId: string })
     >
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
-          <Mail className="h-4 w-4" /> Draft message
+          <Mail className="h-4 w-4" /> {labels.trigger}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-h-[85vh] max-w-lg overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Draft a candidate message</DialogTitle>
-          <DialogDescription>
-            AI drafts the text below for you to review and send through your own email client — nothing is sent
-            automatically.
-          </DialogDescription>
+          <DialogTitle>{labels.title}</DialogTitle>
+          <DialogDescription>{labels.description}</DialogDescription>
         </DialogHeader>
 
         <Select value={messageType} onValueChange={(v) => setMessageType(v as CandidateMessageType)}>
@@ -76,8 +82,8 @@ export function DraftMessageDialog({ applicationId }: { applicationId: string })
           </SelectTrigger>
           <SelectContent>
             {MESSAGE_TYPES.map((t) => (
-              <SelectItem key={t.value} value={t.value}>
-                {t.label}
+              <SelectItem key={t} value={t}>
+                {labels.messageTypeLabels[t]}
               </SelectItem>
             ))}
           </SelectContent>
@@ -86,7 +92,7 @@ export function DraftMessageDialog({ applicationId }: { applicationId: string })
         {draft && (
           <div className="space-y-3 rounded-lg border border-border p-3 text-sm">
             <p>
-              <span className="font-medium">Subject: </span>
+              <span className="font-medium">{labels.subjectLabel} </span>
               {draft.subject}
             </p>
             <p className="whitespace-pre-line text-muted-foreground">{draft.body}</p>
@@ -96,11 +102,11 @@ export function DraftMessageDialog({ applicationId }: { applicationId: string })
         <DialogFooter className="gap-2 sm:justify-start">
           <Button variant="gradient" disabled={isPending} onClick={handleGenerate}>
             {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-            {draft ? "Regenerate" : "Generate draft"}
+            {draft ? labels.regenerateDraft : labels.generateDraft}
           </Button>
           {draft && (
             <Button variant="outline" onClick={handleCopy}>
-              <Copy className="h-4 w-4" /> Copy
+              <Copy className="h-4 w-4" /> {labels.copy}
             </Button>
           )}
         </DialogFooter>

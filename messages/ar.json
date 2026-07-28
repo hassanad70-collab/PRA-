@@ -792,8 +792,31 @@
         "no_show": "لم يحضر",
         "rescheduled": "أعيدت جدولتها"
       },
+      "interviewType": {
+        "phone": "هاتفية",
+        "video": "فيديو",
+        "onsite": "حضورية",
+        "technical": "تقنية",
+        "panel": "لجنة",
+        "final": "نهائية"
+      },
+      "competency": {
+        "Technical Skills": "المهارات التقنية",
+        "Communication": "التواصل",
+        "Problem Solving": "حل المشكلات",
+        "Culture Fit": "الملاءمة الثقافية",
+        "Leadership": "القيادة"
+      },
       "candidateFallback": "مرشح",
       "minutesShort": "{count} د",
+      "statusUpdated": "تم تحديث الحالة",
+      "statusUpdateFailed": "فشل تحديث الحالة",
+      "role": {
+        "owner": "مالك",
+        "admin": "مسؤول",
+        "recruiter": "موظف توظيف",
+        "viewer": "مشاهد"
+      },
       "hiringRecommendation": {
         "strong_yes": "موافقة قوية",
         "yes": "نعم",
@@ -821,9 +844,72 @@
       "generalDepartment": "عام",
       "remoteLocation": "عن بُعد"
     },
+    "JobActionsMenu": {
+      "menuAria": "إجراءات الوظيفة",
+      "publish": "نشر",
+      "toastPublished": "تم نشر الوظيفة — بدأت المطابقة بالذكاء الاصطناعي",
+      "closeJob": "إغلاق الوظيفة",
+      "toastClosed": "تم إغلاق الوظيفة",
+      "duplicate": "تكرار",
+      "toastDuplicated": "تم تكرار الوظيفة",
+      "archive": "أرشفة",
+      "toastArchived": "تمت أرشفة الوظيفة",
+      "toastFailed": "فشل الإجراء"
+    },
     "JobForm": {
       "newJobTitle": "إنشاء وظيفة جديدة",
-      "newJobSubtitle": "يتم حفظ الوظائف كمسودات. انشرها عندما تكون مستعدًا لاستقبال الطلبات."
+      "newJobSubtitle": "يتم حفظ الوظائف كمسودات. انشرها عندما تكون مستعدًا لاستقبال الطلبات.",
+      "jobTitleLabel": "المسمى الوظيفي",
+      "jobTitlePlaceholder": "مهندس باكيند أول",
+      "departmentLabel": "القسم",
+      "departmentPlaceholder": "الهندسة",
+      "aiAssistantLabel": "مساعد نشر الوظائف بالذكاء الاصطناعي",
+      "aiAssistantDescription": "دوّن بعض الملاحظات السريعة (التقنيات، مستوى الخبرة، عمل الفريق) ودع الذكاء الاصطناعي يصيغ الوصف والمسؤوليات والمتطلبات والمزايا والمهارات المطلوبة أدناه — راجعها وعدّلها قبل النشر.",
+      "keyPointsPlaceholder": "مثال: فريق React/Node، منتج B2B SaaS، خبرة 3+ سنوات، غالبًا عن بعد",
+      "draftWithAi": "صياغة بالذكاء الاصطناعي",
+      "descriptionLabel": "وصف الوظيفة",
+      "responsibilitiesLabel": "المسؤوليات (سطر لكل عنصر)",
+      "requirementsLabel": "المتطلبات (سطر لكل عنصر)",
+      "benefitsLabel": "المزايا (سطر لكل عنصر)",
+      "employmentTypeLabel": "نوع التوظيف",
+      "employmentTypeLabels": {
+        "full_time": "دوام كامل",
+        "part_time": "دوام جزئي",
+        "contract": "عقد",
+        "internship": "تدريب",
+        "temporary": "مؤقت"
+      },
+      "experienceLevelLabel": "مستوى الخبرة",
+      "experienceLevelLabels": {
+        "entry": "مبتدئ",
+        "junior": "مبتدئ متقدم",
+        "mid": "متوسط",
+        "senior": "متقدم",
+        "lead": "قائد فريق",
+        "manager": "مدير",
+        "director": "مدير تنفيذي",
+        "executive": "تنفيذي"
+      },
+      "minExperienceYearsLabel": "الحد الأدنى لسنوات الخبرة",
+      "educationRequirementLabel": "المتطلب التعليمي",
+      "educationRequirementPlaceholder": "درجة البكالوريوس",
+      "headcountLabel": "عدد الشواغر",
+      "requiredSkillsLabel": "المهارات المطلوبة (مفصولة بفواصل)",
+      "niceToHaveSkillsLabel": "مهارات إضافية مرغوبة (مفصولة بفواصل)",
+      "locationLabel": "الموقع",
+      "locationPlaceholder": "القاهرة، مصر",
+      "remotePositionLabel": "وظيفة عن بعد",
+      "salaryMinLabel": "الحد الأدنى للراتب",
+      "salaryMaxLabel": "الحد الأقصى للراتب",
+      "currencyLabel": "العملة",
+      "saveChanges": "حفظ التغييرات",
+      "createJobDraft": "إنشاء مسودة وظيفة",
+      "toastJobUpdated": "تم تحديث الوظيفة",
+      "toastJobCreated": "تم إنشاء الوظيفة كمسودة",
+      "toastFormErrors": "يرجى مراجعة النموذج بحثًا عن أخطاء",
+      "toastAddTitleFirst": "أضف مسمى الوظيفة أولاً.",
+      "toastDraftGenerated": "تم توليد المسودة — راجعها وعدّلها قبل النشر",
+      "toastDraftFailed": "فشل توليد المسودة"
     },
     "JobDetail": {
       "applicationsAndViews": "{applications} طلب · {views} مشاهدة",
@@ -863,7 +949,27 @@
       "title": "الفريق",
       "subtitle": "إدارة من يملك صلاحية الوصول إلى {company}.",
       "membersTitle": "الأعضاء ({count})",
-      "pendingInvitesTitle": "الدعوات المعلقة ({count})"
+      "pendingInvitesTitle": "الدعوات المعلقة ({count})",
+      "inviteTeammate": "دعوة زميل",
+      "inviteDialogTitle": "دعوة زميل",
+      "inviteDialogDescription": "يُنشئ رابطًا تشاركه بنفسك — لا يوجد إرسال بريد إلكتروني تلقائي حاليًا.",
+      "emailLabel": "البريد الإلكتروني",
+      "roleLabel": "الدور",
+      "generateInviteLink": "إنشاء رابط الدعوة",
+      "inviteExpiresNote": "تنتهي الصلاحية خلال 7 أيام. شاركه بالطريقة التي تناسبك.",
+      "done": "تم",
+      "copy": "نسخ",
+      "toastInviteFailed": "فشل إنشاء الدعوة",
+      "toastInviteCopied": "تم نسخ رابط الدعوة",
+      "youBadge": "أنت",
+      "removeMemberAria": "إزالة العضو",
+      "toastRoleUpdated": "تم تحديث الدور",
+      "toastRoleUpdateFailed": "فشل تحديث الدور",
+      "toastMemberRemoved": "تمت إزالة العضو",
+      "toastMemberRemoveFailed": "فشلت إزالة العضو",
+      "expiresLabel": "تنتهي في {date}",
+      "toastInviteRevoked": "تم إلغاء الدعوة",
+      "toastInviteRevokeFailed": "فشل إلغاء الدعوة"
     },
     "ApplicationDetail": {
       "appliedTo": "{position} · تقدّم لوظيفة {job}",
@@ -961,6 +1067,7 @@
       "actionFailed": "تعذّر تحديث هذا الطلب الآن.",
       "listView": "قائمة",
       "boardView": "لوحة",
+      "viewToggleAria": "طريقة العرض",
       "noApplicationsYet": "لا توجد طلبات لهذه الوظيفة بعد.",
       "compareLabel": "مقارنة",
       "matchLabel": "التوافق",
@@ -1037,8 +1144,7 @@
       "subject": "الموضوع",
       "body": "النص",
       "toastSuccess": "تم التطبيق على __COUNT__ طلب/طلبات",
-      "toastFailed": "فشل الإجراء الجماعي",
-      "close": "إغلاق"
+      "toastFailed": "فشل الإجراء الجماعي"
     },
     "InterviewIntelligence": {
       "noInterviewsYet": "لا توجد مقابلات مجدولة بعد.",
@@ -1064,6 +1170,43 @@
       "timelineApplied": "تم تقديم الطلب",
       "timelineStatusChange": "تغيّرت الحالة إلى {status}",
       "timelineInterview": "مقابلة {type} ({status})"
+    },
+    "ScheduleInterviewDialog": {
+      "trigger": "جدولة مقابلة",
+      "title": "جدولة مقابلة",
+      "description": "سيرى المرشح هذا في صفحة طلباته.",
+      "dateTimeLabel": "التاريخ والوقت",
+      "durationLabel": "المدة (بالدقائق)",
+      "typeLabel": "النوع",
+      "locationLabel": "الموقع أو الرابط",
+      "locationPlaceholder": "رابط مكالمة فيديو أو عنوان المكتب",
+      "submit": "جدولة",
+      "toastSuccess": "تمت جدولة المقابلة",
+      "toastFailed": "فشلت جدولة المقابلة"
+    },
+    "InterviewFeedbackDialog": {
+      "title": "ملاحظات المقابلة",
+      "description": "يؤدي الحفظ إلى وضع علامة على هذه المقابلة كمكتملة.",
+      "hiringRecommendationLabel": "توصية التوظيف",
+      "submit": "حفظ الملاحظات",
+      "toastSuccess": "تم حفظ الملاحظات",
+      "toastFailed": "فشل حفظ الملاحظات"
+    },
+    "DraftMessageDialog": {
+      "trigger": "صياغة رسالة",
+      "title": "صياغة رسالة للمرشح",
+      "description": "يقوم الذكاء الاصطناعي بصياغة النص أدناه لتراجعه وترسله عبر بريدك الإلكتروني الخاص — لا يُرسل شيء تلقائيًا.",
+      "messageTypeLabels": {
+        "interview_invite": "دعوة لمقابلة",
+        "rejection": "رفض",
+        "offer": "عرض"
+      },
+      "subjectLabel": "الموضوع:",
+      "generateDraft": "توليد مسودة",
+      "regenerateDraft": "إعادة التوليد",
+      "copy": "نسخ",
+      "toastCopied": "تم النسخ إلى الحافظة",
+      "toastFailed": "فشل توليد المسودة."
     }
   }
 }

@@ -20,7 +20,8 @@ import { getHiringDecisionTimeline } from "@/lib/queries/interview-timeline";
 import { getInterviewsForApplication } from "@/lib/queries/interviews";
 import { getRecruiterContext } from "@/lib/queries/jobs";
 import { formatRelativeTime, initials } from "@/lib/utils";
-import type { ApplicationStatus, HiringRecommendation } from "@/types/database";
+import { INTERVIEW_COMPETENCIES } from "@/types/database";
+import type { ApplicationStatus, HiringRecommendation, InterviewCompetency, InterviewType } from "@/types/database";
 
 export default async function ApplicationDetailPage({ params }: { params: Promise<{ applicationId: string; locale: string }> }) {
   const { applicationId, locale } = await params;
@@ -33,18 +34,54 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
   const app = await getApplicationDetail(applicationId);
   if (!app || app.job?.company_id !== recruiter.company_id) notFound();
 
-  const [interviews, timeline, t, tInterview, tShared] = await Promise.all([
+  const [interviews, timeline, t, tInterview, tShared, tSchedule, tFeedback, tDraft] = await Promise.all([
     getInterviewsForApplication(applicationId),
     getHiringDecisionTimeline(applicationId),
     getTranslations("Recruiter.ApplicationDetail"),
     getTranslations("Recruiter.InterviewIntelligence"),
     getTranslations("Recruiter.Shared"),
+    getTranslations("Recruiter.ScheduleInterviewDialog"),
+    getTranslations("Recruiter.InterviewFeedbackDialog"),
+    getTranslations("Recruiter.DraftMessageDialog"),
   ]);
   const screening = app.screening_result;
   const match = app.job_match?.[0];
   const ats = app.ats_score?.[0];
   const candidateProfile = app.candidate?.profile;
   const parsed = app.resume?.parsed_data;
+
+  const statusLabels: Record<ApplicationStatus, string> = {
+    submitted: tShared("applicationStatus.submitted"),
+    screening: tShared("applicationStatus.screening"),
+    shortlisted: tShared("applicationStatus.shortlisted"),
+    interview: tShared("applicationStatus.interview"),
+    offer: tShared("applicationStatus.offer"),
+    hired: tShared("applicationStatus.hired"),
+    rejected: tShared("applicationStatus.rejected"),
+    withdrawn: tShared("applicationStatus.withdrawn"),
+    archived: tShared("applicationStatus.archived"),
+  };
+
+  const interviewTypeLabels: Record<InterviewType, string> = {
+    phone: tShared("interviewType.phone"),
+    video: tShared("interviewType.video"),
+    onsite: tShared("interviewType.onsite"),
+    technical: tShared("interviewType.technical"),
+    panel: tShared("interviewType.panel"),
+    final: tShared("interviewType.final"),
+  };
+
+  const competencyLabels = Object.fromEntries(
+    INTERVIEW_COMPETENCIES.map((c) => [c, tShared(`competency.${c}`)])
+  ) as Record<InterviewCompetency, string>;
+
+  const recommendationLabels: Record<HiringRecommendation, string> = {
+    strong_yes: tShared("hiringRecommendation.strong_yes"),
+    yes: tShared("hiringRecommendation.yes"),
+    neutral: tShared("hiringRecommendation.neutral"),
+    no: tShared("hiringRecommendation.no"),
+    strong_no: tShared("hiringRecommendation.strong_no"),
+  };
 
   const competencyScores: [string, number | null | undefined][] = screening
     ? [
@@ -74,7 +111,11 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
               <p className="text-xs text-muted-foreground">{t("appliedTime", { time: formatRelativeTime(app.applied_at) })}</p>
             </div>
           </div>
-          <StatusSelect applicationId={app.id} status={app.status as ApplicationStatus} />
+          <StatusSelect
+            applicationId={app.id}
+            status={app.status as ApplicationStatus}
+            labels={{ statusLabels, updated: tShared("statusUpdated"), updateFailed: tShared("statusUpdateFailed") }}
+          />
         </CardContent>
       </Card>
 
@@ -82,8 +123,43 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
         <CardHeader className="flex flex-row items-center justify-between gap-2">
           <CardTitle className="text-base">{t("interviewsTitle")}</CardTitle>
           <div className="flex items-center gap-2">
-            <DraftMessageDialog applicationId={app.id} />
-            <ScheduleInterviewDialog applicationId={app.id} jobId={app.job_id} />
+            <DraftMessageDialog
+              applicationId={app.id}
+              labels={{
+                trigger: tDraft("trigger"),
+                title: tDraft("title"),
+                description: tDraft("description"),
+                messageTypeLabels: {
+                  interview_invite: tDraft("messageTypeLabels.interview_invite"),
+                  rejection: tDraft("messageTypeLabels.rejection"),
+                  offer: tDraft("messageTypeLabels.offer"),
+                },
+                subjectLabel: tDraft("subjectLabel"),
+                generateDraft: tDraft("generateDraft"),
+                regenerateDraft: tDraft("regenerateDraft"),
+                copy: tDraft("copy"),
+                toastCopied: tDraft("toastCopied"),
+                toastFailed: tDraft("toastFailed"),
+              }}
+            />
+            <ScheduleInterviewDialog
+              applicationId={app.id}
+              jobId={app.job_id}
+              labels={{
+                trigger: tSchedule("trigger"),
+                title: tSchedule("title"),
+                description: tSchedule("description"),
+                dateTimeLabel: tSchedule("dateTimeLabel"),
+                durationLabel: tSchedule("durationLabel"),
+                typeLabel: tSchedule("typeLabel"),
+                interviewTypeLabels,
+                locationLabel: tSchedule("locationLabel"),
+                locationPlaceholder: tSchedule("locationPlaceholder"),
+                submit: tSchedule("submit"),
+                toastSuccess: tSchedule("toastSuccess"),
+                toastFailed: tSchedule("toastFailed"),
+              }}
+            />
           </div>
         </CardHeader>
         <CardContent>
@@ -95,7 +171,6 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
               cancel: tInterview("cancel"),
               cancelSucceeded: tInterview("cancelSucceeded"),
               cancelFailed: tInterview("cancelFailed"),
-              giveFeedback: tInterview("giveFeedback"),
               recommendationLabel: tInterview("recommendationLabel"),
               scorecardTitle: tInterview("scorecardTitle"),
               starEvaluationTitle: tInterview("starEvaluationTitle"),
@@ -104,6 +179,7 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
               actionLabel: tInterview("actionLabel"),
               resultLabel: tInterview("resultLabel"),
               competencyRatingsTitle: tInterview("competencyRatingsTitle"),
+              competencyLabels,
               feedbackLabel: tInterview("feedbackLabel"),
               aiSummaryTitle: tInterview("aiSummaryTitle"),
               generateSummary: tInterview("generateSummary"),
@@ -117,14 +193,27 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
                 no_show: tShared("interviewStatus.no_show"),
                 rescheduled: tShared("interviewStatus.rescheduled"),
               },
-              recommendationLabels: {
-                strong_yes: tShared("hiringRecommendation.strong_yes"),
-                yes: tShared("hiringRecommendation.yes"),
-                neutral: tShared("hiringRecommendation.neutral"),
-                no: tShared("hiringRecommendation.no"),
-                strong_no: tShared("hiringRecommendation.strong_no"),
-              } satisfies Record<HiringRecommendation, string>,
+              interviewTypeLabels,
+              recommendationLabels,
               minutesLabels: Object.fromEntries(interviews.map((iv) => [iv.id, tShared("minutesShort", { count: iv.duration_minutes })])),
+              feedbackDialog: {
+                giveFeedback: tInterview("giveFeedback"),
+                title: tFeedback("title"),
+                description: tFeedback("description"),
+                starEvaluationTitle: tInterview("starEvaluationTitle"),
+                situationLabel: tInterview("situationLabel"),
+                taskLabel: tInterview("taskLabel"),
+                actionLabel: tInterview("actionLabel"),
+                resultLabel: tInterview("resultLabel"),
+                competencyRatingsTitle: tInterview("competencyRatingsTitle"),
+                competencyLabels,
+                feedbackLabel: tInterview("feedbackLabel"),
+                hiringRecommendationLabel: tFeedback("hiringRecommendationLabel"),
+                recommendationLabels,
+                submit: tFeedback("submit"),
+                toastSuccess: tFeedback("toastSuccess"),
+                toastFailed: tFeedback("toastFailed"),
+              },
             }}
           />
         </CardContent>

@@ -22,16 +22,28 @@ interface Member {
   profile: { full_name: string; email: string } | null;
 }
 
+export interface TeamMemberListLabels {
+  roleLabels: Record<RecruiterRole, string>;
+  youBadge: string;
+  removeMemberAria: string;
+  toastRoleUpdated: string;
+  toastRoleUpdateFailed: string;
+  toastMemberRemoved: string;
+  toastMemberRemoveFailed: string;
+}
+
 export function TeamMemberList({
   members,
   currentUserId,
   canChangeRoles,
   canRemove,
+  labels,
 }: {
   members: Member[];
   currentUserId: string;
   canChangeRoles: boolean;
   canRemove: boolean;
+  labels: TeamMemberListLabels;
 }) {
   const [pendingId, setPendingId] = React.useState<string | null>(null);
   const router = useRouter();
@@ -41,10 +53,10 @@ export function TeamMemberList({
     changeMemberRole(memberId, role)
       .then((result) => {
         if (result.success) {
-          toast.success("Role updated");
+          toast.success(labels.toastRoleUpdated);
           router.refresh();
         } else {
-          toast.error(result.error ?? "Failed to update role");
+          toast.error(result.error ?? labels.toastRoleUpdateFailed);
         }
       })
       .finally(() => setPendingId(null));
@@ -55,10 +67,10 @@ export function TeamMemberList({
     removeMember(memberId)
       .then((result) => {
         if (result.success) {
-          toast.success("Member removed");
+          toast.success(labels.toastMemberRemoved);
           router.refresh();
         } else {
-          toast.error(result.error ?? "Failed to remove member");
+          toast.error(result.error ?? labels.toastMemberRemoveFailed);
         }
       })
       .finally(() => setPendingId(null));
@@ -82,7 +94,7 @@ export function TeamMemberList({
                   {member.profile?.full_name}
                   {isSelf && (
                     <Badge variant="outline" className="text-xs font-normal">
-                      You
+                      {labels.youBadge}
                     </Badge>
                   )}
                 </p>
@@ -93,28 +105,26 @@ export function TeamMemberList({
             <div className="flex shrink-0 items-center gap-2">
               {canChangeRoles && !isOwner && !isSelf ? (
                 <Select value={member.role} disabled={isPending} onValueChange={(v) => handleRoleChange(member.id, v as AssignableRole)}>
-                  <SelectTrigger className="w-32 capitalize">
+                  <SelectTrigger className="w-32">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {ROLES.map((r) => (
-                      <SelectItem key={r} value={r} className="capitalize">
-                        {r}
+                      <SelectItem key={r} value={r}>
+                        {labels.roleLabels[r]}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               ) : (
-                <Badge variant="outline" className="capitalize">
-                  {member.role}
-                </Badge>
+                <Badge variant="outline">{labels.roleLabels[member.role]}</Badge>
               )}
 
               {canRemove && !isOwner && !isSelf && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  aria-label="Remove member"
+                  aria-label={labels.removeMemberAria}
                   disabled={isPending}
                   onClick={() => handleRemove(member.id)}
                 >

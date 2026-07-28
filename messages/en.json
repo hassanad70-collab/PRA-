@@ -792,8 +792,31 @@
         "no_show": "No show",
         "rescheduled": "Rescheduled"
       },
+      "interviewType": {
+        "phone": "Phone",
+        "video": "Video",
+        "onsite": "Onsite",
+        "technical": "Technical",
+        "panel": "Panel",
+        "final": "Final"
+      },
+      "competency": {
+        "Technical Skills": "Technical Skills",
+        "Communication": "Communication",
+        "Problem Solving": "Problem Solving",
+        "Culture Fit": "Culture Fit",
+        "Leadership": "Leadership"
+      },
       "candidateFallback": "Candidate",
       "minutesShort": "{count} min",
+      "statusUpdated": "Status updated",
+      "statusUpdateFailed": "Failed to update status",
+      "role": {
+        "owner": "Owner",
+        "admin": "Admin",
+        "recruiter": "Recruiter",
+        "viewer": "Viewer"
+      },
       "hiringRecommendation": {
         "strong_yes": "Strong yes",
         "yes": "Yes",
@@ -821,9 +844,72 @@
       "generalDepartment": "General",
       "remoteLocation": "Remote"
     },
+    "JobActionsMenu": {
+      "menuAria": "Job actions",
+      "publish": "Publish",
+      "toastPublished": "Job published — AI matching started",
+      "closeJob": "Close job",
+      "toastClosed": "Job closed",
+      "duplicate": "Duplicate",
+      "toastDuplicated": "Job duplicated",
+      "archive": "Archive",
+      "toastArchived": "Job archived",
+      "toastFailed": "Action failed"
+    },
     "JobForm": {
       "newJobTitle": "Create a new job",
-      "newJobSubtitle": "Jobs are saved as drafts. Publish when you're ready to start receiving applications."
+      "newJobSubtitle": "Jobs are saved as drafts. Publish when you're ready to start receiving applications.",
+      "jobTitleLabel": "Job title",
+      "jobTitlePlaceholder": "Senior Backend Engineer",
+      "departmentLabel": "Department",
+      "departmentPlaceholder": "Engineering",
+      "aiAssistantLabel": "AI posting assistant",
+      "aiAssistantDescription": "Jot a few rough notes (stack, seniority, what the team does) and let AI draft the description, responsibilities, requirements, benefits, and required skills below — review and edit before publishing.",
+      "keyPointsPlaceholder": "e.g. React/Node team, B2B SaaS product, 3+ years, mostly remote",
+      "draftWithAi": "Draft with AI",
+      "descriptionLabel": "Job description",
+      "responsibilitiesLabel": "Responsibilities (one per line)",
+      "requirementsLabel": "Requirements (one per line)",
+      "benefitsLabel": "Benefits (one per line)",
+      "employmentTypeLabel": "Employment type",
+      "employmentTypeLabels": {
+        "full_time": "Full time",
+        "part_time": "Part time",
+        "contract": "Contract",
+        "internship": "Internship",
+        "temporary": "Temporary"
+      },
+      "experienceLevelLabel": "Experience level",
+      "experienceLevelLabels": {
+        "entry": "Entry",
+        "junior": "Junior",
+        "mid": "Mid",
+        "senior": "Senior",
+        "lead": "Lead",
+        "manager": "Manager",
+        "director": "Director",
+        "executive": "Executive"
+      },
+      "minExperienceYearsLabel": "Min. years experience",
+      "educationRequirementLabel": "Education requirement",
+      "educationRequirementPlaceholder": "Bachelor's degree",
+      "headcountLabel": "Headcount",
+      "requiredSkillsLabel": "Required skills (comma separated)",
+      "niceToHaveSkillsLabel": "Nice-to-have skills (comma separated)",
+      "locationLabel": "Location",
+      "locationPlaceholder": "Cairo, Egypt",
+      "remotePositionLabel": "Remote position",
+      "salaryMinLabel": "Salary min",
+      "salaryMaxLabel": "Salary max",
+      "currencyLabel": "Currency",
+      "saveChanges": "Save changes",
+      "createJobDraft": "Create job draft",
+      "toastJobUpdated": "Job updated",
+      "toastJobCreated": "Job created as draft",
+      "toastFormErrors": "Please check the form for errors",
+      "toastAddTitleFirst": "Add a job title first.",
+      "toastDraftGenerated": "Draft generated — review and edit before publishing",
+      "toastDraftFailed": "Failed to generate a draft"
     },
     "JobDetail": {
       "applicationsAndViews": "{applications} applications · {views} views",
@@ -863,7 +949,27 @@
       "title": "Team",
       "subtitle": "Manage who has access to {company}.",
       "membersTitle": "Members ({count})",
-      "pendingInvitesTitle": "Pending invites ({count})"
+      "pendingInvitesTitle": "Pending invites ({count})",
+      "inviteTeammate": "Invite teammate",
+      "inviteDialogTitle": "Invite a teammate",
+      "inviteDialogDescription": "Generates a link you share yourself — there's no automatic email for now.",
+      "emailLabel": "Email",
+      "roleLabel": "Role",
+      "generateInviteLink": "Generate invite link",
+      "inviteExpiresNote": "Expires in 7 days. Share it however you'd like.",
+      "done": "Done",
+      "copy": "Copy",
+      "toastInviteFailed": "Failed to create invite",
+      "toastInviteCopied": "Invite link copied",
+      "youBadge": "You",
+      "removeMemberAria": "Remove member",
+      "toastRoleUpdated": "Role updated",
+      "toastRoleUpdateFailed": "Failed to update role",
+      "toastMemberRemoved": "Member removed",
+      "toastMemberRemoveFailed": "Failed to remove member",
+      "expiresLabel": "Expires {date}",
+      "toastInviteRevoked": "Invite revoked",
+      "toastInviteRevokeFailed": "Failed to revoke invite"
     },
     "ApplicationDetail": {
       "appliedTo": "{position} · Applied to {job}",
@@ -961,6 +1067,7 @@
       "actionFailed": "Could not update this application right now.",
       "listView": "List",
       "boardView": "Board",
+      "viewToggleAria": "View",
       "noApplicationsYet": "No applications yet for this job.",
       "compareLabel": "Compare",
       "matchLabel": "Match",
@@ -1037,8 +1144,7 @@
       "subject": "Subject",
       "body": "Body",
       "toastSuccess": "Applied to __COUNT__ application(s)",
-      "toastFailed": "Bulk action failed",
-      "close": "Close"
+      "toastFailed": "Bulk action failed"
     },
     "InterviewIntelligence": {
       "noInterviewsYet": "No interviews scheduled yet.",
@@ -1064,6 +1170,43 @@
       "timelineApplied": "Application submitted",
       "timelineStatusChange": "Status changed to {status}",
       "timelineInterview": "{type} interview ({status})"
+    },
+    "ScheduleInterviewDialog": {
+      "trigger": "Schedule interview",
+      "title": "Schedule interview",
+      "description": "The candidate will see this on their applications page.",
+      "dateTimeLabel": "Date and time",
+      "durationLabel": "Duration (minutes)",
+      "typeLabel": "Type",
+      "locationLabel": "Location or link",
+      "locationPlaceholder": "Video call link or office address",
+      "submit": "Schedule",
+      "toastSuccess": "Interview scheduled",
+      "toastFailed": "Failed to schedule interview"
+    },
+    "InterviewFeedbackDialog": {
+      "title": "Interview feedback",
+      "description": "Marks this interview as completed once saved.",
+      "hiringRecommendationLabel": "Hiring recommendation",
+      "submit": "Save feedback",
+      "toastSuccess": "Feedback saved",
+      "toastFailed": "Failed to save feedback"
+    },
+    "DraftMessageDialog": {
+      "trigger": "Draft message",
+      "title": "Draft a candidate message",
+      "description": "AI drafts the text below for you to review and send through your own email client — nothing is sent automatically.",
+      "messageTypeLabels": {
+        "interview_invite": "Interview invite",
+        "rejection": "Rejection",
+        "offer": "Offer"
+      },
+      "subjectLabel": "Subject:",
+      "generateDraft": "Generate draft",
+      "regenerateDraft": "Regenerate",
+      "copy": "Copy",
+      "toastCopied": "Copied to clipboard",
+      "toastFailed": "Failed to generate a draft."
     }
   }
 }

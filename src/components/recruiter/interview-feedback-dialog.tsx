@@ -21,11 +21,38 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { submitInterviewFeedback } from "@/actions/interviews";
 import { INTERVIEW_COMPETENCIES } from "@/types/database";
-import type { HiringRecommendation } from "@/types/database";
+import type { HiringRecommendation, InterviewCompetency } from "@/types/database";
 
 const RECOMMENDATIONS: HiringRecommendation[] = ["strong_yes", "yes", "neutral", "no", "strong_no"];
 
-export function InterviewFeedbackDialog({ interviewId, applicationId }: { interviewId: string; applicationId: string }) {
+export interface InterviewFeedbackDialogLabels {
+  giveFeedback: string;
+  title: string;
+  description: string;
+  starEvaluationTitle: string;
+  situationLabel: string;
+  taskLabel: string;
+  actionLabel: string;
+  resultLabel: string;
+  competencyRatingsTitle: string;
+  competencyLabels: Record<InterviewCompetency, string>;
+  feedbackLabel: string;
+  hiringRecommendationLabel: string;
+  recommendationLabels: Record<HiringRecommendation, string>;
+  submit: string;
+  toastSuccess: string;
+  toastFailed: string;
+}
+
+export function InterviewFeedbackDialog({
+  interviewId,
+  applicationId,
+  labels,
+}: {
+  interviewId: string;
+  applicationId: string;
+  labels: InterviewFeedbackDialogLabels;
+}) {
   const [open, setOpen] = React.useState(false);
   const [recommendation, setRecommendation] = React.useState<HiringRecommendation>("neutral");
   const [isPending, startTransition] = React.useTransition();
@@ -36,11 +63,11 @@ export function InterviewFeedbackDialog({ interviewId, applicationId }: { interv
     startTransition(async () => {
       const result = await submitInterviewFeedback(interviewId, applicationId, formData);
       if (result.success) {
-        toast.success("Feedback saved");
+        toast.success(labels.toastSuccess);
         setOpen(false);
         router.refresh();
       } else {
-        toast.error(result.error ?? "Failed to save feedback");
+        toast.error(result.error ?? labels.toastFailed);
       }
     });
   };
@@ -49,41 +76,41 @@ export function InterviewFeedbackDialog({ interviewId, applicationId }: { interv
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
-          <ClipboardCheck className="h-4 w-4" /> Give feedback
+          <ClipboardCheck className="h-4 w-4" /> {labels.giveFeedback}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-h-[85vh] max-w-xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Interview feedback</DialogTitle>
-          <DialogDescription>Marks this interview as completed once saved.</DialogDescription>
+          <DialogTitle>{labels.title}</DialogTitle>
+          <DialogDescription>{labels.description}</DialogDescription>
         </DialogHeader>
         <form action={onSubmit} className="space-y-4">
           <div className="space-y-3">
-            <p className="text-sm font-medium">STAR evaluation</p>
+            <p className="text-sm font-medium">{labels.starEvaluationTitle}</p>
             <div className="space-y-2">
-              <Label htmlFor="situation">Situation</Label>
+              <Label htmlFor="situation">{labels.situationLabel}</Label>
               <Textarea id="situation" name="situation" rows={2} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="task">Task</Label>
+              <Label htmlFor="task">{labels.taskLabel}</Label>
               <Textarea id="task" name="task" rows={2} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="action">Action</Label>
+              <Label htmlFor="action">{labels.actionLabel}</Label>
               <Textarea id="action" name="action" rows={2} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="result">Result</Label>
+              <Label htmlFor="result">{labels.resultLabel}</Label>
               <Textarea id="result" name="result" rows={2} />
             </div>
           </div>
 
           <div className="space-y-3">
-            <p className="text-sm font-medium">Competency ratings (1-5)</p>
+            <p className="text-sm font-medium">{labels.competencyRatingsTitle}</p>
             <div className="grid gap-3 sm:grid-cols-2">
               {INTERVIEW_COMPETENCIES.map((competency) => (
                 <div key={competency} className="space-y-2">
-                  <Label htmlFor={`competency_${competency}`}>{competency}</Label>
+                  <Label htmlFor={`competency_${competency}`}>{labels.competencyLabels[competency]}</Label>
                   <Input id={`competency_${competency}`} name={`competency_${competency}`} type="number" min={1} max={5} />
                 </div>
               ))}
@@ -91,20 +118,20 @@ export function InterviewFeedbackDialog({ interviewId, applicationId }: { interv
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="feedback">General feedback</Label>
+            <Label htmlFor="feedback">{labels.feedbackLabel}</Label>
             <Textarea id="feedback" name="feedback" rows={3} />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="hiringRecommendation">Hiring recommendation</Label>
+            <Label htmlFor="hiringRecommendation">{labels.hiringRecommendationLabel}</Label>
             <Select value={recommendation} onValueChange={(v) => setRecommendation(v as HiringRecommendation)}>
-              <SelectTrigger id="hiringRecommendation" className="capitalize">
+              <SelectTrigger id="hiringRecommendation">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {RECOMMENDATIONS.map((r) => (
-                  <SelectItem key={r} value={r} className="capitalize">
-                    {r.replace("_", " ")}
+                  <SelectItem key={r} value={r}>
+                    {labels.recommendationLabels[r]}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -114,7 +141,7 @@ export function InterviewFeedbackDialog({ interviewId, applicationId }: { interv
           <DialogFooter>
             <Button type="submit" variant="gradient" disabled={isPending}>
               {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-              Save feedback
+              {labels.submit}
             </Button>
           </DialogFooter>
         </form>

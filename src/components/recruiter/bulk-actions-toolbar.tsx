@@ -26,8 +26,10 @@ import {
   bulkUpdateApplicationStatus,
 } from "@/actions/bulk-applications";
 import { CsvExportButton } from "@/components/recruiter/csv-export-button";
-import type { ApplicationStatus } from "@/types/database";
+import type { ApplicationStatus, InterviewType } from "@/types/database";
 import type { CandidateMessageDraft } from "@/lib/ai/candidate-message-drafter";
+
+const INTERVIEW_TYPES: InterviewType[] = ["phone", "video", "onsite", "technical", "panel", "final"];
 
 export interface BulkToolbarRecruiter {
   id: string;
@@ -59,6 +61,7 @@ export interface BulkToolbarLabels {
   scheduledAt: string;
   duration: string;
   interviewType: string;
+  interviewTypeLabels: Record<InterviewType, string>;
   locationOrLink: string;
   scheduleSubmit: string;
   emailDialogTitle: string;
@@ -98,7 +101,7 @@ export function BulkActionsToolbar({
   const [emailDraft, setEmailDraft] = React.useState<CandidateMessageDraft | null>(null);
   const [recipientEmails, setRecipientEmails] = React.useState<string[]>([]);
   const [messageType, setMessageType] = React.useState<"rejection" | "offer">("rejection");
-  const [interviewType, setInterviewType] = React.useState("video");
+  const [interviewType, setInterviewType] = React.useState<InterviewType>("video");
 
   const count = selectedApplicationIds.length;
 
@@ -241,14 +244,14 @@ export function BulkActionsToolbar({
             </div>
             <div className="space-y-2">
               <Label htmlFor="interviewType">{labels.interviewType}</Label>
-              <Select value={interviewType} onValueChange={setInterviewType}>
+              <Select value={interviewType} onValueChange={(v) => setInterviewType(v as InterviewType)}>
                 <SelectTrigger id="interviewType">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {["phone", "video", "onsite", "technical", "panel", "final"].map((t) => (
-                    <SelectItem key={t} value={t} className="capitalize">
-                      {t}
+                  {INTERVIEW_TYPES.map((t) => (
+                    <SelectItem key={t} value={t}>
+                      {labels.interviewTypeLabels[t]}
                     </SelectItem>
                   ))}
                 </SelectContent>

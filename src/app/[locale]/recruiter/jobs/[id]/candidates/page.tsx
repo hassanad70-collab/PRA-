@@ -15,7 +15,7 @@ import { getJobById, getRecruiterContext } from "@/lib/queries/jobs";
 import { getRecommendedCandidatesForJob } from "@/lib/queries/matching";
 import { getCompanyMembers } from "@/lib/queries/team";
 import { initials } from "@/lib/utils";
-import type { ApplicationStatus } from "@/types/database";
+import type { ApplicationStatus, InterviewType } from "@/types/database";
 
 const SHORTLIST_SIZE = 5;
 
@@ -49,6 +49,15 @@ export default async function JobCandidatesPage({ params }: { params: Promise<{ 
     rejected: tShared("applicationStatus.rejected"),
     withdrawn: tShared("applicationStatus.withdrawn"),
     archived: tShared("applicationStatus.archived"),
+  };
+
+  const interviewTypeLabels: Record<InterviewType, string> = {
+    phone: tShared("interviewType.phone"),
+    video: tShared("interviewType.video"),
+    onsite: tShared("interviewType.onsite"),
+    technical: tShared("interviewType.technical"),
+    panel: tShared("interviewType.panel"),
+    final: tShared("interviewType.final"),
   };
 
   const recruitersForAssign = companyMembers.map((m) => ({ id: m.id, name: m.profile?.full_name ?? m.profile?.email ?? "" }));
@@ -126,6 +135,7 @@ export default async function JobCandidatesPage({ params }: { params: Promise<{ 
             labels={{
               list: t("listView"),
               board: t("boardView"),
+              viewToggleAria: t("viewToggleAria"),
               noApplications: t("noApplicationsYet"),
               compare: t("compareLabel"),
               matchLabel: t("matchLabel"),
@@ -133,6 +143,8 @@ export default async function JobCandidatesPage({ params }: { params: Promise<{ 
               screeningLabel: t("screeningLabel"),
               statusLabels,
               candidateFallback: tShared("candidateFallback"),
+              statusUpdated: tShared("statusUpdated"),
+              statusUpdateFailed: tShared("statusUpdateFailed"),
               bulk: {
                 selectedCount: tBulk("selectedCount"),
                 moveTo: tBulk("moveTo"),
@@ -150,6 +162,7 @@ export default async function JobCandidatesPage({ params }: { params: Promise<{ 
                 scheduledAt: tBulk("scheduledAt"),
                 duration: tBulk("duration"),
                 interviewType: tBulk("interviewType"),
+                interviewTypeLabels,
                 locationOrLink: tBulk("locationOrLink"),
                 scheduleSubmit: tBulk("scheduleSubmit"),
                 emailDialogTitle: tBulk("emailDialogTitle"),

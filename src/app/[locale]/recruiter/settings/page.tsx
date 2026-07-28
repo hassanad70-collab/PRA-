@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getCurrentUser } from "@/lib/queries/candidate";
 import { getRecruiterContext } from "@/lib/queries/jobs";
+import type { RecruiterRole } from "@/types/database";
 
 export default async function RecruiterSettingsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -19,7 +20,17 @@ export default async function RecruiterSettingsPage({ params }: { params: Promis
   const recruiter = await getRecruiterContext(user.id);
   if (!recruiter) redirect({ href: "/candidate/dashboard", locale });
 
-  const t = await getTranslations("Recruiter.Settings");
+  const [t, tShared] = await Promise.all([
+    getTranslations("Recruiter.Settings"),
+    getTranslations("Recruiter.Shared"),
+  ]);
+
+  const roleLabels: Record<RecruiterRole, string> = {
+    owner: tShared("role.owner"),
+    admin: tShared("role.admin"),
+    recruiter: tShared("role.recruiter"),
+    viewer: tShared("role.viewer"),
+  };
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
@@ -48,9 +59,7 @@ export default async function RecruiterSettingsPage({ params }: { params: Promis
           <div className="space-y-2">
             <Label>{t("role")}</Label>
             <div>
-              <Badge variant="outline" className="capitalize">
-                {recruiter.role}
-              </Badge>
+              <Badge variant="outline">{roleLabels[recruiter.role as RecruiterRole]}</Badge>
             </div>
           </div>
         </CardContent>

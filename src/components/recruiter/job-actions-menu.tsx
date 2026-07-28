@@ -16,7 +16,20 @@ import {
 import { archiveJob, closeJob, duplicateJob, publishJob } from "@/actions/jobs";
 import type { JobStatus } from "@/types/database";
 
-export function JobActionsMenu({ jobId, status }: { jobId: string; status: JobStatus }) {
+export interface JobActionsMenuLabels {
+  menuAria: string;
+  publish: string;
+  toastPublished: string;
+  closeJob: string;
+  toastClosed: string;
+  duplicate: string;
+  toastDuplicated: string;
+  archive: string;
+  toastArchived: string;
+  toastFailed: string;
+}
+
+export function JobActionsMenu({ jobId, status, labels }: { jobId: string; status: JobStatus; labels: JobActionsMenuLabels }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -28,7 +41,7 @@ export function JobActionsMenu({ jobId, status }: { jobId: string; status: JobSt
         if (result.jobId) router.push(`/recruiter/jobs/${result.jobId}`);
         router.refresh();
       } else {
-        toast.error(result.error ?? "Action failed");
+        toast.error(result.error ?? labels.toastFailed);
       }
     });
   };
@@ -36,27 +49,27 @@ export function JobActionsMenu({ jobId, status }: { jobId: string; status: JobSt
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon" disabled={isPending} aria-label="Job actions">
+        <Button variant="outline" size="icon" disabled={isPending} aria-label={labels.menuAria}>
           <MoreVertical className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {status === "draft" && (
-          <DropdownMenuItem onClick={() => run(() => publishJob(jobId), "Job published — AI matching started")}>
-            <Send className="h-4 w-4" /> Publish
+          <DropdownMenuItem onClick={() => run(() => publishJob(jobId), labels.toastPublished)}>
+            <Send className="h-4 w-4" /> {labels.publish}
           </DropdownMenuItem>
         )}
         {status === "published" && (
-          <DropdownMenuItem onClick={() => run(() => closeJob(jobId), "Job closed")}>
-            <XCircle className="h-4 w-4" /> Close job
+          <DropdownMenuItem onClick={() => run(() => closeJob(jobId), labels.toastClosed)}>
+            <XCircle className="h-4 w-4" /> {labels.closeJob}
           </DropdownMenuItem>
         )}
-        <DropdownMenuItem onClick={() => run(() => duplicateJob(jobId), "Job duplicated")}>
-          <Copy className="h-4 w-4" /> Duplicate
+        <DropdownMenuItem onClick={() => run(() => duplicateJob(jobId), labels.toastDuplicated)}>
+          <Copy className="h-4 w-4" /> {labels.duplicate}
         </DropdownMenuItem>
         {status !== "archived" && (
-          <DropdownMenuItem onClick={() => run(() => archiveJob(jobId), "Job archived")}>
-            <Archive className="h-4 w-4" /> Archive
+          <DropdownMenuItem onClick={() => run(() => archiveJob(jobId), labels.toastArchived)}>
+            <Archive className="h-4 w-4" /> {labels.archive}
           </DropdownMenuItem>
         )}
       </DropdownMenuContent>

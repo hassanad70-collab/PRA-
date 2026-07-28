@@ -8,10 +8,10 @@ import { useRouter } from "@/i18n/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { InterviewFeedbackDialog } from "@/components/recruiter/interview-feedback-dialog";
+import { InterviewFeedbackDialog, type InterviewFeedbackDialogLabels } from "@/components/recruiter/interview-feedback-dialog";
 import { generateInterviewSummary, updateInterviewStatus } from "@/actions/interviews";
 import { formatDate } from "@/lib/utils";
-import type { Interview, InterviewStatus } from "@/types/database";
+import type { Interview, InterviewCompetency, InterviewStatus, InterviewType } from "@/types/database";
 
 const STATUS_VARIANT: Record<InterviewStatus, "default" | "secondary" | "success" | "warning" | "destructive" | "outline"> = {
   scheduled: "warning",
@@ -26,7 +26,6 @@ export interface InterviewListLabels {
   cancel: string;
   cancelSucceeded: string;
   cancelFailed: string;
-  giveFeedback: string;
   recommendationLabel: string;
   scorecardTitle: string;
   starEvaluationTitle: string;
@@ -35,6 +34,7 @@ export interface InterviewListLabels {
   actionLabel: string;
   resultLabel: string;
   competencyRatingsTitle: string;
+  competencyLabels: Record<InterviewCompetency, string>;
   feedbackLabel: string;
   aiSummaryTitle: string;
   generateSummary: string;
@@ -42,10 +42,12 @@ export interface InterviewListLabels {
   generatingSummary: string;
   summaryFailed: string;
   statusLabels: Record<InterviewStatus, string>;
+  interviewTypeLabels: Record<InterviewType, string>;
   recommendationLabels: Record<string, string>;
   /** Keyed by interview id -- precomputed server-side since functions can't
    * cross the Server-to-Client Component boundary. */
   minutesLabels: Record<string, string>;
+  feedbackDialog: InterviewFeedbackDialogLabels;
 }
 
 export function InterviewList({
@@ -106,9 +108,7 @@ export function InterviewList({
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge variant={STATUS_VARIANT[iv.status]}>{labels.statusLabels[iv.status]}</Badge>
-                    <Badge variant="outline" className="capitalize">
-                      {iv.interview_type}
-                    </Badge>
+                    <Badge variant="outline">{labels.interviewTypeLabels[iv.interview_type]}</Badge>
                   </div>
                   <p className="mt-1.5 flex items-center gap-1.5 text-sm text-muted-foreground">
                     <Calendar className="h-3.5 w-3.5" /> {formatDate(iv.scheduled_at)} · {labels.minutesLabels[iv.id]}
@@ -127,7 +127,7 @@ export function InterviewList({
                 </div>
                 {iv.status === "scheduled" && (
                   <div className="flex shrink-0 items-center gap-2">
-                    <InterviewFeedbackDialog interviewId={iv.id} applicationId={applicationId} />
+                    <InterviewFeedbackDialog interviewId={iv.id} applicationId={applicationId} labels={labels.feedbackDialog} />
                     <Button variant="ghost" size="sm" disabled={pendingId === iv.id} onClick={() => handleCancel(iv.id)}>
                       {pendingId === iv.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Ban className="h-3.5 w-3.5" />}
                       {labels.cancel}
@@ -144,7 +144,9 @@ export function InterviewList({
                     <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                       {Object.entries(iv.competency_ratings).map(([competency, rating]) => (
                         <div key={competency} className="rounded-lg border border-border p-2 text-center">
-                          <p className="text-xs text-muted-foreground">{competency}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {labels.competencyLabels[competency as InterviewCompetency] ?? competency}
+                          </p>
                           <p className="text-lg font-bold">{rating}/5</p>
                         </div>
                       ))}

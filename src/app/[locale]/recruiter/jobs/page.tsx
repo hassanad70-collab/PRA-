@@ -27,10 +27,23 @@ export default async function RecruiterJobsPage({ params }: { params: Promise<{ 
   if (!recruiter) redirect({ href: "/candidate/dashboard", locale });
 
   const jobs = await getRecruiterJobs(recruiter.company_id);
-  const [t, tShared] = await Promise.all([
+  const [t, tShared, tActions] = await Promise.all([
     getTranslations("Recruiter.Jobs"),
     getTranslations("Recruiter.Shared"),
+    getTranslations("Recruiter.JobActionsMenu"),
   ]);
+  const actionsLabels = {
+    menuAria: tActions("menuAria"),
+    publish: tActions("publish"),
+    toastPublished: tActions("toastPublished"),
+    closeJob: tActions("closeJob"),
+    toastClosed: tActions("toastClosed"),
+    duplicate: tActions("duplicate"),
+    toastDuplicated: tActions("toastDuplicated"),
+    archive: tActions("archive"),
+    toastArchived: tActions("toastArchived"),
+    toastFailed: tActions("toastFailed"),
+  };
 
   return (
     <div className="space-y-6">
@@ -73,7 +86,7 @@ export default async function RecruiterJobsPage({ params }: { params: Promise<{ 
                 <Users className="h-3.5 w-3.5" />
                 {job.applications_count}
               </Link>
-              <JobActionsMenu jobId={job.id} status={job.status as JobStatus} />
+              <JobActionsMenu jobId={job.id} status={job.status as JobStatus} labels={actionsLabels} />
             </CardContent>
           </Card>
         ))}

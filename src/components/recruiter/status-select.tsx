@@ -26,14 +26,22 @@ const STATUSES: ApplicationStatus[] = [
   "archived",
 ];
 
+export interface StatusSelectLabels {
+  statusLabels: Record<ApplicationStatus, string>;
+  updated: string;
+  updateFailed: string;
+}
+
 export function StatusSelect({
   applicationId,
   status,
   className,
+  labels,
 }: {
   applicationId: string;
   status: ApplicationStatus;
   className?: string;
+  labels: StatusSelectLabels;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -46,21 +54,21 @@ export function StatusSelect({
         startTransition(async () => {
           const result = await updateApplicationStatus(applicationId, value as ApplicationStatus);
           if (result.success) {
-            toast.success("Status updated");
+            toast.success(labels.updated);
             router.refresh();
           } else {
-            toast.error(result.error ?? "Failed to update status");
+            toast.error(result.error ?? labels.updateFailed);
           }
         })
       }
     >
-      <SelectTrigger className={cn("w-44 capitalize", className)}>
+      <SelectTrigger className={cn("w-44", className)}>
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
         {STATUSES.map((s) => (
-          <SelectItem key={s} value={s} className="capitalize">
-            {s.replace("_", " ")}
+          <SelectItem key={s} value={s}>
+            {labels.statusLabels[s]}
           </SelectItem>
         ))}
       </SelectContent>
