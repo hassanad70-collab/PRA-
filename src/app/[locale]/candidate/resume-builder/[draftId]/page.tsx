@@ -33,6 +33,7 @@ export default async function ResumeDraftEditorPage({ params }: { params: Promis
             <Badge variant={draft.status === "finalized" ? "success" : "outline"} className="capitalize">
               {draft.status}
             </Badge>
+            {draft.version > 1 && <Badge variant="outline">{t("version", { version: draft.version })}</Badge>}
           </div>
           <div className="flex gap-2">
             <ImportResumeDialog draftId={draft.id} />

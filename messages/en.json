@@ -478,7 +478,8 @@
     "ResumeDraftEditor": {
       "allDrafts": "All drafts",
       "lastPdfDownload": "Last PDF download",
-      "lastWordDownload": "Last Word download"
+      "lastWordDownload": "Last Word download",
+      "version": "Version {version}"
     },
     "ImportResume": {
       "trigger": "Import resume",
@@ -691,7 +692,20 @@
       "toastSkillApplied": "Skill added",
       "toastAchievementApplied": "Achievement added",
       "toastApplyFailed": "Failed to apply suggestion",
-      "toastBatchApplied": "{count} suggestions applied"
+      "toastBatchApplied": "{count} suggestions applied",
+      "historyTitle": "History",
+      "noHistoryYet": "No suggestions reviewed yet — accepted and rejected suggestions will appear here.",
+      "historyType": {
+        "summary": "Professional summary",
+        "experience": "Experience bullet",
+        "skills": "Skills",
+        "achievement": "Achievement",
+        "ats_keyword": "ATS keyword"
+      },
+      "historyOutcome": {
+        "accepted": "Accepted",
+        "rejected": "Rejected"
+      }
     },
     "SaveJob": {
       "save": "Save job",

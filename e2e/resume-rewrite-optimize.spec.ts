@@ -52,7 +52,10 @@ test.describe("Resume Intelligence Hub — Rewrite & Optimize (Unit B)", () => {
     await page.getByRole("heading", { name: "Rewrite & Optimize" }).scrollIntoViewIfNeeded();
     await page.getByRole("button", { name: "Generate suggestions" }).click();
 
-    await expect(page.getByText("Professional summary")).toBeVisible({ timeout: 15_000 });
+    // Not scoped with .first() this text would also match a History (Unit C)
+    // entry from a prior run of this same suite -- that module renders the
+    // same "Professional summary" label for its own accepted/rejected rows.
+    await expect(page.getByText("Professional summary").first()).toBeVisible({ timeout: 15_000 });
     await page.getByRole("button", { name: "Accept" }).first().click();
     await expect(page.getByText("Applied").first()).toBeVisible({ timeout: 10_000 });
 
@@ -73,7 +76,7 @@ test.describe("Resume Intelligence Hub — Rewrite & Optimize (Unit B)", () => {
     await page.getByRole("heading", { name: "Rewrite & Optimize" }).scrollIntoViewIfNeeded();
     await page.getByRole("button", { name: "Generate suggestions" }).click();
 
-    await expect(page.getByText("Professional summary")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText("Professional summary").first()).toBeVisible({ timeout: 15_000 });
     await page.getByRole("button", { name: "Reject" }).first().click();
     await expect(page.getByText("Rejected").first()).toBeVisible();
 

@@ -9,10 +9,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AtsScoreCard } from "@/components/candidate/ats-score-card";
 import { ResumeHealthChecklist } from "@/components/candidate/resume-intelligence/health-checklist";
 import { RewriteOptimizePanel } from "@/components/candidate/resume-intelligence/rewrite-optimize-panel";
+import { SuggestionHistoryList } from "@/components/candidate/resume-intelligence/suggestion-history-list";
 import { ResumeUpload } from "@/components/candidate/resume-upload";
 import { SetPrimaryButton } from "@/components/candidate/set-primary-button";
 import { getCandidateFullProfile, getCurrentUser, getLatestAtsScore } from "@/lib/queries/candidate";
+import { getSuggestionHistory } from "@/lib/resume-intelligence/suggestion-events";
 import { runStructuralChecks } from "@/lib/resume-intelligence/structural-checks";
+import { createClient } from "@/lib/supabase/server";
 import { formatRelativeTime } from "@/lib/utils";
 
 export default async function ResumePage({ params }: { params: Promise<{ locale: string }> }) {
@@ -20,12 +23,14 @@ export default async function ResumePage({ params }: { params: Promise<{ locale:
   const user = await getCurrentUser();
   if (!user) redirect({ href: "/login", locale });
 
-  const [{ resumes }, atsScore, t, tShared, tResumeIntelligence] = await Promise.all([
+  const supabase = await createClient();
+  const [{ resumes }, atsScore, t, tShared, tResumeIntelligence, suggestionHistory] = await Promise.all([
     getCandidateFullProfile(user.id),
     getLatestAtsScore(user.id),
     getTranslations("Candidate.Resume"),
     getTranslations("Candidate.Shared"),
     getTranslations("Candidate.ResumeIntelligence"),
+    getSuggestionHistory(supabase, user.id),
   ]);
 
   const scoredResume = atsScore ? resumes.find((r) => r.id === atsScore.resume_id) : undefined;
@@ -111,6 +116,8 @@ export default async function ResumePage({ params }: { params: Promise<{ locale:
       )}
 
       <RewriteOptimizePanel />
+
+      <SuggestionHistoryList events={suggestionHistory} />
     </div>
   );
 }

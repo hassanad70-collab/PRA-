@@ -10,7 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "@/i18n/navigation";
 import { addAchievement, addSkill, applySummaryRewrite, updateExperienceDescription } from "@/actions/profile";
-import { generateResumeSuggestions, type ResumeSuggestions } from "@/actions/resume";
+import { decideSuggestionEvent } from "@/actions/resume-intelligence";
+import { generateResumeSuggestions, type LabeledSuggestion, type ResumeSuggestions } from "@/actions/resume";
 
 type ItemStatus = "pending" | "applied" | "rejected";
 
@@ -22,10 +23,32 @@ function listKeys(s: ResumeSuggestions): string[] {
   s.experience.forEach((e) => {
     if (e.suggested.trim() && e.suggested.trim() !== (e.current ?? "").trim()) keys.push(`experience:${e.id}`);
   });
-  s.skillAdditions.forEach((skill) => keys.push(`skill:${skill}`));
+  s.skillAdditions.forEach((skill) => keys.push(`skill:${skill.value}`));
   s.achievements.forEach((_, i) => keys.push(`achievement:${i}`));
-  s.atsKeywords.forEach((k) => keys.push(`keyword:${k}`));
+  s.atsKeywords.forEach((k) => keys.push(`keyword:${k.value}`));
   return keys;
+}
+
+/** The event id logged for a suggestion (Unit C), looked up by the same key scheme used for UI state -- null for items where logging failed, in which case decideSuggestionEvent is simply skipped. */
+function eventIdForKey(s: ResumeSuggestions, key: string): string | null {
+  if (key === "summary") return s.summary.eventId;
+  if (key.startsWith("experience:")) {
+    const id = key.slice("experience:".length);
+    return s.experience.find((e) => e.id === id)?.eventId ?? null;
+  }
+  if (key.startsWith("skill:")) {
+    const name = key.slice("skill:".length);
+    return s.skillAdditions.find((x) => x.value === name)?.eventId ?? null;
+  }
+  if (key.startsWith("keyword:")) {
+    const name = key.slice("keyword:".length);
+    return s.atsKeywords.find((x) => x.value === name)?.eventId ?? null;
+  }
+  if (key.startsWith("achievement:")) {
+    const index = Number(key.slice("achievement:".length));
+    return s.achievements[index]?.eventId ?? null;
+  }
+  return null;
 }
 
 /**
@@ -41,6 +64,12 @@ function listKeys(s: ResumeSuggestions): string[] {
  * Health checklist above, not here: those are deterministic pattern
  * checks, not AI generation, per the "AI only for what can't be produced
  * deterministically" principle.
+ *
+ * Every suggestion shown here was logged as a pending resume_suggestion_events
+ * row by generateResumeSuggestions (Unit C); accepting/rejecting here also
+ * calls decideSuggestionEvent so the History module has a durable record --
+ * best-effort only, never blocking the user-visible accept/reject action if
+ * the bookkeeping call itself fails.
  */
 export function RewriteOptimizePanel() {
   const t = useTranslations("Candidate.ResumeIntelligence");
@@ -95,14 +124,20 @@ export function RewriteOptimizePanel() {
     }
     if (key.startsWith("achievement:")) {
       const index = Number(key.slice("achievement:".length));
-      const text = suggestions.achievements[index];
-      if (!text) return false;
-      const res = await addAchievement(text);
+      const item = suggestions.achievements[index];
+      if (!item) return false;
+      const res = await addAchievement(item.value);
       if (!res.success) toast.error(res.error ?? t("toastApplyFailed"));
       else toast.success(t("toastAchievementApplied"));
       return res.success;
     }
     return false;
+  };
+
+  const recordDecision = (key: string, outcome: "accepted" | "rejected") => {
+    if (!suggestions) return;
+    const eventId = eventIdForKey(suggestions, key);
+    if (eventId) decideSuggestionEvent(eventId, outcome).catch(() => {});
   };
 
   const handleAccept = (key: string) => {
@@ -111,6 +146,7 @@ export function RewriteOptimizePanel() {
       .then((ok) => {
         if (ok) {
           setItemStatus((prev) => ({ ...prev, [key]: "applied" }));
+          recordDecision(key, "accepted");
           router.refresh();
         }
       })
@@ -119,6 +155,7 @@ export function RewriteOptimizePanel() {
 
   const handleReject = (key: string) => {
     setItemStatus((prev) => ({ ...prev, [key]: "rejected" }));
+    recordDecision(key, "rejected");
   };
 
   const pendingKeys = suggestions ? listKeys(suggestions).filter((k) => (itemStatus[k] ?? "pending") === "pending") : [];
@@ -132,6 +169,7 @@ export function RewriteOptimizePanel() {
       if (ok) {
         count++;
         setItemStatus((prev) => ({ ...prev, [key]: "applied" }));
+        recordDecision(key, "accepted");
       }
     }
     setApplyingKey(null);
@@ -306,7 +344,7 @@ function ListItem({
 }: {
   label: string;
   prefix: string;
-  items: string[];
+  items: LabeledSuggestion[];
   itemStatus: Record<string, ItemStatus>;
   applyingKey: string | null;
   onAccept: (key: string) => void;
@@ -318,11 +356,11 @@ function ListItem({
       <p className="mb-3 text-sm font-medium">{label}</p>
       <div className="space-y-2">
         {items.map((item, index) => {
-          const key = `${prefix}${useIndexKey ? index : item}`;
+          const key = `${prefix}${useIndexKey ? index : item.value}`;
           const status = itemStatus[key] ?? "pending";
           return (
             <div key={key} className="flex items-center justify-between gap-3 rounded-lg bg-secondary/40 px-3 py-2">
-              <span className="text-sm">{item}</span>
+              <span className="text-sm">{item.value}</span>
               <StatusOrActions
                 status={status}
                 isApplying={applyingKey === key}

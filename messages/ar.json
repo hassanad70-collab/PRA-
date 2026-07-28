@@ -478,7 +478,8 @@
     "ResumeDraftEditor": {
       "allDrafts": "كل المسودات",
       "lastPdfDownload": "آخر تنزيل بصيغة PDF",
-      "lastWordDownload": "آخر تنزيل بصيغة Word"
+      "lastWordDownload": "آخر تنزيل بصيغة Word",
+      "version": "الإصدار {version}"
     },
     "ImportResume": {
       "trigger": "استيراد سيرة ذاتية",
@@ -691,7 +692,20 @@
       "toastSkillApplied": "تمت إضافة المهارة",
       "toastAchievementApplied": "تمت إضافة الإنجاز",
       "toastApplyFailed": "فشل تطبيق الاقتراح",
-      "toastBatchApplied": "تم تطبيق {count} اقتراحات"
+      "toastBatchApplied": "تم تطبيق {count} اقتراحات",
+      "historyTitle": "السجل",
+      "noHistoryYet": "لم تتم مراجعة أي اقتراحات بعد — ستظهر هنا الاقتراحات المقبولة والمرفوضة.",
+      "historyType": {
+        "summary": "الملخص المهني",
+        "experience": "نقطة خبرة",
+        "skills": "المهارات",
+        "achievement": "إنجاز",
+        "ats_keyword": "كلمة مفتاحية لـ ATS"
+      },
+      "historyOutcome": {
+        "accepted": "مقبول",
+        "rejected": "مرفوض"
+      }
     },
     "SaveJob": {
       "save": "حفظ الوظيفة",

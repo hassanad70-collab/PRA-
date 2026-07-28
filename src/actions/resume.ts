@@ -7,6 +7,7 @@ import { parseResumeText } from "@/lib/ai/resume-parser";
 import { scoreResumeATS } from "@/lib/ai/ats-scorer";
 import { generateAchievementStatements, generateAtsKeywordSuggestions } from "@/lib/ai/resume-improver";
 import { generateExperienceSuggestion, generateSkillsSuggestion, generateSummarySuggestion } from "@/lib/ai/resume-builder";
+import { logSuggestionEvent } from "@/lib/resume-intelligence/suggestion-events";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import type { ParsedResumeData } from "@/types/database";
@@ -320,14 +321,20 @@ export interface ResumeExperienceSuggestion {
   companyName: string;
   current: string | null;
   suggested: string;
+  eventId: string | null;
+}
+
+export interface LabeledSuggestion {
+  value: string;
+  eventId: string | null;
 }
 
 export interface ResumeSuggestions {
-  summary: { current: string | null; suggested: string };
+  summary: { current: string | null; suggested: string; eventId: string | null };
   experience: ResumeExperienceSuggestion[];
-  skillAdditions: string[];
-  achievements: string[];
-  atsKeywords: string[];
+  skillAdditions: LabeledSuggestion[];
+  achievements: LabeledSuggestion[];
+  atsKeywords: LabeledSuggestion[];
 }
 
 export interface GenerateResumeSuggestionsResult extends ActionResult {
@@ -340,7 +347,10 @@ export interface GenerateResumeSuggestionsResult extends ActionResult {
  * profile data (not a resume's parsed snapshot) -- summary and experience
  * bullets reuse the exact same functions the Resume Builder already uses
  * for its per-section suggestions, so there's one rewriter/bullet-optimizer
- * implementation, not two.
+ * implementation, not two. Every suggestion actually shown gets a durable
+ * event row (Unit C) so it can later be accepted/rejected and shown in the
+ * History module -- logged here, decided via decideSuggestionEvent in
+ * actions/resume-intelligence.ts once the candidate reviews it.
  */
 export async function generateResumeSuggestions(): Promise<GenerateResumeSuggestionsResult> {
   const supabase = await createClient();
@@ -395,22 +405,90 @@ export async function generateResumeSuggestions(): Promise<GenerateResumeSuggest
     // generateExperienceSuggestion is order-preserving by contract, but
     // matching on company+title (rather than array index) stays correct
     // even if that contract ever loosens.
-    const suggestionByRole = new Map(experienceResult.map((e) => [`${e.company_name} ${e.job_title}`, e.description]));
+    const roleKey = (companyName: string, jobTitle: string) => companyName + " :: " + jobTitle;
+    const suggestionByRole = new Map(experienceResult.map((e) => [roleKey(e.company_name, e.job_title), e.description]));
+
+    const summarySuggested = summaryResult.text ?? "";
+    const summaryChanged = summarySuggested.trim() !== "" && summarySuggested.trim() !== (candidate?.summary ?? "").trim();
+
+    const experienceWithDiffs = experienceRows.map((e) => {
+      const suggested = suggestionByRole.get(roleKey(e.company_name, e.job_title)) ?? e.description ?? "";
+      const changed = suggested.trim() !== "" && suggested.trim() !== (e.description ?? "").trim();
+      return { row: e, suggested, changed };
+    });
+
+    const newSkills = skillsResult.suggested_additions.filter(
+      (s) => !skillNames.some((existing) => existing.toLowerCase() === s.toLowerCase())
+    );
+    const newKeywords = atsKeywords.filter((k) => !skillNames.some((existing) => existing.toLowerCase() === k.toLowerCase()));
+
+    // Every suggestion actually shown to the candidate gets a durable event
+    // row; items filtered out above (no real change / already-known skill)
+    // are never logged, keeping the audit log free of no-op noise. Logged
+    // sequentially (not Promise.all) so each insert's result lines up with
+    // its source item without needing a second pass to re-associate them.
+    const summaryEventId = summaryChanged
+      ? await logSuggestionEvent(supabase, {
+          candidateId: user.id,
+          source: "rewrite_optimize",
+          suggestionType: "summary",
+          beforeValue: candidate?.summary ?? null,
+          afterValue: summarySuggested,
+        })
+      : null;
+
+    const experienceEventIds: (string | null)[] = [];
+    for (const e of experienceWithDiffs) {
+      if (e.changed) {
+        experienceEventIds.push(
+          await logSuggestionEvent(supabase, {
+            candidateId: user.id,
+            source: "rewrite_optimize",
+            suggestionType: "experience",
+            targetId: e.row.id,
+            beforeValue: e.row.description,
+            afterValue: e.suggested,
+          })
+        );
+      } else {
+        experienceEventIds.push(null);
+      }
+    }
+
+    const skillEventIds: (string | null)[] = [];
+    for (const s of newSkills) {
+      skillEventIds.push(
+        await logSuggestionEvent(supabase, { candidateId: user.id, source: "rewrite_optimize", suggestionType: "skills", afterValue: s })
+      );
+    }
+
+    const achievementEventIds: (string | null)[] = [];
+    for (const a of achievements) {
+      achievementEventIds.push(
+        await logSuggestionEvent(supabase, { candidateId: user.id, source: "rewrite_optimize", suggestionType: "achievement", afterValue: a })
+      );
+    }
+
+    const keywordEventIds: (string | null)[] = [];
+    for (const k of newKeywords) {
+      keywordEventIds.push(
+        await logSuggestionEvent(supabase, { candidateId: user.id, source: "rewrite_optimize", suggestionType: "ats_keyword", afterValue: k })
+      );
+    }
 
     const suggestions: ResumeSuggestions = {
-      summary: { current: candidate?.summary ?? null, suggested: summaryResult.text ?? "" },
-      experience: experienceRows.map((e) => ({
-        id: e.id,
-        jobTitle: e.job_title,
-        companyName: e.company_name,
-        current: e.description,
-        suggested: suggestionByRole.get(`${e.company_name} ${e.job_title}`) ?? e.description ?? "",
+      summary: { current: candidate?.summary ?? null, suggested: summarySuggested, eventId: summaryEventId },
+      experience: experienceWithDiffs.map((e, i) => ({
+        id: e.row.id,
+        jobTitle: e.row.job_title,
+        companyName: e.row.company_name,
+        current: e.row.description,
+        suggested: e.suggested,
+        eventId: experienceEventIds[i],
       })),
-      skillAdditions: skillsResult.suggested_additions.filter(
-        (s) => !skillNames.some((existing) => existing.toLowerCase() === s.toLowerCase())
-      ),
-      achievements,
-      atsKeywords: atsKeywords.filter((k) => !skillNames.some((existing) => existing.toLowerCase() === k.toLowerCase())),
+      skillAdditions: newSkills.map((s, i) => ({ value: s, eventId: skillEventIds[i] })),
+      achievements: achievements.map((a, i) => ({ value: a, eventId: achievementEventIds[i] })),
+      atsKeywords: newKeywords.map((k, i) => ({ value: k, eventId: keywordEventIds[i] })),
     };
 
     return { success: true, suggestions };

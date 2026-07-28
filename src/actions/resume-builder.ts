@@ -8,6 +8,7 @@ import { generateResumeDocx } from "@/lib/documents/resume-docx";
 import { generateResumePdf } from "@/lib/documents/resume-pdf";
 import { diffImportedResumeAgainstDraft } from "@/lib/resume-builder/merge";
 import { createDraftSeededFromProfile, deleteResumeDraft, getResumeDraftWithSections } from "@/lib/queries/resume-builder";
+import { logSuggestionEvent } from "@/lib/resume-intelligence/suggestion-events";
 import { createClient } from "@/lib/supabase/server";
 import type {
   AiEligibleSectionType,
@@ -109,6 +110,16 @@ export async function regenerateSection(draftId: string, sectionType: AiEligible
     .eq("id", section.id);
   if (error) return { success: false, error: error.message };
 
+  await logSuggestionEvent(supabase, {
+    candidateId: user.id,
+    source: "resume_builder",
+    suggestionType: sectionType,
+    draftId,
+    sectionId: section.id,
+    beforeValue: section.content,
+    afterValue: suggestion,
+  });
+
   revalidateCandidatePath(`/candidate/resume-builder/${draftId}`);
   return { success: true, suggestion };
 }
@@ -133,8 +144,33 @@ export async function acceptSectionSuggestion(sectionId: string): Promise<Action
     .eq("id", sectionId);
   if (error) return { success: false, error: error.message };
 
+  await markLatestPendingEventForSection(supabase, sectionId, "accepted");
+
   revalidateCandidatePath(`/candidate/resume-builder/${section.draft_id}`);
   return { success: true };
+}
+
+/** Finds the most recent still-pending suggestion event for a section and decides it -- see decideSuggestionEvent in actions/resume-intelligence.ts, which this mirrors for the case where the UI only has a section_id, not the event id. */
+async function markLatestPendingEventForSection(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  sectionId: string,
+  outcome: "accepted" | "rejected"
+) {
+  const { data: pending } = await supabase
+    .from("resume_suggestion_events")
+    .select("id")
+    .eq("section_id", sectionId)
+    .eq("outcome", "pending")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (pending) {
+    await supabase
+      .from("resume_suggestion_events")
+      .update({ outcome, decided_at: new Date().toISOString() })
+      .eq("id", pending.id);
+  }
 }
 
 export async function rejectSectionSuggestion(sectionId: string): Promise<ActionResult> {
@@ -155,6 +191,8 @@ export async function rejectSectionSuggestion(sectionId: string): Promise<Action
     .update({ ai_suggestion: null, updated_at: new Date().toISOString() })
     .eq("id", sectionId);
   if (error) return { success: false, error: error.message };
+
+  await markLatestPendingEventForSection(supabase, sectionId, "rejected");
 
   revalidateCandidatePath(`/candidate/resume-builder/${section.draft_id}`);
   return { success: true };
@@ -277,6 +315,9 @@ export async function finalizeResumeDraft(draftId: string, format: "pdf" | "docx
       .from("resume_drafts")
       .update({
         status: "finalized",
+        // Lightweight version counter (Unit C) -- a count of finalize
+        // events, not a content snapshot; see migration 0020.
+        version: draft.version + 1,
         ...(pdfUrl ? { finalized_pdf_url: pdfUrl } : {}),
         ...(docxUrl ? { finalized_docx_url: docxUrl } : {}),
         updated_at: new Date().toISOString(),

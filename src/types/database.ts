@@ -524,6 +524,8 @@ export interface ResumeDraft {
   source_resume_id: string | null;
   finalized_pdf_url: string | null;
   finalized_docx_url: string | null;
+  /** Lightweight version counter (Unit C) -- incremented each successful finalize, not a full content snapshot. */
+  version: number;
   created_at: string;
   updated_at: string;
 }
