@@ -794,6 +794,13 @@
       },
       "candidateFallback": "مرشح",
       "minutesShort": "{count} د",
+      "hiringRecommendation": {
+        "strong_yes": "موافقة قوية",
+        "yes": "نعم",
+        "neutral": "محايد",
+        "no": "لا",
+        "strong_no": "رفض قوي"
+      },
       "applicationStatus": {
         "submitted": "مُرسل",
         "screening": "قيد الفرز",
@@ -1032,6 +1039,31 @@
       "toastSuccess": "تم التطبيق على __COUNT__ طلب/طلبات",
       "toastFailed": "فشل الإجراء الجماعي",
       "close": "إغلاق"
+    },
+    "InterviewIntelligence": {
+      "noInterviewsYet": "لا توجد مقابلات مجدولة بعد.",
+      "cancel": "إلغاء",
+      "cancelSucceeded": "تم إلغاء المقابلة",
+      "cancelFailed": "فشل إلغاء المقابلة",
+      "giveFeedback": "إضافة ملاحظات",
+      "recommendationLabel": "التوصية",
+      "scorecardTitle": "بطاقة التقييم",
+      "starEvaluationTitle": "تقييم STAR",
+      "situationLabel": "الموقف",
+      "taskLabel": "المهمة",
+      "actionLabel": "الإجراء",
+      "resultLabel": "النتيجة",
+      "competencyRatingsTitle": "تقييمات الكفاءات",
+      "feedbackLabel": "الملاحظات",
+      "aiSummaryTitle": "ملخص الذكاء الاصطناعي",
+      "generateSummary": "توليد ملخص بالذكاء الاصطناعي",
+      "regenerateSummary": "إعادة التوليد",
+      "generatingSummary": "جارٍ التوليد…",
+      "summaryFailed": "تعذّر توليد الملخص الآن.",
+      "timelineTitle": "الجدول الزمني لقرار التوظيف",
+      "timelineApplied": "تم تقديم الطلب",
+      "timelineStatusChange": "تغيّرت الحالة إلى {status}",
+      "timelineInterview": "مقابلة {type} ({status})"
     }
   }
 }

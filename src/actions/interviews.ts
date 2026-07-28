@@ -3,6 +3,7 @@
 import { revalidateCandidatePath } from "@/lib/revalidate-candidate-path";
 import { revalidateRecruiterPath } from "@/lib/revalidate-recruiter-path";
 import { generateInterviewQuestions } from "@/lib/ai/interview-questions";
+import { summarizeInterview } from "@/lib/ai/interview-summary";
 import { createClient } from "@/lib/supabase/server";
 import { interviewFeedbackSchema, scheduleInterviewSchema } from "@/lib/validations/interview";
 import { INTERVIEW_COMPETENCIES } from "@/types/database";
@@ -152,4 +153,47 @@ export async function submitInterviewFeedback(
 
   revalidateRecruiterPath(`/applications/${applicationId}`);
   return { success: true };
+}
+
+export interface GenerateInterviewSummaryResult extends ActionResult {
+  summary?: string;
+}
+
+/** Interview Intelligence (Phase 8) AI Summary -- generated on demand from
+ * whatever feedback/star_evaluation/competency_ratings already exist on the
+ * interview (via the existing submitInterviewFeedback flow), persisted into
+ * interviews.ai_summary (migration 0026) so it isn't regenerated on every view. */
+export async function generateInterviewSummary(interviewId: string, applicationId: string): Promise<GenerateInterviewSummaryResult> {
+  const ctx = await requireRecruiter();
+  if (!ctx) return { success: false, error: "Only recruiters can generate an interview summary." };
+
+  const { data: interview } = await ctx.supabase
+    .from("interviews")
+    .select(
+      `feedback, star_evaluation, competency_ratings, interview_type,
+      application:applications(job:jobs(title), candidate:candidates(profile:profiles(full_name)))`
+    )
+    .eq("id", interviewId)
+    .single()
+    .returns<{
+      feedback: string | null;
+      star_evaluation: StarEvaluation | null;
+      competency_ratings: CompetencyRatings | null;
+      interview_type: string;
+      application: { job: { title: string } | null; candidate: { profile: { full_name: string } | null } | null } | null;
+    }>();
+
+  if (!interview) return { success: false, error: "Interview not found." };
+
+  const summary = await summarizeInterview(interview.feedback, interview.star_evaluation, interview.competency_ratings, {
+    jobTitle: interview.application?.job?.title ?? "the role",
+    candidateName: interview.application?.candidate?.profile?.full_name ?? "the candidate",
+    interviewType: interview.interview_type,
+  });
+
+  const { error } = await ctx.supabase.from("interviews").update({ ai_summary: summary }).eq("id", interviewId);
+  if (error) return { success: false, error: error.message };
+
+  revalidateRecruiterPath(`/applications/${applicationId}`);
+  return { success: true, summary };
 }

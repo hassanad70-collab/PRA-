@@ -794,6 +794,13 @@
       },
       "candidateFallback": "Candidate",
       "minutesShort": "{count} min",
+      "hiringRecommendation": {
+        "strong_yes": "Strong yes",
+        "yes": "Yes",
+        "neutral": "Neutral",
+        "no": "No",
+        "strong_no": "Strong no"
+      },
       "applicationStatus": {
         "submitted": "Submitted",
         "screening": "Screening",
@@ -1032,6 +1039,31 @@
       "toastSuccess": "Applied to __COUNT__ application(s)",
       "toastFailed": "Bulk action failed",
       "close": "Close"
+    },
+    "InterviewIntelligence": {
+      "noInterviewsYet": "No interviews scheduled yet.",
+      "cancel": "Cancel",
+      "cancelSucceeded": "Interview cancelled",
+      "cancelFailed": "Failed to cancel interview",
+      "giveFeedback": "Give feedback",
+      "recommendationLabel": "Recommendation",
+      "scorecardTitle": "Scorecard",
+      "starEvaluationTitle": "STAR evaluation",
+      "situationLabel": "Situation",
+      "taskLabel": "Task",
+      "actionLabel": "Action",
+      "resultLabel": "Result",
+      "competencyRatingsTitle": "Competency ratings",
+      "feedbackLabel": "Feedback",
+      "aiSummaryTitle": "AI Summary",
+      "generateSummary": "Generate AI summary",
+      "regenerateSummary": "Regenerate",
+      "generatingSummary": "Generating…",
+      "summaryFailed": "Could not generate a summary right now.",
+      "timelineTitle": "Hiring decision timeline",
+      "timelineApplied": "Application submitted",
+      "timelineStatusChange": "Status changed to {status}",
+      "timelineInterview": "{type} interview ({status})"
     }
   }
 }

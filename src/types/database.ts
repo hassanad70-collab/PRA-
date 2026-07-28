@@ -414,6 +414,8 @@ export interface Interview {
   star_evaluation: StarEvaluation | null;
   competency_ratings: CompetencyRatings | null;
   hiring_recommendation: HiringRecommendation | null;
+  /** Interview Intelligence (Recruiter Intelligence v2.0, Phase 8) -- migration 0026. Null until generated on demand from feedback/star_evaluation/competency_ratings. */
+  ai_summary: string | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;
