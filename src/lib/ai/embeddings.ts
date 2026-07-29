@@ -1,6 +1,7 @@
 import "server-only";
 
 import { AI_MODELS, getOpenAI } from "./openai";
+import { logAIError, logMissingApiKey } from "./errors";
 
 /**
  * Generates a 1536-dim embedding vector for the given text using
@@ -11,7 +12,7 @@ export async function generateEmbedding(text: string): Promise<number[] | null> 
   const openai = getOpenAI();
 
   if (!openai) {
-    console.warn("OpenAI API not configured. Embeddings unavailable.");
+    logMissingApiKey("embeddings.generateEmbedding");
     return null;
   }
 
@@ -25,10 +26,10 @@ export async function generateEmbedding(text: string): Promise<number[] | null> 
     return response.data[0].embedding;
   } catch (err) {
     // A configured key doesn't guarantee a successful call (rate limits,
-    // quota, transient network errors, etc.) — treat any failure the same
-    // as "not configured" rather than crashing the caller (job publish,
-    // resume upload) with an unhandled 500.
-    console.error("generateEmbedding: OpenAI call failed", err);
+    // quota, transient network errors, etc.) -- classify and log the real
+    // reason, but still degrade to null rather than crashing the caller
+    // (job publish, resume upload) with an unhandled 500.
+    logAIError("embeddings.generateEmbedding", err);
     return null;
   }
 }

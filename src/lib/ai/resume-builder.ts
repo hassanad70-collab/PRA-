@@ -4,6 +4,7 @@ import { zodResponseFormat } from "openai/helpers/zod";
 import { z } from "zod";
 
 import { AI_MODELS, getOpenAI } from "./openai";
+import { InvalidAIResponseError, logAIError, logMissingApiKey } from "./errors";
 import type { ResumeSectionContentMap } from "@/types/database";
 
 /**
@@ -35,7 +36,10 @@ export async function generateSummarySuggestion(input: {
   topSkills?: string[];
 }): Promise<ResumeSectionContentMap["summary"]> {
   const openai = getOpenAI();
-  if (!openai) return { text: input.currentSummary ?? "Enable the OpenAI API key to generate a summary suggestion." };
+  if (!openai) {
+    logMissingApiKey("resume-builder.generateSummarySuggestion");
+    return { text: input.currentSummary ?? "Enable the OpenAI API key to generate a summary suggestion." };
+  }
 
   try {
     const completion = await openai.beta.chat.completions.parse({
@@ -51,10 +55,10 @@ export async function generateSummarySuggestion(input: {
       temperature: 0.4,
     });
     const result = completion.choices[0].message.parsed;
-    if (!result) throw new Error("No structured output returned.");
+    if (!result) throw new InvalidAIResponseError();
     return result;
   } catch (err) {
-    console.error("generateSummarySuggestion failed", err);
+    logAIError("resume-builder.generateSummarySuggestion", err);
     return { text: input.currentSummary ?? "" };
   }
 }
@@ -79,7 +83,10 @@ export async function generateExperienceSuggestion(
   entries: ResumeSectionContentMap["experience"]
 ): Promise<ResumeSectionContentMap["experience"]> {
   const openai = getOpenAI();
-  if (!openai) return entries;
+  if (!openai) {
+    logMissingApiKey("resume-builder.generateExperienceSuggestion");
+    return entries;
+  }
   if (entries.length === 0) return entries;
 
   try {
@@ -96,7 +103,7 @@ export async function generateExperienceSuggestion(
       temperature: 0.4,
     });
     const result = completion.choices[0].message.parsed;
-    if (!result) throw new Error("No structured output returned.");
+    if (!result) throw new InvalidAIResponseError();
     return result.entries.map((e) => ({
       company_name: e.company_name,
       job_title: e.job_title,
@@ -107,7 +114,7 @@ export async function generateExperienceSuggestion(
       description: e.description ?? undefined,
     }));
   } catch (err) {
-    console.error("generateExperienceSuggestion failed", err);
+    logAIError("resume-builder.generateExperienceSuggestion", err);
     return entries;
   }
 }
@@ -126,7 +133,10 @@ export async function generateSkillsSuggestion(input: {
   experienceSummary?: string;
 }): Promise<{ items: string[]; suggested_additions: string[] }> {
   const openai = getOpenAI();
-  if (!openai) return { items: input.currentSkills, suggested_additions: [] };
+  if (!openai) {
+    logMissingApiKey("resume-builder.generateSkillsSuggestion");
+    return { items: input.currentSkills, suggested_additions: [] };
+  }
 
   try {
     const completion = await openai.beta.chat.completions.parse({
@@ -142,10 +152,10 @@ export async function generateSkillsSuggestion(input: {
       temperature: 0.4,
     });
     const result = completion.choices[0].message.parsed;
-    if (!result) throw new Error("No structured output returned.");
+    if (!result) throw new InvalidAIResponseError();
     return result;
   } catch (err) {
-    console.error("generateSkillsSuggestion failed", err);
+    logAIError("resume-builder.generateSkillsSuggestion", err);
     return { items: input.currentSkills, suggested_additions: [] };
   }
 }

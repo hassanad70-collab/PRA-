@@ -4,6 +4,7 @@ import { zodResponseFormat } from "openai/helpers/zod";
 import { z } from "zod";
 
 import { AI_MODELS, getOpenAI } from "./openai";
+import { InvalidAIResponseError, logAIError, logMissingApiKey } from "./errors";
 
 /**
  * Recruiter Copilot (Recruiter Intelligence v2.0, Phase 5). Deliberately
@@ -54,7 +55,7 @@ export async function interpretCopilotQuery(query: string): Promise<CopilotInten
 
   const openai = getOpenAI();
   if (!openai) {
-    console.warn("OpenAI API not configured. Copilot query classification unavailable.");
+    logMissingApiKey("recruiter-copilot.interpretCopilotQuery");
     return fallback;
   }
 
@@ -70,10 +71,10 @@ export async function interpretCopilotQuery(query: string): Promise<CopilotInten
     });
 
     const result = completion.choices[0].message.parsed;
-    if (!result) throw new Error("Copilot intent classification returned no structured output.");
+    if (!result) throw new InvalidAIResponseError("Copilot intent classification returned no structured output.");
     return result;
   } catch (err) {
-    console.error("interpretCopilotQuery: OpenAI call failed", err);
+    logAIError("recruiter-copilot.interpretCopilotQuery", err);
     return fallback;
   }
 }

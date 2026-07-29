@@ -1,6 +1,7 @@
 import "server-only";
 
 import { AI_MODELS, getOpenAI } from "./openai";
+import { logAIError, logMissingApiKey } from "./errors";
 import type { CompetencyRatings, StarEvaluation } from "@/types/database";
 
 const SYSTEM_PROMPT = `You are an AI assistant condensing a recruiter's interview feedback into a short, useful summary for other people on the hiring team who weren't in the interview. Base the summary only on the feedback text, STAR evaluation, and competency ratings given -- do not invent details. 3-4 sentences, plain text, no markdown.`;
@@ -46,7 +47,7 @@ export async function summarizeInterview(
 
   const openai = getOpenAI();
   if (!openai) {
-    console.warn("OpenAI API not configured. Returning unsummarized interview feedback.");
+    logMissingApiKey("interview-summary.summarizeInterview");
     return feedbackText;
   }
 
@@ -66,7 +67,7 @@ export async function summarizeInterview(
     const text = completion.choices[0]?.message?.content;
     return text?.trim() || feedbackText;
   } catch (err) {
-    console.error("summarizeInterview: OpenAI call failed", err);
+    logAIError("interview-summary.summarizeInterview", err);
     return feedbackText;
   }
 }

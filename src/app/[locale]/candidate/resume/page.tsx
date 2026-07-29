@@ -115,6 +115,7 @@ export default async function ResumePage({ params }: { params: Promise<{ locale:
             checks={structuralChecks}
             resumeId={scoredResume.id}
             isPartial={scoredResume.parse_status === "completed_partial"}
+            parseErrorCode={scoredResume.parse_error_code}
           />
         </div>
       )}

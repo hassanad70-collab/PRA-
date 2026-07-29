@@ -4,6 +4,7 @@ import { zodResponseFormat } from "openai/helpers/zod";
 import { z } from "zod";
 
 import { AI_MODELS, getOpenAI } from "./openai";
+import { InvalidAIResponseError, logAIError, logMissingApiKey } from "./errors";
 import { buildJobText } from "./job-matcher";
 import type { Job } from "@/types/database";
 
@@ -54,7 +55,7 @@ export async function generateInterviewQuestions(
 ): Promise<InterviewQuestionSet> {
   const openai = getOpenAI();
   if (!openai) {
-    console.warn("OpenAI API not configured. Returning fallback interview questions.");
+    logMissingApiKey("interview-questions.generateInterviewQuestions");
     return FALLBACK;
   }
 
@@ -70,10 +71,10 @@ export async function generateInterviewQuestions(
     });
 
     const result = completion.choices[0].message.parsed;
-    if (!result) throw new Error("AI question generation returned no structured output.");
+    if (!result) throw new InvalidAIResponseError("AI question generation returned no structured output.");
     return result;
   } catch (err) {
-    console.error("generateInterviewQuestions: OpenAI call failed", err);
+    logAIError("interview-questions.generateInterviewQuestions", err);
     return FALLBACK;
   }
 }

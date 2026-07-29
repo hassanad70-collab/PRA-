@@ -97,7 +97,7 @@ const RAW_TEXT_FIXTURE =
 async function seedResumeAndScore(
   admin: ReturnType<typeof adminClient>,
   candidateId: string,
-  opts: { parsedData: object; parseStatus: string; rawText?: string }
+  opts: { parsedData: object; parseStatus: string; rawText?: string; parseErrorCode?: string }
 ) {
   // Clean slate so getLatestAtsScore's "most recent row" pick is
   // deterministic across repeated runs.
@@ -114,6 +114,7 @@ async function seedResumeAndScore(
       raw_text: opts.rawText ?? RAW_TEXT_FIXTURE,
       parsed_data: opts.parsedData,
       parse_status: opts.parseStatus,
+      parse_error_code: opts.parseErrorCode ?? null,
       is_primary: true,
     })
     .select("id")
@@ -216,6 +217,42 @@ test.describe("Resume Health Checklist consistency", () => {
     // parseAndScoreResume code path the initial upload uses.
     await expect(page.getByText(/Resume re-analyzed\.|Could not reparse/)).toBeVisible({ timeout: 15_000 });
     await expect(page.locator("body")).not.toContainText("Application error");
+  });
+
+  test("a rate-limit failure shows rate-limit-specific wording with a Retry button (transient, worth retrying)", async ({ page }) => {
+    const admin = adminClient();
+    const { data: candidateProfile } = await admin.from("profiles").select("id").eq("email", TEST_USERS.candidate.email).single();
+    await seedResumeAndScore(admin, candidateProfile!.id, {
+      parsedData: DEGRADED_FALLBACK,
+      parseStatus: "completed_partial",
+      parseErrorCode: "rate_limit",
+    });
+
+    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
+    await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
+    await page.goto("/candidate/resume");
+
+    await expect(page.getByText(/rate limit/i)).toBeVisible();
+    await expect(page.getByRole("button", { name: "Retry extraction" })).toBeVisible();
+  });
+
+  test("a missing-API-key failure shows a distinct message and hides the Retry button (won't self-heal)", async ({ page }) => {
+    const admin = adminClient();
+    const { data: candidateProfile } = await admin.from("profiles").select("id").eq("email", TEST_USERS.candidate.email).single();
+    await seedResumeAndScore(admin, candidateProfile!.id, {
+      parsedData: DEGRADED_FALLBACK,
+      parseStatus: "completed_partial",
+      parseErrorCode: "missing_api_key",
+    });
+
+    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
+    await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
+    await page.goto("/candidate/resume");
+
+    await expect(page.getByText(/isn't enabled for this environment/i)).toBeVisible();
+    // Retrying a missing API key reproduces the exact same fallback every
+    // time, so offering a button here would just waste the candidate's click.
+    await expect(page.getByRole("button", { name: "Retry extraction" })).not.toBeVisible();
   });
 
   test("works the same way for an Arabic resume", async ({ page }) => {

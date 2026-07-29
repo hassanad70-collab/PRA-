@@ -4,6 +4,7 @@ import { zodResponseFormat } from "openai/helpers/zod";
 import { z } from "zod";
 
 import { AI_MODELS, getOpenAI } from "./openai";
+import { InvalidAIResponseError, logAIError, logMissingApiKey } from "./errors";
 
 const jobDraftSchema = z.object({
   description: z.string().describe("2-4 paragraph overview of the role and the team"),
@@ -39,7 +40,7 @@ export async function generateJobDescriptionDraft(input: {
 }): Promise<JobDraft> {
   const openai = getOpenAI();
   if (!openai) {
-    console.warn("OpenAI API not configured. Returning fallback job draft.");
+    logMissingApiKey("job-description-writer.generateJobDescriptionDraft");
     return FALLBACK;
   }
 
@@ -66,10 +67,10 @@ export async function generateJobDescriptionDraft(input: {
     });
 
     const result = completion.choices[0].message.parsed;
-    if (!result) throw new Error("AI job draft returned no structured output.");
+    if (!result) throw new InvalidAIResponseError("AI job draft returned no structured output.");
     return result;
   } catch (err) {
-    console.error("generateJobDescriptionDraft: OpenAI call failed", err);
+    logAIError("job-description-writer.generateJobDescriptionDraft", err);
     return FALLBACK;
   }
 }

@@ -164,7 +164,7 @@ async function processResume(resumeId: string, candidateId: string, buffer: Buff
 async function parseAndScoreResume(resumeId: string, candidateId: string, rawText: string) {
   const admin = createAdminClient();
 
-  const { data: parsed, success } = await parseResumeText(rawText);
+  const { data: parsed, success, error } = await parseResumeText(rawText);
 
   await admin
     .from("resumes")
@@ -172,9 +172,11 @@ async function parseAndScoreResume(resumeId: string, candidateId: string, rawTex
       raw_text: rawText,
       parsed_data: parsed,
       parse_status: success ? "completed" : "completed_partial",
-      parse_error: success
-        ? null
-        : "AI structured extraction did not complete for this resume (raw text and ATS score are still available). Try again.",
+      // parse_error carries full diagnostic detail (never shown to the
+      // candidate -- see health-checklist.tsx for the friendly, per-reason
+      // banner text keyed off parse_error_code instead).
+      parse_error: success ? null : error?.diagnostic ?? "AI structured extraction did not complete.",
+      parse_error_code: success ? null : error?.reason ?? "unknown_error",
       parsed_at: new Date().toISOString(),
     })
     .eq("id", resumeId);

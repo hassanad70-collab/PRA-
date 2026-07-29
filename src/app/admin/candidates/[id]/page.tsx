@@ -84,6 +84,7 @@ export default async function AdminCandidateDetailPage({ params }: { params: Pro
                       : "outline"
                   }
                   className="capitalize"
+                  title={resume.parse_error_code ? `${resume.parse_error_code}: ${resume.parse_error ?? ""}` : undefined}
                 >
                   {resume.parse_status.replace("_", " ")}
                 </Badge>

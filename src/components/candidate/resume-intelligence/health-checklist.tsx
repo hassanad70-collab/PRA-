@@ -31,15 +31,23 @@ const STATUS_COLOR = {
  * one case where that's a known-incomplete AI extraction rather than a
  * property of the resume itself.
  */
+/** Reasons that won't self-heal on retry -- offering a "Retry" button for
+ * these would just waste the candidate's click and reproduce the exact same
+ * fallback, since nothing about the request itself was the problem. */
+const NON_RETRYABLE_REASONS = new Set(["missing_api_key", "invalid_api_key", "authentication_error"]);
+
 export function ResumeHealthChecklist({
   checks,
   resumeId,
   isPartial,
+  parseErrorCode,
 }: {
   checks: StructuralCheck[];
   resumeId: string;
   /** True when parsed_data is the degraded fallback (parse_status === "completed_partial") -- every check below is reporting on that fallback, not on the resume's actual content. */
   isPartial: boolean;
+  /** Classified reason for the partial state (see src/lib/ai/errors.ts) -- null for legacy rows predating this column, or when isPartial is false. */
+  parseErrorCode: string | null;
 }) {
   const t = useTranslations("Candidate.ResumeIntelligence");
   const [isPending, startTransition] = useTransition();
@@ -52,6 +60,9 @@ export function ResumeHealthChecklist({
     });
   };
 
+  const canRetry = !parseErrorCode || !NON_RETRYABLE_REASONS.has(parseErrorCode);
+  const noticeKey = parseErrorCode ? (`extractionErrors.${parseErrorCode}` as Parameters<typeof t>[0]) : ("partialExtractionNotice" as Parameters<typeof t>[0]);
+
   return (
     <Card>
       <CardHeader>
@@ -63,12 +74,14 @@ export function ResumeHealthChecklist({
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-warning/30 bg-warning/10 p-3">
             <p className="flex items-start gap-2 text-sm text-warning">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-              {t("partialExtractionNotice")}
+              {t(noticeKey)}
             </p>
-            <Button type="button" size="sm" variant="outline" disabled={isPending} onClick={handleRetry}>
-              {isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-              {t("retryExtraction")}
-            </Button>
+            {canRetry && (
+              <Button type="button" size="sm" variant="outline" disabled={isPending} onClick={handleRetry}>
+                {isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                {t("retryExtraction")}
+              </Button>
+            )}
           </div>
         )}
         <ul className="space-y-3">

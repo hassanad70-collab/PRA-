@@ -4,6 +4,7 @@ import { zodResponseFormat } from "openai/helpers/zod";
 import { z } from "zod";
 
 import { AI_MODELS, getOpenAI } from "./openai";
+import { InvalidAIResponseError, logAIError, logMissingApiKey } from "./errors";
 import type { Job, ParsedResumeData } from "@/types/database";
 import { buildCandidateText, buildJobText } from "./job-matcher";
 
@@ -49,7 +50,7 @@ export async function runAIScreening(
 
   const openai = getOpenAI();
   if (!openai) {
-    console.warn("OpenAI API not configured. Returning default screening scores.");
+    logMissingApiKey("screening.runAIScreening");
     return fallback;
   }
 
@@ -68,10 +69,10 @@ export async function runAIScreening(
     });
 
     const result = completion.choices[0].message.parsed;
-    if (!result) throw new Error("AI screening returned no structured output.");
+    if (!result) throw new InvalidAIResponseError("AI screening returned no structured output.");
     return result;
   } catch (err) {
-    console.error("runAIScreening: OpenAI call failed", err);
+    logAIError("screening.runAIScreening", err);
     return fallback;
   }
 }

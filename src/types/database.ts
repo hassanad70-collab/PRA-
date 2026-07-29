@@ -239,6 +239,22 @@ export interface Resume {
    */
   parse_status: "pending" | "processing" | "completed" | "completed_partial" | "failed";
   parse_error: string | null;
+  /**
+   * Machine-readable reason for parse_status "completed_partial"/"failed"
+   * (see src/lib/ai/errors.ts's AIErrorReason, duplicated here rather than
+   * imported since that module is server-only and this type is shared with
+   * client components). Null on a genuine "completed" success.
+   */
+  parse_error_code:
+    | "missing_api_key"
+    | "invalid_api_key"
+    | "authentication_error"
+    | "rate_limit"
+    | "timeout"
+    | "network_error"
+    | "invalid_json_response"
+    | "unknown_error"
+    | null;
   embedding: number[] | null;
   is_primary: boolean;
   uploaded_at: string;

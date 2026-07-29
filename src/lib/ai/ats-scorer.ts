@@ -4,6 +4,7 @@ import { zodResponseFormat } from "openai/helpers/zod";
 import { z } from "zod";
 
 import { AI_MODELS, getOpenAI } from "./openai";
+import { InvalidAIResponseError, logAIError, logMissingApiKey } from "./errors";
 import type { ParsedResumeData } from "@/types/database";
 
 const atsScoreSchema = z.object({
@@ -54,7 +55,7 @@ export async function scoreResumeATS(rawText: string, parsed: ParsedResumeData):
 
   const openai = getOpenAI();
   if (!openai) {
-    console.warn("OpenAI API not configured. Returning default ATS scores.");
+    logMissingApiKey("ats-scorer.scoreResumeATS");
     return fallback;
   }
 
@@ -75,10 +76,10 @@ export async function scoreResumeATS(rawText: string, parsed: ParsedResumeData):
     });
 
     const result = completion.choices[0].message.parsed;
-    if (!result) throw new Error("AI ATS scoring returned no structured output.");
+    if (!result) throw new InvalidAIResponseError("AI ATS scoring returned no structured output.");
     return result;
   } catch (err) {
-    console.error("scoreResumeATS: OpenAI call failed", err);
+    logAIError("ats-scorer.scoreResumeATS", err);
     return fallback;
   }
 }

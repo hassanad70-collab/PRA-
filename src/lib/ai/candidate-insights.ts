@@ -4,6 +4,7 @@ import { zodResponseFormat } from "openai/helpers/zod";
 import { z } from "zod";
 
 import { AI_MODELS, getOpenAI } from "./openai";
+import { InvalidAIResponseError, logAIError, logMissingApiKey } from "./errors";
 import type { Job, ParsedResumeData } from "@/types/database";
 import { buildCandidateText, buildJobText } from "./job-matcher";
 
@@ -47,7 +48,7 @@ export async function generateCandidateInsight(
 
   const openai = getOpenAI();
   if (!openai) {
-    console.warn("OpenAI API not configured. Returning default candidate insight.");
+    logMissingApiKey("candidate-insights.generateCandidateInsight");
     return fallback;
   }
 
@@ -68,10 +69,10 @@ export async function generateCandidateInsight(
     });
 
     const result = completion.choices[0].message.parsed;
-    if (!result) throw new Error("AI candidate insight returned no structured output.");
+    if (!result) throw new InvalidAIResponseError("AI candidate insight returned no structured output.");
     return result;
   } catch (err) {
-    console.error("generateCandidateInsight: OpenAI call failed", err);
+    logAIError("candidate-insights.generateCandidateInsight", err);
     return fallback;
   }
 }

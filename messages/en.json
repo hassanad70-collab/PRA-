@@ -624,6 +624,16 @@
       "retryExtraction": "Retry extraction",
       "reparseSucceeded": "Resume re-analyzed.",
       "reparseFailed": "Could not reparse this resume right now. Please try again.",
+      "extractionErrors": {
+        "missing_api_key": "AI structured extraction isn't enabled for this environment yet. Your ATS score is still based on the raw text, but the checks below won't be accurate until this is enabled.",
+        "invalid_api_key": "AI extraction is temporarily unavailable. Our team has been notified — no need to retry right now.",
+        "authentication_error": "AI extraction is temporarily unavailable. Our team has been notified — no need to retry right now.",
+        "rate_limit": "AI extraction hit a rate limit. Your ATS score is still based on the raw text — try again in a few minutes.",
+        "timeout": "AI extraction timed out. Your ATS score is still based on the raw text — try again.",
+        "network_error": "We couldn't reach the AI service to extract structured details. Your ATS score is still based on the raw text — try again shortly.",
+        "invalid_json_response": "AI extraction returned an unexpected response. Your ATS score is still based on the raw text — try again.",
+        "unknown_error": "We couldn't fully extract structured details from this resume yet. Your ATS score is still based on the raw text — try again."
+      },
       "checks": {
         "email": {
           "pass": "Email address detected.",

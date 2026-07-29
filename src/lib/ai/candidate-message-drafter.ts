@@ -4,6 +4,7 @@ import { zodResponseFormat } from "openai/helpers/zod";
 import { z } from "zod";
 
 import { AI_MODELS, getOpenAI } from "./openai";
+import { InvalidAIResponseError, logAIError, logMissingApiKey } from "./errors";
 
 export type CandidateMessageType = "interview_invite" | "rejection" | "offer";
 
@@ -49,7 +50,7 @@ export async function generateCandidateMessage(
 ): Promise<CandidateMessageDraft> {
   const openai = getOpenAI();
   if (!openai) {
-    console.warn("OpenAI API not configured. Returning fallback candidate message.");
+    logMissingApiKey("candidate-message-drafter.generateCandidateMessage");
     return FALLBACK;
   }
 
@@ -78,10 +79,10 @@ export async function generateCandidateMessage(
     });
 
     const result = completion.choices[0].message.parsed;
-    if (!result) throw new Error("AI message draft returned no structured output.");
+    if (!result) throw new InvalidAIResponseError("AI message draft returned no structured output.");
     return result;
   } catch (err) {
-    console.error("generateCandidateMessage: OpenAI call failed", err);
+    logAIError("candidate-message-drafter.generateCandidateMessage", err);
     return FALLBACK;
   }
 }

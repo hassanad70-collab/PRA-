@@ -4,6 +4,7 @@ import { zodResponseFormat } from "openai/helpers/zod";
 import { z } from "zod";
 
 import { AI_MODELS, getOpenAI } from "./openai";
+import { InvalidAIResponseError, logAIError, logMissingApiKey } from "./errors";
 
 /**
  * Focused, single-purpose generators for the Resume Intelligence Hub's
@@ -37,7 +38,10 @@ export async function generateAchievementStatements(input: {
   experience: ExperienceInput[];
 }): Promise<string[]> {
   const openai = getOpenAI();
-  if (!openai) return [];
+  if (!openai) {
+    logMissingApiKey("resume-improver.generateAchievementStatements");
+    return [];
+  }
   if (!input.experience.length) return [];
 
   try {
@@ -55,10 +59,10 @@ export async function generateAchievementStatements(input: {
       temperature: 0.5,
     });
     const result = completion.choices[0].message.parsed;
-    if (!result) throw new Error("No structured output returned.");
+    if (!result) throw new InvalidAIResponseError();
     return result.statements;
   } catch (err) {
-    console.error("generateAchievementStatements failed", err);
+    logAIError("resume-improver.generateAchievementStatements", err);
     return [];
   }
 }
@@ -75,7 +79,10 @@ export async function generateAtsKeywordSuggestions(input: {
   experience: ExperienceInput[];
 }): Promise<string[]> {
   const openai = getOpenAI();
-  if (!openai) return [];
+  if (!openai) {
+    logMissingApiKey("resume-improver.generateAtsKeywordSuggestions");
+    return [];
+  }
 
   try {
     const completion = await openai.beta.chat.completions.parse({
@@ -92,10 +99,10 @@ export async function generateAtsKeywordSuggestions(input: {
       temperature: 0.3,
     });
     const result = completion.choices[0].message.parsed;
-    if (!result) throw new Error("No structured output returned.");
+    if (!result) throw new InvalidAIResponseError();
     return result.keywords;
   } catch (err) {
-    console.error("generateAtsKeywordSuggestions failed", err);
+    logAIError("resume-improver.generateAtsKeywordSuggestions", err);
     return [];
   }
 }

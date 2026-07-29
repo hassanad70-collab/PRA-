@@ -4,6 +4,7 @@ import { zodResponseFormat } from "openai/helpers/zod";
 import { z } from "zod";
 
 import { AI_MODELS, getOpenAI } from "./openai";
+import { InvalidAIResponseError, logAIError, logMissingApiKey } from "./errors";
 import type { Job, ParsedResumeData } from "@/types/database";
 
 const matchAnalysisSchema = z.object({
@@ -72,7 +73,7 @@ export async function analyzeJobMatch(
 
   const openai = getOpenAI();
   if (!openai) {
-    console.warn("OpenAI API not configured. Returning default job match analysis.");
+    logMissingApiKey("job-matcher.analyzeJobMatch");
     return fallback;
   }
 
@@ -91,10 +92,10 @@ export async function analyzeJobMatch(
     });
 
     const result = completion.choices[0].message.parsed;
-    if (!result) throw new Error("AI job matching returned no structured output.");
+    if (!result) throw new InvalidAIResponseError("AI job matching returned no structured output.");
     return result;
   } catch (err) {
-    console.error("analyzeJobMatch: OpenAI call failed", err);
+    logAIError("job-matcher.analyzeJobMatch", err);
     return fallback;
   }
 }

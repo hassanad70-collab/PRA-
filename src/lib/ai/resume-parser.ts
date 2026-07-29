@@ -4,6 +4,7 @@ import { zodResponseFormat } from "openai/helpers/zod";
 import { z } from "zod";
 
 import { AI_MODELS, getOpenAI } from "./openai";
+import { InvalidAIResponseError, isRetryableAIError, logAIError, logMissingApiKey, type ClassifiedAIError } from "./errors";
 import type { ParsedResumeData } from "@/types/database";
 
 const experienceSchema = z.object({
@@ -86,6 +87,8 @@ export interface ResumeParseResult {
    * Checklist (which reads structured fields only) silently disagree.
    */
   success: boolean;
+  /** Present only when success is false -- the classified reason (see src/lib/ai/errors.ts). */
+  error?: ClassifiedAIError;
 }
 
 const FALLBACK_DATA: ParsedResumeData = {
@@ -99,9 +102,11 @@ const FALLBACK_DATA: ParsedResumeData = {
   achievements: [],
 };
 
-async function attemptExtraction(rawText: string): Promise<ParsedResumeData | null> {
+type ExtractionAttempt = { data: ParsedResumeData } | { error: ClassifiedAIError };
+
+async function attemptExtraction(rawText: string): Promise<ExtractionAttempt> {
   const openai = getOpenAI();
-  if (!openai) return null;
+  if (!openai) return { error: logMissingApiKey("resume-parser.parseResumeText") };
 
   try {
     const completion = await openai.beta.chat.completions.parse({
@@ -115,33 +120,31 @@ async function attemptExtraction(rawText: string): Promise<ParsedResumeData | nu
     });
 
     const parsed = completion.choices[0].message.parsed;
-    if (!parsed) throw new Error("AI resume parsing returned no structured output.");
-    return parsed as ParsedResumeData;
+    if (!parsed) throw new InvalidAIResponseError("AI resume parsing returned no structured output.");
+    return { data: parsed as ParsedResumeData };
   } catch (err) {
-    console.error("parseResumeText: OpenAI call failed", err);
-    return null;
+    return { error: logAIError("resume-parser.parseResumeText", err) };
   }
 }
 
 /**
  * Extracts structured candidate data from raw resume text using an LLM with
  * a strict JSON schema. Powers the AI Resume Parser + Profile Auto-Generation
- * features. Retries once on failure (rate limits/transient network errors
- * are the most common cause of a single dropped attempt) before degrading to
- * a fallback -- see ResumeParseResult.success for how callers must handle
- * that fallback case.
+ * features. Retries once on transient failures (rate limit, timeout, network
+ * error, malformed response) before degrading to a fallback; skips the retry
+ * for deterministic failures (missing/invalid key, auth error) that won't
+ * self-heal -- see ResumeParseResult.success/.error for how callers must
+ * handle that fallback case.
  */
 export async function parseResumeText(rawText: string): Promise<ResumeParseResult> {
-  if (!getOpenAI()) {
-    console.warn("OpenAI API not configured. Returning empty resume data.");
-    return { data: FALLBACK_DATA, success: false };
+  const first = await attemptExtraction(rawText);
+  if ("data" in first) return { data: first.data, success: true };
+  if (!isRetryableAIError(first.error.reason)) {
+    return { data: FALLBACK_DATA, success: false, error: first.error };
   }
 
-  const first = await attemptExtraction(rawText);
-  if (first) return { data: first, success: true };
-
   const retry = await attemptExtraction(rawText);
-  if (retry) return { data: retry, success: true };
+  if ("data" in retry) return { data: retry.data, success: true };
 
-  return { data: FALLBACK_DATA, success: false };
+  return { data: FALLBACK_DATA, success: false, error: retry.error };
 }
