@@ -11,6 +11,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/admin/recruiters", label: "Recruiters", icon: "UserCog" },
   { href: "/admin/candidates", label: "Candidates", icon: "GraduationCap" },
   { href: "/admin/audit-logs", label: "Audit Logs", icon: "ScrollText" },
+  { href: "/admin/diagnostics", label: "Diagnostics", icon: "Activity" },
   { href: "/admin/settings", label: "Settings", icon: "Settings" },
 ];
 

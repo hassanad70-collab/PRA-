@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  Activity,
   BarChart3,
   Bookmark,
   Briefcase,
@@ -42,6 +43,7 @@ import { cn, initials } from "@/lib/utils";
 // instead — resolved to an actual icon component here, inside the client
 // boundary, via this registry.
 const ICON_MAP = {
+  Activity,
   LayoutDashboard,
   User,
   FileText,
