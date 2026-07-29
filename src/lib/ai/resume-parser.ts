@@ -67,35 +67,41 @@ const resumeExtractionSchema = z.object({
 
 export type ResumeExtraction = z.infer<typeof resumeExtractionSchema>;
 
-const SYSTEM_PROMPT = `You are an expert resume parser used inside an enterprise ATS. Extract structured data from raw resume text with high precision. Rules:
+const SYSTEM_PROMPT = `You are an expert resume parser used inside an enterprise ATS. The resume may be written in English or Arabic (or a mix) -- extract with the same precision regardless of language. Extract structured data from raw resume text with high precision. Rules:
 - Never invent information that is not present or strongly implied in the text.
 - Dates should be normalized to ISO format (YYYY-MM-DD or YYYY-MM) where possible.
 - years_of_experience should be a realistic estimate computed from the work history date ranges, not a number pulled from the text unless work history is unavailable.
 - skills should include both explicitly listed skills and skills clearly demonstrated in experience/project descriptions.
-- If a field is not present in the resume, use null (or an empty array for list fields).`;
+- If a field is not present in the resume, use null (or an empty array for list fields).
+- Keep extracted text (names, titles, descriptions) in its original language -- do not translate.`;
 
-/**
- * Extracts structured candidate data from raw resume text using an LLM with
- * a strict JSON schema. Powers the AI Resume Parser + Profile Auto-Generation
- * features. Returns minimal data if OpenAI is not available.
- */
-export async function parseResumeText(rawText: string): Promise<ParsedResumeData> {
-  const fallback: ParsedResumeData = {
-    summary: "Resume uploaded. Enable OpenAI API key to extract structured data.",
-    experience: [],
-    education: [],
-    skills: [],
-    certificates: [],
-    languages: [],
-    projects: [],
-    achievements: [],
-  };
+export interface ResumeParseResult {
+  data: ParsedResumeData;
+  /**
+   * False whenever `data` is the degraded fallback (no API key, or every
+   * attempt below failed) rather than a real extraction. Callers must use
+   * this to distinguish "the resume genuinely has no email/phone/experience"
+   * from "structured extraction didn't run" -- collapsing the two is what
+   * let the ATS score (which reads raw text directly) and the Resume Health
+   * Checklist (which reads structured fields only) silently disagree.
+   */
+  success: boolean;
+}
 
+const FALLBACK_DATA: ParsedResumeData = {
+  summary: "Resume uploaded. Enable OpenAI API key to extract structured data.",
+  experience: [],
+  education: [],
+  skills: [],
+  certificates: [],
+  languages: [],
+  projects: [],
+  achievements: [],
+};
+
+async function attemptExtraction(rawText: string): Promise<ParsedResumeData | null> {
   const openai = getOpenAI();
-  if (!openai) {
-    console.warn("OpenAI API not configured. Returning empty resume data.");
-    return fallback;
-  }
+  if (!openai) return null;
 
   try {
     const completion = await openai.beta.chat.completions.parse({
@@ -112,10 +118,30 @@ export async function parseResumeText(rawText: string): Promise<ParsedResumeData
     if (!parsed) throw new Error("AI resume parsing returned no structured output.");
     return parsed as ParsedResumeData;
   } catch (err) {
-    // A configured key doesn't guarantee a successful call (rate limits,
-    // quota, transient network errors, malformed output, etc.) — degrade to
-    // the same fallback as "not configured" instead of crashing the upload.
     console.error("parseResumeText: OpenAI call failed", err);
-    return fallback;
+    return null;
   }
+}
+
+/**
+ * Extracts structured candidate data from raw resume text using an LLM with
+ * a strict JSON schema. Powers the AI Resume Parser + Profile Auto-Generation
+ * features. Retries once on failure (rate limits/transient network errors
+ * are the most common cause of a single dropped attempt) before degrading to
+ * a fallback -- see ResumeParseResult.success for how callers must handle
+ * that fallback case.
+ */
+export async function parseResumeText(rawText: string): Promise<ResumeParseResult> {
+  if (!getOpenAI()) {
+    console.warn("OpenAI API not configured. Returning empty resume data.");
+    return { data: FALLBACK_DATA, success: false };
+  }
+
+  const first = await attemptExtraction(rawText);
+  if (first) return { data: first, success: true };
+
+  const retry = await attemptExtraction(rawText);
+  if (retry) return { data: retry, success: true };
+
+  return { data: FALLBACK_DATA, success: false };
 }

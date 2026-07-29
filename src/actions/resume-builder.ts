@@ -244,7 +244,10 @@ export async function importResumeIntoDraft(draftId: string, formData: FormData)
     if (!rawText || rawText.trim().length < 50) {
       return { success: false, error: "Could not extract readable text from this file." };
     }
-    const parsed = await parseResumeText(rawText);
+    const { data: parsed, success } = await parseResumeText(rawText);
+    if (!success) {
+      return { success: false, error: "Could not extract structured data from this resume right now. Please try again." };
+    }
     const diffs = diffImportedResumeAgainstDraft(draft.sections, parsed);
     return { success: true, diffs };
   } catch (err) {

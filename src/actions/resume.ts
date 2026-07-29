@@ -128,32 +128,67 @@ export async function uploadResume(formData: FormData): Promise<UploadResumeResu
  * because it writes across several tables on behalf of the "system".
  */
 async function processResume(resumeId: string, candidateId: string, buffer: Buffer, mimeType: string) {
-  const admin = createAdminClient();
-
   const rawText = await extractTextFromFile(buffer, mimeType);
   if (!rawText || rawText.trim().length < 50) {
     throw new Error("Could not extract readable text from this file.");
   }
 
-  const parsed: ParsedResumeData = await parseResumeText(rawText);
   const embedding = await generateEmbedding(rawText);
+  const admin = createAdminClient();
+  if (embedding) {
+    await admin
+      .from("resumes")
+      .update({ embedding: toVectorLiteral(embedding) as unknown as number[] })
+      .eq("id", resumeId);
+  }
+
+  await parseAndScoreResume(resumeId, candidateId, rawText);
+
+  // Genuinely fire-and-forget: don't block the upload response on matching
+  // every published job. generateMatchesForResume never throws (every query
+  // is null-guarded or wrapped internally), so this can't affect parse_status.
+  generateMatchesForResume(resumeId, candidateId).catch((err) => {
+    console.error("generateMatchesForResume failed for resume", resumeId, err);
+  });
+}
+
+/**
+ * The parse-and-score half of the pipeline, split out from processResume so
+ * reparseResume() (a candidate-triggered retry for a resume that previously
+ * landed in "completed_partial") can rerun exactly this step against the
+ * already-stored raw_text, without re-extracting text or re-uploading the
+ * file. This is also the single place that writes parsed_data and calls the
+ * ATS scorer, so the two always run against the identical ParsedResumeData
+ * object -- there is no second/duplicate parsing path anywhere else.
+ */
+async function parseAndScoreResume(resumeId: string, candidateId: string, rawText: string) {
+  const admin = createAdminClient();
+
+  const { data: parsed, success } = await parseResumeText(rawText);
 
   await admin
     .from("resumes")
     .update({
       raw_text: rawText,
       parsed_data: parsed,
-      parse_status: "completed",
+      parse_status: success ? "completed" : "completed_partial",
+      parse_error: success
+        ? null
+        : "AI structured extraction did not complete for this resume (raw text and ATS score are still available). Try again.",
       parsed_at: new Date().toISOString(),
-      ...(embedding ? { embedding: toVectorLiteral(embedding) as unknown as number[] } : {}),
     })
     .eq("id", resumeId);
 
-  await populateCandidateProfileFromResume(candidateId, parsed);
+  if (success) {
+    await populateCandidateProfileFromResume(candidateId, parsed);
+  }
 
   const atsResult = await scoreResumeATS(rawText, parsed);
   const keywordDensity = Object.fromEntries(atsResult.keyword_density.map((k) => [k.keyword, k.count]));
 
+  // ats_scores is append-only per attempt (the admin candidate-detail view
+  // lists every row as history) -- a manual reparse just adds a newer row,
+  // which getLatestAtsScore/atsScore.resume_id naturally picks up as current.
   await admin.from("ats_scores").insert({
     resume_id: resumeId,
     candidate_id: candidateId,
@@ -171,13 +206,40 @@ async function processResume(resumeId: string, candidateId: string, buffer: Buff
   });
 
   await admin.rpc("recompute_profile_completion", { p_candidate_id: candidateId });
+}
 
-  // Genuinely fire-and-forget: don't block the upload response on matching
-  // every published job. generateMatchesForResume never throws (every query
-  // is null-guarded or wrapped internally), so this can't affect parse_status.
-  generateMatchesForResume(resumeId, candidateId).catch((err) => {
-    console.error("generateMatchesForResume failed for resume", resumeId, err);
-  });
+/**
+ * Retries AI structured extraction + ATS scoring for a resume already stuck
+ * in "completed_partial", reusing its stored raw_text -- no re-upload
+ * required. See parseAndScoreResume's doc comment for why this is the same
+ * code path the initial upload uses, not a second implementation.
+ */
+export async function reparseResume(resumeId: string): Promise<ActionResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: "You must be signed in." };
+
+  const { data: resume } = await supabase
+    .from("resumes")
+    .select("id, raw_text")
+    .eq("id", resumeId)
+    .eq("candidate_id", user.id)
+    .single();
+  if (!resume?.raw_text) return { success: false, error: "This resume has no extracted text to reparse." };
+
+  try {
+    await parseAndScoreResume(resumeId, user.id, resume.raw_text);
+  } catch (err) {
+    console.error("reparseResume failed", err);
+    return { success: false, error: "Could not reparse this resume right now. Please try again." };
+  }
+
+  revalidateCandidatePath("/candidate/resume");
+  revalidateCandidatePath("/candidate/profile");
+  revalidateCandidatePath("/candidate/dashboard");
+  return { success: true };
 }
 
 /**

@@ -83,7 +83,7 @@ export async function checkResumeAsGuest(formData: FormData): Promise<GuestAtsCh
     return { success: false, error: "Could not extract readable text from this file." };
   }
 
-  const parsed = await parseResumeText(rawText);
+  const { data: parsed } = await parseResumeText(rawText);
   const result = await scoreResumeATS(rawText, parsed);
 
   // Only record usage — and thus consume the guest's one free scan — on a

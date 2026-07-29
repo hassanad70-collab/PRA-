@@ -79,7 +79,7 @@ export default async function ResumePage({ params }: { params: Promise<{ locale:
                     <p className="truncate text-sm font-medium">{resume.file_name}</p>
                     <p className="text-xs text-muted-foreground">
                       {tShared("uploaded", { time: formatRelativeTime(resume.uploaded_at) })} ·{" "}
-                      <span className="capitalize">{resume.parse_status}</span>
+                      <span className="capitalize">{resume.parse_status.replace("_", " ")}</span>
                     </p>
                   </div>
                 </div>
@@ -108,10 +108,14 @@ export default async function ResumePage({ params }: { params: Promise<{ locale:
         )}
       </div>
 
-      {structuralChecks && (
+      {structuralChecks && scoredResume && (
         <div className="space-y-3">
           <h2 className="text-sm font-semibold text-muted-foreground">{tResumeIntelligence("scoreHealthTitle")}</h2>
-          <ResumeHealthChecklist checks={structuralChecks} />
+          <ResumeHealthChecklist
+            checks={structuralChecks}
+            resumeId={scoredResume.id}
+            isPartial={scoredResume.parse_status === "completed_partial"}
+          />
         </div>
       )}
 

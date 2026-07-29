@@ -620,6 +620,10 @@
       "scoreHealthTitle": "Score & Health",
       "checklistTitle": "Resume health checklist",
       "checklistSubtitle": "Deterministic checks -- not AI opinion -- run against your primary resume's parsed content.",
+      "partialExtractionNotice": "We couldn't fully extract structured details (email, phone, experience, education, skills) from this resume yet. Your ATS score is still based on the raw text, but the checks below won't be accurate until you retry.",
+      "retryExtraction": "Retry extraction",
+      "reparseSucceeded": "Resume re-analyzed.",
+      "reparseFailed": "Could not reparse this resume right now. Please try again.",
       "checks": {
         "email": {
           "pass": "Email address detected.",

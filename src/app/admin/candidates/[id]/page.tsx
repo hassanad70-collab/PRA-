@@ -73,8 +73,19 @@ export default async function AdminCandidateDetailPage({ params }: { params: Pro
                 {resume.is_primary && <Badge variant="outline">Primary</Badge>}
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <Badge variant={resume.parse_status === "completed" ? "success" : resume.parse_status === "failed" ? "destructive" : "outline"} className="capitalize">
-                  {resume.parse_status}
+                <Badge
+                  variant={
+                    resume.parse_status === "completed"
+                      ? "success"
+                      : resume.parse_status === "failed"
+                      ? "destructive"
+                      : resume.parse_status === "completed_partial"
+                      ? "warning"
+                      : "outline"
+                  }
+                  className="capitalize"
+                >
+                  {resume.parse_status.replace("_", " ")}
                 </Badge>
                 <span className="text-xs text-muted-foreground">{formatDate(resume.uploaded_at)}</span>
               </div>

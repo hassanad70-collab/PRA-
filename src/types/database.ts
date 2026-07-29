@@ -229,7 +229,15 @@ export interface Resume {
   file_size_bytes: number | null;
   raw_text: string | null;
   parsed_data: ParsedResumeData | null;
-  parse_status: "pending" | "processing" | "completed" | "failed";
+  /**
+   * "completed_partial" means text extraction succeeded but AI structured
+   * extraction (email/phone/experience/education/skills) did not -- raw_text
+   * and an ATS score (which reads raw_text directly) may still exist, but
+   * parsed_data is the empty fallback. Distinct from "completed" so the UI
+   * never presents a Resume Health Checklist failure as if it contradicts a
+   * seemingly-normal ATS score.
+   */
+  parse_status: "pending" | "processing" | "completed" | "completed_partial" | "failed";
   parse_error: string | null;
   embedding: number[] | null;
   is_primary: boolean;
