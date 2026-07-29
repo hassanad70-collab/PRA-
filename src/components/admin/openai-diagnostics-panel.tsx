@@ -39,6 +39,7 @@ export function OpenAIDiagnosticsPanel() {
           <div className="space-y-2 rounded-lg border border-border p-4 text-sm">
             <Row label="OPENAI_API_KEY present" value={result.keyPresent ? "Yes" : "No"} ok={result.keyPresent} />
             <Row label="OPENAI_API_KEY length" value={String(result.keyLength ?? 0)} ok={(result.keyLength ?? 0) > 0} />
+            {result.baseUrl && <Row label="Configured endpoint" value={result.baseUrl} />}
             <Row label="Live call succeeded" value={result.callSucceeded ? "Yes" : "No"} ok={result.callSucceeded} />
             {result.callSucceeded ? (
               <>

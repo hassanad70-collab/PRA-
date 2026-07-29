@@ -23,7 +23,9 @@ export interface OpenAIDiagnosticsResult extends ActionResult {
   keyPresent?: boolean;
   /** Character length only -- proves "empty string" (length 0) vs "looks like a real key" without revealing it. */
   keyLength?: number;
-  /** True only if a real OpenAI chat completion call actually succeeded just now. */
+  /** The endpoint this runtime is actually configured to call (AI_BASE_URL or its default). */
+  baseUrl?: string;
+  /** True only if a real chat completion call actually succeeded just now. */
   callSucceeded?: boolean;
   modelUsed?: string;
   responseText?: string;
@@ -52,6 +54,7 @@ export async function diagnoseOpenAIIntegration(): Promise<OpenAIDiagnosticsResu
   if (!openai) {
     return { success: true, keyPresent, keyLength, callSucceeded: false, errorReason: "missing_api_key" };
   }
+  const baseUrl = openai.baseURL;
 
   try {
     const completion = await openai.chat.completions.create({
@@ -64,6 +67,7 @@ export async function diagnoseOpenAIIntegration(): Promise<OpenAIDiagnosticsResu
       success: true,
       keyPresent,
       keyLength,
+      baseUrl,
       callSucceeded: true,
       modelUsed: AI_MODELS.reasoning,
       responseText: text,
@@ -74,6 +78,7 @@ export async function diagnoseOpenAIIntegration(): Promise<OpenAIDiagnosticsResu
       success: true,
       keyPresent,
       keyLength,
+      baseUrl,
       callSucceeded: false,
       errorReason: classified.reason,
       errorDiagnostic: classified.diagnostic,
