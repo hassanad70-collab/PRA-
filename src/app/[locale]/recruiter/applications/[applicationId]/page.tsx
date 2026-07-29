@@ -120,7 +120,7 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
       </Card>
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between gap-2">
+        <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2">
           <CardTitle className="text-base">{t("interviewsTitle")}</CardTitle>
           <div className="flex items-center gap-2">
             <DraftMessageDialog

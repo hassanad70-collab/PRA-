@@ -153,7 +153,7 @@ export function DashboardShell({ navItems, user, children, settingsHref, labels 
         </div>
       )}
 
-      <div className="flex min-h-screen flex-1 flex-col">
+      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
         <header className="flex h-16 items-center justify-between border-b border-border px-4 lg:justify-end lg:px-8">
           <Button
             variant="ghost"
@@ -169,7 +169,7 @@ export function DashboardShell({ navItems, user, children, settingsHref, labels 
             <ThemeToggle />
           </div>
         </header>
-        <main className="flex-1 p-4 lg:p-8">{children}</main>
+        <main className="min-w-0 flex-1 p-4 lg:p-8">{children}</main>
       </div>
     </div>
   );
