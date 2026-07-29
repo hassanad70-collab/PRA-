@@ -14,8 +14,10 @@ test.describe("Recruiter workflow", () => {
     const errors: string[] = [];
     page.on("pageerror", (err) => errors.push(err.message));
 
-    await expect(page.getByRole("heading", { name: "HR Dashboard" })).toBeVisible();
-    await expect(page.getByText("Open jobs")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Hiring Command Center" })).toBeVisible();
+    // "Open jobs" also labels a column in the Recruiter Workload table
+    // further down the page, so scope to the KPI card specifically.
+    await expect(page.getByText("Open jobs").first()).toBeVisible();
     expect(errors).toEqual([]);
   });
 
@@ -81,6 +83,9 @@ test.describe("Recruiter workflow", () => {
     );
 
     await page.goto(`/recruiter/jobs/${job!.id}/candidates`);
+    // Shortlist is the default tab (Phase 4); the List/Board toggle lives
+    // inside the Applicants tab.
+    await page.getByRole("tab", { name: /Applicants/ }).click();
     await expect(page.getByRole("button", { name: "List" })).toBeVisible();
     await page.getByRole("button", { name: "Board" }).click();
 
@@ -105,6 +110,7 @@ test.describe("Recruiter workflow", () => {
     );
 
     await page.goto(`/recruiter/jobs/${job!.id}/candidates`);
+    await page.getByRole("tab", { name: /Applicants/ }).click();
     await page.getByRole("button", { name: "Board" }).click();
 
     await page.getByTestId("kanban-column-submitted").getByRole("combobox").click();
@@ -112,6 +118,7 @@ test.describe("Recruiter workflow", () => {
     await expect(page.getByText("Status updated")).toBeVisible();
 
     await page.reload();
+    await page.getByRole("tab", { name: /Applicants/ }).click();
     await page.getByRole("button", { name: "Board" }).click();
     await expect(page.getByTestId("kanban-column-shortlisted").getByText(TEST_USERS.candidate.fullName)).toBeVisible();
     await expect(page.getByTestId("kanban-column-submitted").getByText("No candidates")).toBeVisible();
@@ -121,7 +128,9 @@ test.describe("Recruiter workflow", () => {
   });
 
   test("recruiter has a dedicated Interviews view reachable from the sidebar", async ({ page }) => {
-    await page.getByRole("link", { name: "Interviews" }).click();
+    // The dashboard's Quick Actions row also has an "Interviews" link (same
+    // destination), so scope to the sidebar nav specifically.
+    await page.getByRole("navigation").getByRole("link", { name: "Interviews" }).click();
     await expect(page).toHaveURL(/\/recruiter\/interviews$/);
     await expect(page.getByRole("heading", { name: "Interviews" })).toBeVisible();
     await expect(page.getByText(/Upcoming \(\d+\)/)).toBeVisible();

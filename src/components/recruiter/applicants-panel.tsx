@@ -35,6 +35,7 @@ export interface ApplicantsPanelLabels {
   board: string;
   viewToggleAria: string;
   noApplications: string;
+  noCandidatesInColumn: string;
   compare: string;
   matchLabel: string;
   atsLabel: string;
@@ -138,7 +139,7 @@ export function ApplicantsPanel({
           applications={applications}
           labels={{
             statusLabels: labels.statusLabels,
-            noCandidates: labels.noApplications,
+            noCandidates: labels.noCandidatesInColumn,
             matchLabel: labels.matchLabel,
             atsLabel: labels.atsLabel,
             screenLabel: labels.screeningLabel,

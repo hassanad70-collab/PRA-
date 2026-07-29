@@ -94,7 +94,7 @@ test.describe.serial("AI Interview Assistant", () => {
     await page.getByLabel("Location or link").fill("https://meet.example.test/e2e-interview");
     await page.getByRole("button", { name: "Schedule", exact: true }).click();
 
-    await expect(page.getByText("scheduled", { exact: true })).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText("Scheduled", { exact: true })).toBeVisible({ timeout: 10_000 });
     await expect(page.getByText("https://meet.example.test/e2e-interview")).toBeVisible();
 
     await logout(page);
@@ -112,7 +112,7 @@ test.describe.serial("AI Interview Assistant", () => {
     await page.getByRole("button", { name: "Give feedback" }).click();
     await page.getByRole("button", { name: "Save feedback" }).click();
 
-    await expect(page.getByText("completed", { exact: true })).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText("Completed", { exact: true })).toBeVisible({ timeout: 10_000 });
     await expect(page.getByText(/Recommendation:/)).toBeVisible();
   });
 });

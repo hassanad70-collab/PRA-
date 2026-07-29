@@ -137,6 +137,7 @@ export default async function JobCandidatesPage({ params }: { params: Promise<{ 
               board: t("boardView"),
               viewToggleAria: t("viewToggleAria"),
               noApplications: t("noApplicationsYet"),
+              noCandidatesInColumn: t("noCandidatesInColumn"),
               compare: t("compareLabel"),
               matchLabel: t("matchLabel"),
               atsLabel: t("atsLabel"),
