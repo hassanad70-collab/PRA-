@@ -37,7 +37,7 @@ export function AtsScoreCard({ score }: { score: AtsScore }) {
                 </div>
                 <div className="mt-1 h-1.5 rounded-full bg-muted">
                   <div
-                    className="h-1.5 rounded-full bg-gradient-to-r from-indigo-500 to-fuchsia-500"
+                    className="h-1.5 rounded-full bg-gradient-to-r from-blue-600 to-blue-400"
                     style={{ width: `${value ?? 0}%` }}
                   />
                 </div>

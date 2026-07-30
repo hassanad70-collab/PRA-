@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { getRedirectLocale } from "@/i18n/get-redirect-locale";
 import { defaultLocale, locales } from "@/i18n/routing";
 import { trackEvent } from "@/lib/analytics/track";
+import { queueTemplateEmail } from "@/lib/email";
 import { readGuestSessionId } from "@/lib/guest/session";
 import { rateLimitByIp, rateLimitByIpAndTarget } from "@/lib/rate-limit";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -74,6 +75,13 @@ export async function registerCandidate(formData: FormData): Promise<ActionResul
 
   const { error: candidateError } = await admin.from("candidates").insert({ id: data.user.id });
   if (candidateError) return { success: false, error: candidateError.message };
+
+  // Queue welcome email (fire-and-forget via the email queue worker).
+  const platformUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.pratalent.com";
+  queueTemplateEmail("welcome", { email, name: fullName }, {
+    candidate_name: fullName,
+    platform_url: platformUrl,
+  }).catch(() => {});
 
   // Sign the new account in immediately on the session client so the user
   // lands in their dashboard already authenticated, not back at /login.
@@ -156,6 +164,13 @@ export async function registerRecruiter(formData: FormData): Promise<ActionResul
   });
 
   if (recruiterError) return { success: false, error: recruiterError.message };
+
+  // Queue welcome email for new recruiters (non-blocking).
+  const platformUrlR = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.pratalent.com";
+  queueTemplateEmail("welcome", { email, name: fullName }, {
+    candidate_name: fullName,
+    platform_url: platformUrlR,
+  }).catch(() => {});
 
   const supabase = await createClient();
   const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });

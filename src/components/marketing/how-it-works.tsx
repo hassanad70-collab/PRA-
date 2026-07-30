@@ -31,7 +31,7 @@ export function HowItWorks() {
                 transition={{ duration: 0.4, delay: i * 0.1 }}
                 className="relative flex flex-col items-center text-center"
               >
-                <div className="relative z-10 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-indigo-600 to-fuchsia-600 text-white shadow-lg">
+                <div className="relative z-10 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-700 to-blue-500 text-white shadow-lg">
                   <Icon className="h-5 w-5" />
                 </div>
                 <h3 className="mt-4 font-semibold">{step.title}</h3>

@@ -14,7 +14,7 @@ export function Hero() {
   return (
     <section className="relative overflow-hidden pb-24 pt-20 sm:pt-28">
       <div className="absolute inset-0 -z-10 bg-grid-pattern bg-[size:40px_40px] opacity-[0.04]" />
-      <div className="absolute start-1/2 top-0 -z-10 h-[600px] w-[900px] -translate-x-1/2 rounded-full bg-gradient-to-tr from-indigo-500/20 via-violet-500/20 to-fuchsia-500/20 blur-3xl rtl:translate-x-1/2" />
+      <div className="absolute start-1/2 top-0 -z-10 h-[600px] w-[900px] -translate-x-1/2 rounded-full bg-gradient-to-tr from-blue-600/20 via-blue-500/15 to-sky-400/10 blur-3xl rtl:translate-x-1/2" />
 
       <div className="container flex flex-col items-center text-center">
         <m.div

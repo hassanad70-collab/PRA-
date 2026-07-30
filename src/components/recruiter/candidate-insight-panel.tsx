@@ -76,7 +76,7 @@ export function CandidateInsightPanel({
             <div className="flex items-center gap-2">
               <div className="h-2 flex-1 rounded-full bg-muted">
                 <div
-                  className="h-2 rounded-full bg-gradient-to-r from-indigo-500 to-fuchsia-500"
+                  className="h-2 rounded-full bg-gradient-to-r from-blue-600 to-blue-400"
                   style={{ width: `${insight.hiring_confidence_score ?? 0}%` }}
                 />
               </div>

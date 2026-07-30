@@ -14,7 +14,7 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
     <div className="flex min-h-screen items-center justify-center px-6 py-12">
       <div className="w-full max-w-sm">
         <div className="mb-8 flex items-center justify-center gap-2 text-lg font-semibold">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-600 to-fuchsia-600 text-white">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-700 to-blue-500 text-white">
             <Sparkles className="h-4 w-4" />
           </div>
           PRA

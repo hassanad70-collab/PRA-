@@ -324,42 +324,69 @@ export function ExternalJobSearch({
         </div>
       </div>
 
-      {hasSearched && (
-        <div className="space-y-3">
-          <p className="text-sm font-medium text-muted-foreground">{t("resultsTitle")}</p>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-            {PLATFORMS.map((platform) => (
-              <Card key={platform.key} className="transition-shadow hover:shadow-md">
-                <CardContent className="p-4">
-                  <div className="mb-3 flex items-center gap-3">
-                    <div
-                      className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg text-xs font-bold text-white"
-                      style={{ backgroundColor: platform.color }}
-                    >
-                      {platform.initials}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium">{platform.label}</p>
-                      {queryDisplay && (
-                        <p className="truncate text-xs text-muted-foreground">{queryDisplay}</p>
-                      )}
-                    </div>
-                  </div>
-                  <a
-                    href={platform.buildUrl(state)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
-                  >
-                    {t("openSearch")}
-                    <ExternalLink className="h-3 w-3" />
-                  </a>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+      {/* Platform cards — always visible so users understand what will happen */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-medium">
+            {hasSearched ? t("resultsTitle") : t("platformsTitle")}
+          </p>
+          <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted-foreground">
+            <ExternalLink className="h-3 w-3" />
+            {t("opensInNewTab")}
+          </span>
         </div>
-      )}
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          {PLATFORMS.map((platform) => (
+            <Card
+              key={platform.key}
+              className={cn(
+                "transition-all",
+                hasSearched
+                  ? "hover:shadow-md hover:border-primary/40"
+                  : "opacity-60 hover:opacity-80"
+              )}
+            >
+              <CardContent className="flex flex-col gap-3 p-4">
+                <div className="flex items-center gap-3">
+                  <div
+                    className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg text-xs font-bold text-white"
+                    style={{ backgroundColor: platform.color }}
+                  >
+                    {platform.initials}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium">{platform.label}</p>
+                    {queryDisplay && hasSearched ? (
+                      <p className="truncate text-xs text-muted-foreground">{queryDisplay}</p>
+                    ) : (
+                      <p className="text-xs text-muted-foreground">{t("searchToOpen")}</p>
+                    )}
+                  </div>
+                </div>
+                <a
+                  href={hasSearched ? platform.buildUrl(state) : undefined}
+                  onClick={!hasSearched ? (e) => e.preventDefault() : undefined}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-disabled={!hasSearched}
+                  className={cn(
+                    "inline-flex w-full items-center justify-center gap-1.5 rounded-md border px-3 py-2 text-xs font-medium transition-colors",
+                    hasSearched
+                      ? "border-primary bg-primary/5 text-primary hover:bg-primary hover:text-primary-foreground cursor-pointer"
+                      : "border-border bg-muted text-muted-foreground cursor-not-allowed"
+                  )}
+                >
+                  {t("openSearch")}
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        {!hasSearched && (
+          <p className="text-center text-xs text-muted-foreground">{t("enterSearchToActivate")}</p>
+        )}
+      </div>
 
       <SaveSearchDialog
         open={saveDialogOpen}
