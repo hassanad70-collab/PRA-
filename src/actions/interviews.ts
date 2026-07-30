@@ -4,6 +4,7 @@ import { revalidateCandidatePath } from "@/lib/revalidate-candidate-path";
 import { revalidateRecruiterPath } from "@/lib/revalidate-recruiter-path";
 import { generateInterviewQuestions } from "@/lib/ai/interview-questions";
 import { summarizeInterview } from "@/lib/ai/interview-summary";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { interviewFeedbackSchema, scheduleInterviewSchema } from "@/lib/validations/interview";
 import { INTERVIEW_COMPETENCIES } from "@/types/database";
@@ -92,7 +93,29 @@ export async function scheduleInterview(applicationId: string, jobId: string, fo
   if (error) return { success: false, error: error.message };
 
   // Advance the pipeline stage, but don't clobber a later stage (offer/hired/rejected).
-  await ctx.supabase.from("applications").update({ status: "interview" }).eq("id", applicationId).in("status", ADVANCEABLE_STATUSES);
+  const { data: app } = await ctx.supabase
+    .from("applications")
+    .update({ status: "interview" })
+    .eq("id", applicationId)
+    .in("status", ADVANCEABLE_STATUSES)
+    .select("candidate_id, job:jobs(title)")
+    .maybeSingle();
+
+  // Fire-and-forget in-app notification to the candidate
+  if (app?.candidate_id) {
+    const jobTitle = (app as { job?: { title?: string } }).job?.title ?? "a position";
+    const scheduledAt = new Date(parsed.data.scheduledAt).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
+    void (async () => {
+      await createAdminClient().from("notifications").insert({
+        user_id: app.candidate_id,
+        type: "interview_scheduled",
+        title: "Interview Scheduled",
+        message: `Your interview for "${jobTitle}" has been scheduled for ${scheduledAt}.`,
+        link: "/candidate/applications",
+        data: { application_id: applicationId, scheduled_at: parsed.data.scheduledAt },
+      });
+    })();
+  }
 
   revalidateRecruiterPath(`/applications/${applicationId}`);
   revalidateRecruiterPath(`/jobs/${jobId}/candidates`);

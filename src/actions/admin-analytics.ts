@@ -117,6 +117,31 @@ export async function getDailyActivity(days = 30, companyId?: string): Promise<D
   return (data ?? []) as DailyActivity[];
 }
 
+export interface SearchAnalytics {
+  total_searches: number;
+  unique_searches: number;
+  unique_searchers: number;
+  total_saved_searches: number;
+  total_active_alerts: number;
+  total_alerts: number;
+  ai_recs_cached: number;
+  searches_today: number;
+  searches_this_week: number;
+  top_queries: Array<{ term: string; count: number }>;
+  top_keywords: Array<{ term: string; count: number }>;
+  top_locations: Array<{ term: string; count: number }>;
+  experience_distribution: Record<string, number>;
+  alert_frequency_distribution: Record<string, number>;
+}
+
+export async function getSearchAnalytics(): Promise<SearchAnalytics | null> {
+  await requireSuperAdmin();
+  const admin = createAdminClient();
+  const { data, error } = await admin.rpc("get_search_analytics");
+  if (error) { console.error("get_search_analytics", error); return null; }
+  return data as SearchAnalytics;
+}
+
 export async function getCompaniesForFilter(): Promise<{ id: string; name: string }[]> {
   await requireSuperAdmin();
   const admin = createAdminClient();

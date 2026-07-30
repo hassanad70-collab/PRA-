@@ -1,4 +1,4 @@
-import { Activity, BarChart3, Briefcase, Database, FileText, TrendingUp, Users } from "lucide-react";
+import { Activity, BarChart3, Bell, Bookmark, Briefcase, Database, FileText, Search, Sparkles, TrendingUp, Users } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +14,7 @@ import {
   getDailyActivity,
   getMonthlyGrowthMetrics,
   getPlatformAnalytics,
+  getSearchAnalytics,
 } from "@/actions/admin-analytics";
 
 function KpiCard({
@@ -50,12 +51,13 @@ export default async function AdminAnalyticsPage({
 }) {
   const params = await searchParams;
 
-  const [analytics, monthlyGrowth, atsDistribution, dailyActivity, companies] = await Promise.all([
+  const [analytics, monthlyGrowth, atsDistribution, dailyActivity, companies, searchAnalytics] = await Promise.all([
     getPlatformAnalytics(params.from, params.to, params.company_id),
     getMonthlyGrowthMetrics(12, params.company_id),
     getAtsScoreDistribution(params.company_id),
     getDailyActivity(30, params.company_id),
     getCompaniesForFilter(),
+    getSearchAnalytics(),
   ]);
 
   const a = analytics;
@@ -189,6 +191,106 @@ export default async function AdminAnalyticsPage({
           </CardContent>
         </Card>
       </div>
+
+      {/* Job Discovery Analytics */}
+      <div>
+        <h2 className="mb-3 text-sm font-medium text-muted-foreground">Job Discovery & Search Intelligence</h2>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <KpiCard label="Total Searches" value={searchAnalytics?.total_searches ?? 0} sub={`${searchAnalytics?.searches_today ?? 0} today`} icon={Search} />
+          <KpiCard label="Unique Searchers" value={searchAnalytics?.unique_searchers ?? 0} sub={`${searchAnalytics?.searches_this_week ?? 0} this week`} icon={Users} />
+          <KpiCard label="Saved Searches" value={searchAnalytics?.total_saved_searches ?? 0} icon={Bookmark} />
+          <KpiCard label="Active Alerts" value={searchAnalytics?.total_active_alerts ?? 0} sub={`of ${searchAnalytics?.total_alerts ?? 0} total`} icon={Bell} />
+        </div>
+        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-1">
+          <KpiCard label="AI Career Recs Cached" value={searchAnalytics?.ai_recs_cached ?? 0} sub="24h TTL cache" icon={Sparkles} />
+        </div>
+      </div>
+
+      {/* Top Searched Terms */}
+      {(searchAnalytics?.top_queries?.length || 0) > 0 && (
+        <div className="grid gap-6 lg:grid-cols-3">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Top Job Titles Searched</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {(searchAnalytics?.top_queries ?? []).map((q, i) => (
+                  <div key={q.term} className="flex items-center gap-2">
+                    <span className="w-5 flex-shrink-0 text-xs text-muted-foreground">{i + 1}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="mb-0.5 flex items-center justify-between gap-2">
+                        <span className="truncate text-xs font-medium">{q.term}</span>
+                        <span className="flex-shrink-0 text-xs text-muted-foreground">×{q.count}</span>
+                      </div>
+                      <div className="h-1 rounded-full bg-muted">
+                        <div
+                          className="h-1 rounded-full bg-primary"
+                          style={{ width: `${Math.min(100, (q.count / (searchAnalytics?.top_queries?.[0]?.count ?? 1)) * 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Top Keywords</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {(searchAnalytics?.top_keywords ?? []).map((q, i) => (
+                  <div key={q.term} className="flex items-center gap-2">
+                    <span className="w-5 flex-shrink-0 text-xs text-muted-foreground">{i + 1}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="mb-0.5 flex items-center justify-between gap-2">
+                        <span className="truncate text-xs font-medium">{q.term}</span>
+                        <span className="flex-shrink-0 text-xs text-muted-foreground">×{q.count}</span>
+                      </div>
+                      <div className="h-1 rounded-full bg-muted">
+                        <div
+                          className="h-1 rounded-full bg-primary"
+                          style={{ width: `${Math.min(100, (q.count / (searchAnalytics?.top_keywords?.[0]?.count ?? 1)) * 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Top Locations</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {(searchAnalytics?.top_locations ?? []).map((q, i) => (
+                  <div key={q.term} className="flex items-center gap-2">
+                    <span className="w-5 flex-shrink-0 text-xs text-muted-foreground">{i + 1}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="mb-0.5 flex items-center justify-between gap-2">
+                        <span className="truncate text-xs font-medium">{q.term}</span>
+                        <span className="flex-shrink-0 text-xs text-muted-foreground">×{q.count}</span>
+                      </div>
+                      <div className="h-1 rounded-full bg-muted">
+                        <div
+                          className="h-1 rounded-full bg-primary"
+                          style={{ width: `${Math.min(100, (q.count / (searchAnalytics?.top_locations?.[0]?.count ?? 1)) * 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Charts */}
       <div className="grid gap-6 lg:grid-cols-2">

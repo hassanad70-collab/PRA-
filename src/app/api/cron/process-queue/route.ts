@@ -79,10 +79,20 @@ async function processJob(
         search_name: alert.name,
         platform_url: platformUrl,
       });
-      await admin
-        .from("candidate_job_alerts")
-        .update({ last_sent_at: new Date().toISOString() })
-        .eq("id", alertId);
+      await Promise.all([
+        admin
+          .from("candidate_job_alerts")
+          .update({ last_sent_at: new Date().toISOString() })
+          .eq("id", alertId),
+        admin.from("notifications").insert({
+          user_id: alert.candidate_id,
+          type: "job_alert",
+          title: `New jobs matching "${alert.name}"`,
+          message: "New opportunities are available for your saved search. Search now to see them.",
+          link: "/candidate/jobs?tab=saved",
+          data: { alert_id: alertId, alert_name: alert.name },
+        }),
+      ]);
       break;
     }
     case "weekly_digest_send": {

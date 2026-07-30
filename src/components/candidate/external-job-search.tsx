@@ -6,7 +6,6 @@ import { Bookmark, ExternalLink, Globe, Search, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -17,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { SaveSearchDialog } from "./save-search-dialog";
+import { SearchAutocomplete } from "./search-autocomplete";
 import type { JobSearchRecommendation } from "@/types/job-discovery";
 
 // ---------------------------------------------------------------------------
@@ -243,28 +243,31 @@ export function ExternalJobSearch({
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">{t("titleLabel")}</Label>
-            <Input
+            <SearchAutocomplete
+              field="title"
               placeholder={t("titlePlaceholder")}
               value={state.title}
-              onChange={(e) => updateField("title", e.target.value)}
+              onChange={(v) => updateField("title", v)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             />
           </div>
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">{t("keywordsLabel")}</Label>
-            <Input
+            <SearchAutocomplete
+              field="keywords"
               placeholder={t("keywordsPlaceholder")}
               value={state.keywords}
-              onChange={(e) => updateField("keywords", e.target.value)}
+              onChange={(v) => updateField("keywords", v)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             />
           </div>
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">{t("locationLabel")}</Label>
-            <Input
+            <SearchAutocomplete
+              field="location"
               placeholder={t("locationPlaceholder")}
               value={state.location}
-              onChange={(e) => updateField("location", e.target.value)}
+              onChange={(v) => updateField("location", v)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             />
           </div>

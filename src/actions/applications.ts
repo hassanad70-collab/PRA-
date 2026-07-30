@@ -172,11 +172,31 @@ export async function updateApplicationStatus(applicationId: string, status: App
     .from("applications")
     .update({ status, status_reason: reason ?? null })
     .eq("id", applicationId)
-    .select("id")
+    .select("id, candidate_id, job:jobs(title)")
     .maybeSingle();
 
   if (error) return { success: false, error: error.message };
   if (!updated) return { success: false, error: "You don't have permission to update this application." };
+
+  // Fire-and-forget in-app notification to the candidate
+  const notifType = status === "interview" ? "interview_scheduled"
+    : status === "offer" ? "offer_extended"
+    : "application_status_changed";
+  const statusLabel: Record<string, string> = {
+    screening: "Screening", shortlisted: "Shortlisted", interview: "Interview Scheduled",
+    offer: "Offer Extended", hired: "Hired", rejected: "Rejected", withdrawn: "Withdrawn",
+  };
+  const jobTitle = (updated as { job?: { title?: string } }).job?.title ?? "a position";
+  void (async () => {
+    await createAdminClient().from("notifications").insert({
+      user_id: updated.candidate_id,
+      type: notifType,
+      title: `Application status update — ${statusLabel[status] ?? status}`,
+      message: `Your application for "${jobTitle}" has moved to ${statusLabel[status] ?? status}.`,
+      link: "/candidate/applications",
+      data: { application_id: applicationId, status },
+    });
+  })();
 
   revalidateRecruiterPath("", "layout");
   return { success: true };
