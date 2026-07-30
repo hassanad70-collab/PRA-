@@ -2,6 +2,7 @@
 
 import { AI_MODELS, getOpenAI } from "@/lib/ai/openai";
 import { classifyAIError } from "@/lib/ai/errors";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionResult } from "./auth";
 
@@ -66,6 +67,100 @@ export interface OpenAIDiagnosticsResult extends ActionResult {
   environment?: string;
   /** Version string of the openai npm package installed in this deployment. */
   sdkVersion?: string;
+}
+
+export interface SystemHealthResult {
+  database: {
+    reachable: boolean;
+    latencyMs: number;
+    companiesCount?: number;
+  };
+  queue: {
+    reachable: boolean;
+    pending: number;
+    running: number;
+    failed: number;
+    latencyMs: number;
+  };
+  email: {
+    providerConfigured: boolean;
+    provider: string;
+    pending: number;
+    sent: number;
+    failed: number;
+  };
+  billing: {
+    stripeConfigured: boolean;
+    webhookConfigured: boolean;
+    activeSubscriptions: number;
+    pendingBillingEvents: number;
+  };
+}
+
+export async function getSystemHealth(): Promise<SystemHealthResult> {
+  const ctx = await requireSuperAdmin();
+  if (!ctx) {
+    return {
+      database: { reachable: false, latencyMs: 0 },
+      queue: { reachable: false, pending: 0, running: 0, failed: 0, latencyMs: 0 },
+      email: { providerConfigured: false, provider: "none", pending: 0, sent: 0, failed: 0 },
+      billing: { stripeConfigured: false, webhookConfigured: false, activeSubscriptions: 0, pendingBillingEvents: 0 },
+    };
+  }
+
+  const admin = createAdminClient();
+
+  // Run all checks in parallel
+  const [dbResult, queueResult, emailResult, billingResult] = await Promise.allSettled([
+    (async () => {
+      const t0 = Date.now();
+      const { count } = await admin.from("companies").select("id", { count: "exact", head: true }).is("deleted_at", null);
+      return { reachable: true, latencyMs: Date.now() - t0, companiesCount: count ?? 0 };
+    })(),
+    (async () => {
+      const t0 = Date.now();
+      const { data } = await admin.from("job_queue").select("status");
+      const latencyMs = Date.now() - t0;
+      const rows = data ?? [];
+      return {
+        reachable: true,
+        pending: rows.filter((r) => r.status === "pending").length,
+        running: rows.filter((r) => r.status === "running").length,
+        failed: rows.filter((r) => r.status === "failed").length,
+        latencyMs,
+      };
+    })(),
+    (async () => {
+      const { data } = await admin.from("email_queue").select("status");
+      const rows = data ?? [];
+      return {
+        providerConfigured: !!process.env.RESEND_API_KEY,
+        provider: process.env.RESEND_API_KEY ? "Resend" : "none",
+        pending: rows.filter((r) => r.status === "pending").length,
+        sent: rows.filter((r) => r.status === "sent").length,
+        failed: rows.filter((r) => r.status === "failed").length,
+      };
+    })(),
+    (async () => {
+      const [{ count: activeSubs }, { count: pendingEvents }] = await Promise.all([
+        admin.from("subscriptions").select("id", { count: "exact", head: true }).eq("status", "active"),
+        admin.from("billing_events").select("id", { count: "exact", head: true }).eq("processed", false),
+      ]);
+      return {
+        stripeConfigured: !!process.env.STRIPE_SECRET_KEY,
+        webhookConfigured: !!process.env.STRIPE_WEBHOOK_SECRET,
+        activeSubscriptions: activeSubs ?? 0,
+        pendingBillingEvents: pendingEvents ?? 0,
+      };
+    })(),
+  ]);
+
+  return {
+    database: dbResult.status === "fulfilled" ? dbResult.value : { reachable: false, latencyMs: 0 },
+    queue: queueResult.status === "fulfilled" ? queueResult.value : { reachable: false, pending: 0, running: 0, failed: 0, latencyMs: 0 },
+    email: emailResult.status === "fulfilled" ? emailResult.value : { providerConfigured: false, provider: "none", pending: 0, sent: 0, failed: 0 },
+    billing: billingResult.status === "fulfilled" ? billingResult.value : { stripeConfigured: false, webhookConfigured: false, activeSubscriptions: 0, pendingBillingEvents: 0 },
+  };
 }
 
 /**
