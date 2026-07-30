@@ -71,8 +71,14 @@ export async function markComplete(jobId: string): Promise<void> {
     .eq("id", jobId);
 }
 
-/** Mark a job as failed with an error message. */
-export async function markFailed(jobId: string, error: string): Promise<void> {
+/**
+ * Mark a running job as failed.
+ * If attempts < max_attempts the job goes back to 'pending' for retry.
+ * If attempts >= max_attempts it moves permanently to 'failed'.
+ * claim_next_job() already incremented attempts before we started, so we
+ * read the current value and compare against max_attempts.
+ */
+export async function markFailed(jobId: string, errorMessage: string): Promise<void> {
   const admin = createAdminClient();
 
   const { data: job } = await admin
@@ -81,12 +87,11 @@ export async function markFailed(jobId: string, error: string): Promise<void> {
     .eq("id", jobId)
     .single();
 
-  const nextStatus =
-    job && job.attempts >= job.max_attempts ? "failed" : "pending";
+  const exhausted = job ? job.attempts >= job.max_attempts : true;
 
   await admin
     .from("job_queue")
-    .update({ status: nextStatus, last_error: error })
+    .update({ status: exhausted ? "failed" : "pending", last_error: errorMessage })
     .eq("id", jobId);
 }
 
@@ -100,7 +105,10 @@ export async function cancelJob(jobId: string): Promise<void> {
     .eq("status", "pending");
 }
 
-/** Fetch queue stats for the dashboard. */
+/**
+ * Fetch queue stats using parallel indexed COUNT queries.
+ * Avoids a full table scan compared to SELECT status FROM job_queue.
+ */
 export async function getQueueStats(): Promise<{
   pending: number;
   running: number;
@@ -109,15 +117,18 @@ export async function getQueueStats(): Promise<{
   cancelled: number;
 }> {
   const admin = createAdminClient();
-  const { data, error } = await admin.from("job_queue").select("status");
-  if (error || !data) return { pending: 0, running: 0, completed: 0, failed: 0, cancelled: 0 };
 
-  return data.reduce(
-    (acc, row) => {
-      const s = row.status as JobStatus;
-      acc[s] = (acc[s] ?? 0) + 1;
-      return acc;
-    },
-    { pending: 0, running: 0, completed: 0, failed: 0, cancelled: 0 }
+  const [pending, running, completed, failed, cancelled] = await Promise.all(
+    (["pending", "running", "completed", "failed", "cancelled"] as const).map((s) =>
+      admin.from("job_queue").select("id", { count: "exact", head: true }).eq("status", s)
+    )
   );
+
+  return {
+    pending: pending.count ?? 0,
+    running: running.count ?? 0,
+    completed: completed.count ?? 0,
+    failed: failed.count ?? 0,
+    cancelled: cancelled.count ?? 0,
+  };
 }

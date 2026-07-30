@@ -1,15 +1,52 @@
 import { NextResponse } from "next/server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
+import { queueTemplateEmail } from "@/lib/email";
 
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
+
+/** Maximum age (seconds) of an accepted Stripe webhook — replay protection. */
+const WEBHOOK_TOLERANCE_SECONDS = 300;
+
+/**
+ * Map Stripe price IDs to internal plan slugs.
+ * Configure these env vars in the Stripe dashboard once products are created:
+ *   STRIPE_PRICE_ID_STARTER, STRIPE_PRICE_ID_PROFESSIONAL, STRIPE_PRICE_ID_ENTERPRISE
+ */
+function priceIdToPlan(priceId: string | undefined): string | null {
+  if (!priceId) return null;
+  const map: Record<string, string> = {};
+  if (process.env.STRIPE_PRICE_ID_STARTER) map[process.env.STRIPE_PRICE_ID_STARTER] = "starter";
+  if (process.env.STRIPE_PRICE_ID_PROFESSIONAL) map[process.env.STRIPE_PRICE_ID_PROFESSIONAL] = "professional";
+  if (process.env.STRIPE_PRICE_ID_ENTERPRISE) map[process.env.STRIPE_PRICE_ID_ENTERPRISE] = "enterprise";
+  return map[priceId] ?? null;
+}
+
+/** Derive plan from Stripe subscription items array. Returns null if unmapped. */
+function normalizePlan(items: unknown): string | null {
+  const arr = items as Array<{ price?: { id?: string } }> | undefined;
+  // Use the first line item's price ID for plan resolution.
+  return priceIdToPlan(arr?.[0]?.price?.id);
+}
+
+function mapSubStatus(stripeStatus: string): string {
+  const map: Record<string, string> = {
+    active: "active",
+    trialing: "trialing",
+    past_due: "past_due",
+    canceled: "cancelled",
+    cancelled: "cancelled",
+    unpaid: "past_due",
+    incomplete: "past_due",
+    incomplete_expired: "cancelled",
+    paused: "suspended",
+  };
+  return map[stripeStatus] ?? "active";
+}
 
 export async function POST(req: Request) {
   const rawBody = await req.text();
   const sig = req.headers.get("stripe-signature");
-
-  // Log the raw event immediately before any processing
-  const admin = createAdminClient();
 
   let event: { id?: string; type?: string; data?: unknown };
   try {
@@ -18,12 +55,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  // Verify signature when secret is configured (using Web Crypto — no stripe SDK required)
-  if (STRIPE_WEBHOOK_SECRET && sig) {
+  // Verify signature + timestamp when secret is configured.
+  if (STRIPE_WEBHOOK_SECRET) {
+    if (!sig) {
+      return NextResponse.json({ error: "Missing stripe-signature header" }, { status: 400 });
+    }
     try {
       const sigValid = await verifyStripeSignature(rawBody, sig, STRIPE_WEBHOOK_SECRET);
       if (!sigValid) {
-        return NextResponse.json({ error: "Invalid Stripe signature" }, { status: 400 });
+        return NextResponse.json({ error: "Invalid Stripe signature or stale timestamp" }, { status: 400 });
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Signature verification failed";
@@ -34,24 +74,27 @@ export async function POST(req: Request) {
   const eventType = event.type ?? "unknown";
   const stripeEventId = event.id ?? null;
 
-  // Persist to billing_events (idempotent via unique constraint on stripe_event_id)
-  const { error: logError } = await admin.from("billing_events").upsert(
-    {
-      event_type: eventType,
-      stripe_event_id: stripeEventId,
-      payload: event as Record<string, unknown>,
-      processed: false,
-    },
-    { onConflict: "stripe_event_id", ignoreDuplicates: true }
-  );
+  const admin = createAdminClient();
 
-  if (logError) {
-    console.error("billing_events upsert failed:", logError);
+  // Persist to billing_events before processing (idempotent via unique constraint).
+  if (stripeEventId) {
+    const { error: logError } = await admin.from("billing_events").upsert(
+      {
+        event_type: eventType,
+        stripe_event_id: stripeEventId,
+        payload: event as Record<string, unknown>,
+        processed: false,
+      },
+      { onConflict: "stripe_event_id", ignoreDuplicates: true }
+    );
+    if (logError) {
+      console.error("billing_events upsert failed:", logError);
+    }
   }
 
-  // Process known event types
+  // Process known event types.
   try {
-    await handleStripeEvent(eventType, event.data as Record<string, unknown>);
+    await handleStripeEvent(admin, eventType, event.data as Record<string, unknown>);
 
     if (stripeEventId) {
       await admin
@@ -74,10 +117,10 @@ export async function POST(req: Request) {
 }
 
 async function handleStripeEvent(
+  admin: ReturnType<typeof createAdminClient>,
   type: string,
   data: Record<string, unknown>
 ): Promise<void> {
-  const admin = createAdminClient();
   const obj = data?.object as Record<string, unknown> | undefined;
 
   switch (type) {
@@ -91,8 +134,8 @@ async function handleStripeEvent(
       await admin
         .from("subscriptions")
         .update({
-          plan: plan ?? "free",
-          status: status ?? "active",
+          ...(plan && { plan }),
+          ...(status && { status }),
           current_period_start: obj?.current_period_start
             ? new Date((obj.current_period_start as number) * 1000).toISOString()
             : null,
@@ -100,25 +143,27 @@ async function handleStripeEvent(
             ? new Date((obj.current_period_end as number) * 1000).toISOString()
             : null,
           cancel_at_period_end: Boolean(obj?.cancel_at_period_end),
+          trial_ends_at: obj?.trial_end
+            ? new Date((obj.trial_end as number) * 1000).toISOString()
+            : null,
         })
         .eq("stripe_subscription_id", stripeSubId);
 
-      // Keep denormalized plan on companies
-      if (plan || status) {
-        const { data: sub } = await admin
-          .from("subscriptions")
-          .select("company_id")
-          .eq("stripe_subscription_id", stripeSubId)
-          .maybeSingle();
-        if (sub?.company_id) {
-          await admin
-            .from("companies")
-            .update({
-              ...(plan && { subscription_plan: plan }),
-              ...(status && { subscription_status: mapSubStatus(status) }),
-            })
-            .eq("id", sub.company_id);
-        }
+      // Keep denormalized plan/status on companies for fast plan checks.
+      const { data: sub } = await admin
+        .from("subscriptions")
+        .select("company_id")
+        .eq("stripe_subscription_id", stripeSubId)
+        .maybeSingle();
+
+      if (sub?.company_id && (plan || status)) {
+        await admin
+          .from("companies")
+          .update({
+            ...(plan && { subscription_plan: plan }),
+            ...(status && { subscription_status: mapSubStatus(status) }),
+          })
+          .eq("id", sub.company_id);
       }
       break;
     }
@@ -126,10 +171,24 @@ async function handleStripeEvent(
     case "customer.subscription.deleted": {
       const stripeSubId = obj?.id as string | undefined;
       if (!stripeSubId) break;
+
       await admin
         .from("subscriptions")
         .update({ status: "cancelled" })
         .eq("stripe_subscription_id", stripeSubId);
+
+      // Keep companies table in sync.
+      const { data: sub } = await admin
+        .from("subscriptions")
+        .select("company_id")
+        .eq("stripe_subscription_id", stripeSubId)
+        .maybeSingle();
+      if (sub?.company_id) {
+        await admin
+          .from("companies")
+          .update({ subscription_status: "cancelled" })
+          .eq("id", sub.company_id);
+      }
       break;
     }
 
@@ -137,81 +196,95 @@ async function handleStripeEvent(
     case "invoice.payment_failed": {
       const stripeInvId = obj?.id as string | undefined;
       if (!stripeInvId) break;
-      // Upsert invoice record
+
       const customerId = obj?.customer as string | undefined;
-      if (customerId) {
-        const { data: sub } = await admin
-          .from("subscriptions")
-          .select("company_id")
-          .eq("stripe_customer_id", customerId)
+      if (!customerId) break;
+
+      const { data: sub } = await admin
+        .from("subscriptions")
+        .select("company_id")
+        .eq("stripe_customer_id", customerId)
+        .maybeSingle();
+
+      if (!sub?.company_id) break;
+
+      // Upsert invoice record.
+      await admin.from("invoices").upsert(
+        {
+          company_id: sub.company_id,
+          stripe_invoice_id: stripeInvId,
+          amount_due: (obj?.amount_due as number) ?? 0,
+          amount_paid: (obj?.amount_paid as number) ?? 0,
+          currency: (obj?.currency as string) ?? "usd",
+          status: (obj?.status as string) ?? "open",
+          invoice_url: (obj?.hosted_invoice_url as string) ?? null,
+          paid_at: obj?.status_transitions
+            ? new Date(((obj.status_transitions as Record<string, number>).paid_at ?? 0) * 1000).toISOString()
+            : null,
+        },
+        { onConflict: "stripe_invoice_id" }
+      );
+
+      // Queue a payment_failed notification to the billing admin.
+      if (type === "invoice.payment_failed") {
+        const { data: company } = await admin
+          .from("companies")
+          .select("name, subscription_plan")
+          .eq("id", sub.company_id)
           .maybeSingle();
 
-        if (sub?.company_id) {
-          await admin.from("invoices").upsert(
-            {
-              company_id: sub.company_id,
-              stripe_invoice_id: stripeInvId,
-              amount_due: (obj?.amount_due as number) ?? 0,
-              amount_paid: (obj?.amount_paid as number) ?? 0,
-              currency: (obj?.currency as string) ?? "usd",
-              status: (obj?.status as string) ?? "open",
-              invoice_url: (obj?.hosted_invoice_url as string) ?? null,
-              paid_at: obj?.status === "paid" ? new Date().toISOString() : null,
-            },
-            { onConflict: "stripe_invoice_id" }
-          );
+        // Find the company's billing contact or any admin recruiter.
+        const { data: subscription } = await admin
+          .from("subscriptions")
+          .select("billing_email, billing_name")
+          .eq("company_id", sub.company_id)
+          .maybeSingle();
+
+        const billingEmail = subscription?.billing_email ?? (obj?.customer_email as string | undefined);
+
+        if (billingEmail && company) {
+          await queueTemplateEmail("payment_failed", { email: billingEmail, name: subscription?.billing_name ?? undefined }, {
+            company_admin_name: subscription?.billing_name ?? "Account Admin",
+            plan: company.subscription_plan ?? "your",
+          }).catch((err) => {
+            console.error("Failed to queue payment_failed email:", err);
+          });
         }
       }
       break;
     }
 
     default:
-      // Unknown event — logged, not processed
+      // Unknown event type — logged to billing_events, no processing required.
       break;
   }
 }
 
-function normalizePlan(items: unknown): string | null {
-  // Very rough — in production you'd map Stripe price IDs to plan slugs
-  const arr = items as Array<{ price?: { nickname?: string } }> | undefined;
-  const nickname = arr?.[0]?.price?.nickname?.toLowerCase();
-  if (!nickname) return null;
-  if (nickname.includes("enterprise")) return "enterprise";
-  if (nickname.includes("professional")) return "professional";
-  if (nickname.includes("starter")) return "starter";
-  return "free";
-}
-
-function mapSubStatus(stripeStatus: string): string {
-  const map: Record<string, string> = {
-    active: "active",
-    trialing: "trialing",
-    past_due: "past_due",
-    canceled: "cancelled",
-    cancelled: "cancelled",
-    unpaid: "past_due",
-    incomplete: "past_due",
-    incomplete_expired: "cancelled",
-    paused: "suspended",
-  };
-  return map[stripeStatus] ?? "active";
-}
-
-/** Verify Stripe webhook signature using Web Crypto (no SDK required). */
+/**
+ * Verify Stripe webhook signature using Web Crypto (no stripe SDK required).
+ * Also enforces the 5-minute tolerance to prevent replay attacks.
+ */
 async function verifyStripeSignature(
   rawBody: string,
   sigHeader: string,
   secret: string
 ): Promise<boolean> {
   const parts = sigHeader.split(",").reduce<Record<string, string>>((acc, part) => {
-    const [key, val] = part.split("=");
-    if (key && val) acc[key.trim()] = val.trim();
+    const idx = part.indexOf("=");
+    if (idx > 0) acc[part.slice(0, idx).trim()] = part.slice(idx + 1).trim();
     return acc;
   }, {});
 
   const timestamp = parts["t"];
   const v1 = parts["v1"];
   if (!timestamp || !v1) return false;
+
+  // Replay protection: reject webhooks older than WEBHOOK_TOLERANCE_SECONDS.
+  const webhookAge = Math.floor(Date.now() / 1000) - parseInt(timestamp, 10);
+  if (isNaN(webhookAge) || webhookAge > WEBHOOK_TOLERANCE_SECONDS || webhookAge < -60) {
+    console.error(`Stripe webhook timestamp out of tolerance: age=${webhookAge}s`);
+    return false;
+  }
 
   const signed = `${timestamp}.${rawBody}`;
   const encoder = new TextEncoder();
@@ -227,5 +300,11 @@ async function verifyStripeSignature(
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
 
-  return computed === v1;
+  // Constant-time comparison to prevent timing attacks.
+  if (computed.length !== v1.length) return false;
+  let diff = 0;
+  for (let i = 0; i < computed.length; i++) {
+    diff |= computed.charCodeAt(i) ^ v1.charCodeAt(i);
+  }
+  return diff === 0;
 }

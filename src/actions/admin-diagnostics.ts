@@ -119,26 +119,31 @@ export async function getSystemHealth(): Promise<SystemHealthResult> {
     })(),
     (async () => {
       const t0 = Date.now();
-      const { data } = await admin.from("job_queue").select("status");
-      const latencyMs = Date.now() - t0;
-      const rows = data ?? [];
+      const [{ count: pending }, { count: running }, { count: failed }] = await Promise.all([
+        admin.from("job_queue").select("id", { count: "exact", head: true }).eq("status", "pending"),
+        admin.from("job_queue").select("id", { count: "exact", head: true }).eq("status", "running"),
+        admin.from("job_queue").select("id", { count: "exact", head: true }).eq("status", "failed"),
+      ]);
       return {
         reachable: true,
-        pending: rows.filter((r) => r.status === "pending").length,
-        running: rows.filter((r) => r.status === "running").length,
-        failed: rows.filter((r) => r.status === "failed").length,
-        latencyMs,
+        pending: pending ?? 0,
+        running: running ?? 0,
+        failed: failed ?? 0,
+        latencyMs: Date.now() - t0,
       };
     })(),
     (async () => {
-      const { data } = await admin.from("email_queue").select("status");
-      const rows = data ?? [];
+      const [{ count: pending }, { count: sent }, { count: failed }] = await Promise.all([
+        admin.from("email_queue").select("id", { count: "exact", head: true }).eq("status", "pending"),
+        admin.from("email_queue").select("id", { count: "exact", head: true }).eq("status", "sent"),
+        admin.from("email_queue").select("id", { count: "exact", head: true }).eq("status", "failed"),
+      ]);
       return {
         providerConfigured: !!process.env.RESEND_API_KEY,
         provider: process.env.RESEND_API_KEY ? "Resend" : "none",
-        pending: rows.filter((r) => r.status === "pending").length,
-        sent: rows.filter((r) => r.status === "sent").length,
-        failed: rows.filter((r) => r.status === "failed").length,
+        pending: pending ?? 0,
+        sent: sent ?? 0,
+        failed: failed ?? 0,
       };
     })(),
     (async () => {

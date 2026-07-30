@@ -6,6 +6,13 @@ const MAX_JOBS_PER_INVOCATION = 5;
 const CRON_SECRET = process.env.CRON_SECRET;
 
 export async function GET(req: Request) {
+  // In production, CRON_SECRET is mandatory. Vercel injects it automatically
+  // on cron invocations (Pro+). Without it, anyone could trigger job processing.
+  if (process.env.VERCEL_ENV === "production" && !CRON_SECRET) {
+    console.error("CRON_SECRET is not set in production — cron endpoint disabled for safety");
+    return NextResponse.json({ error: "Cron secret not configured" }, { status: 503 });
+  }
+
   if (CRON_SECRET) {
     const auth = req.headers.get("authorization");
     if (auth !== `Bearer ${CRON_SECRET}`) {
@@ -48,6 +55,7 @@ async function processJob(
       break;
     }
     default:
+      // Permanently fail unknown job types so they don't occupy the queue.
       throw new Error(`Unknown job type: ${type}`);
   }
 }

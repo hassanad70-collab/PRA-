@@ -81,7 +81,14 @@ export async function queueTemplateEmail(
   });
 }
 
-/** Attempt to send a queued email and record the result. Stubs without RESEND_API_KEY. */
+/**
+ * Attempt to send a queued email via Resend and record the result.
+ *
+ * In production (VERCEL_ENV === "production") without RESEND_API_KEY the
+ * email is marked failed — undelivered mail must not silently succeed.
+ * In development/preview, the send is skipped and marked as sent_stub so
+ * the happy path still flows without credentials.
+ */
 export async function sendQueuedEmail(emailId: string): Promise<{ success: boolean; error?: string }> {
   const admin = createAdminClient();
 
@@ -94,19 +101,42 @@ export async function sendQueuedEmail(emailId: string): Promise<{ success: boole
   if (error || !email) return { success: false, error: "Email not found" };
 
   const resendKey = process.env.RESEND_API_KEY;
+  const isProduction = process.env.VERCEL_ENV === "production";
 
   if (!resendKey) {
+    if (isProduction) {
+      const msg = "RESEND_API_KEY is not configured in production";
+      await admin
+        .from("email_queue")
+        .update({
+          status: "failed",
+          last_error: msg,
+          attempts: (email.attempts as number) + 1,
+        })
+        .eq("id", emailId);
+      await admin.from("email_events").insert({
+        email_id: emailId,
+        event_type: "failed",
+        metadata: { reason: msg },
+      });
+      return { success: false, error: msg };
+    }
+
+    // Development / preview: stub delivery so the rest of the pipeline works.
     await admin
       .from("email_queue")
-      .update({ status: "sent", sent_at: new Date().toISOString(), provider_id: "stub-no-key" })
+      .update({
+        status: "sent",
+        sent_at: new Date().toISOString(),
+        provider_id: "stub-dev",
+        attempts: (email.attempts as number) + 1,
+      })
       .eq("id", emailId);
-
     await admin.from("email_events").insert({
       email_id: emailId,
       event_type: "sent_stub",
-      metadata: { reason: "RESEND_API_KEY not configured" },
+      metadata: { reason: "RESEND_API_KEY not set; development stub" },
     });
-
     return { success: true };
   }
 
@@ -119,30 +149,52 @@ export async function sendQueuedEmail(emailId: string): Promise<{ success: boole
         to: email.to_name ? `${email.to_name} <${email.to_email}>` : email.to_email,
         subject: email.subject,
         html: email.html_body,
-        text: email.text_body,
+        text: email.text_body ?? undefined,
       }),
     });
+
+    const newAttempts = (email.attempts as number) + 1;
 
     if (!res.ok) {
       const errText = await res.text();
       await admin
         .from("email_queue")
-        .update({ last_error: errText })
+        .update({ last_error: errText, attempts: newAttempts })
         .eq("id", emailId);
+      await admin.from("email_events").insert({
+        email_id: emailId,
+        event_type: "failed",
+        metadata: { status: res.status, body: errText.slice(0, 500) },
+      });
       return { success: false, error: errText };
     }
 
     const json = (await res.json()) as { id?: string };
     await admin
       .from("email_queue")
-      .update({ status: "sent", sent_at: new Date().toISOString(), provider_id: json.id ?? null })
+      .update({
+        status: "sent",
+        sent_at: new Date().toISOString(),
+        provider_id: json.id ?? null,
+        attempts: newAttempts,
+      })
       .eq("id", emailId);
-
     await admin.from("email_events").insert({ email_id: emailId, event_type: "sent" });
     return { success: true };
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Unknown error";
-    await admin.from("email_queue").update({ last_error: msg }).eq("id", emailId);
+    await admin
+      .from("email_queue")
+      .update({
+        last_error: msg,
+        attempts: (email.attempts as number) + 1,
+      })
+      .eq("id", emailId);
+    await admin.from("email_events").insert({
+      email_id: emailId,
+      event_type: "failed",
+      metadata: { reason: msg },
+    });
     return { success: false, error: msg };
   }
 }
