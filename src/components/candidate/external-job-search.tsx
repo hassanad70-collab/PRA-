@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { ExternalLink, Globe, Search, Sparkles } from "lucide-react";
+import { Bookmark, ExternalLink, Globe, Search, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -16,28 +16,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { SaveSearchDialog } from "./save-search-dialog";
+import type { JobSearchRecommendation } from "@/types/job-discovery";
 
 // ---------------------------------------------------------------------------
-// Public types (shared with the page / AI layer)
+// Public types
 // ---------------------------------------------------------------------------
 
-export interface JobSearchRecommendation {
-  title: string;
-  keywords: string;
-  reason: string;
-}
-
-// ---------------------------------------------------------------------------
-// Search state
-// ---------------------------------------------------------------------------
-
-interface SearchState {
+export interface SearchState {
   title: string;
   keywords: string;
   location: string;
   experienceLevel: string;
   filters: string[];
 }
+
+export type { JobSearchRecommendation };
 
 type FilterKey = "remote" | "hybrid" | "on-site" | "full_time" | "part_time" | "internship";
 
@@ -51,7 +45,7 @@ const FILTER_KEYS: FilterKey[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// URL builders — pure functions, no side-effects
+// URL builders
 // ---------------------------------------------------------------------------
 
 function buildQuery(title: string, keywords: string): string {
@@ -65,13 +59,7 @@ function buildGoogleJobsUrl({ title, keywords, location }: SearchState): string 
     : "https://www.google.com/search?ibp=htl;jobs";
 }
 
-function buildLinkedInUrl({
-  title,
-  keywords,
-  location,
-  experienceLevel,
-  filters,
-}: SearchState): string {
+function buildLinkedInUrl({ title, keywords, location, experienceLevel, filters }: SearchState): string {
   const params = new URLSearchParams();
   const q = buildQuery(title, keywords);
   if (q) params.set("keywords", q);
@@ -105,11 +93,7 @@ function buildIndeedUrl({ title, keywords, location, filters }: SearchState): st
   if (q) params.set("q", q);
   if (location.trim()) params.set("l", location.trim());
   if (filters.includes("remote")) params.set("remotejob", "1");
-  const jtMap: Record<string, string> = {
-    full_time: "fulltime",
-    part_time: "parttime",
-    internship: "internship",
-  };
+  const jtMap: Record<string, string> = { full_time: "fulltime", part_time: "parttime", internship: "internship" };
   const matchedJt = filters.find((f) => jtMap[f]);
   if (matchedJt) params.set("jt", jtMap[matchedJt]);
   return `https://www.indeed.com/jobs?${params.toString()}`;
@@ -122,10 +106,6 @@ function buildBaytUrl({ title, keywords, location }: SearchState): string {
   if (location.trim()) params.set("l", location.trim());
   return `https://www.bayt.com/en/international/jobs/?${params.toString()}`;
 }
-
-// ---------------------------------------------------------------------------
-// Platform definitions — labels are hardcoded brand names (proper nouns)
-// ---------------------------------------------------------------------------
 
 interface PlatformDef {
   key: string;
@@ -149,9 +129,15 @@ const PLATFORMS: PlatformDef[] = [
 
 interface ExternalJobSearchProps {
   recommendations?: JobSearchRecommendation[];
+  initialSearch?: SearchState;
+  onSearchExecuted?: (params: { query: string; keywords: string; location: string; experience_level: string; filters: string[] }) => void;
 }
 
-export function ExternalJobSearch({ recommendations = [] }: ExternalJobSearchProps) {
+export function ExternalJobSearch({
+  recommendations = [],
+  initialSearch,
+  onSearchExecuted,
+}: ExternalJobSearchProps) {
   const t = useTranslations("Candidate.Jobs");
 
   const filterOptions: { key: FilterKey; label: string }[] = [
@@ -163,14 +149,11 @@ export function ExternalJobSearch({ recommendations = [] }: ExternalJobSearchPro
     { key: "internship", label: t("filterInternship") },
   ];
 
-  const [state, setState] = useState<SearchState>({
-    title: "",
-    keywords: "",
-    location: "",
-    experienceLevel: "any",
-    filters: [],
-  });
-  const [hasSearched, setHasSearched] = useState(false);
+  const [state, setState] = useState<SearchState>(
+    initialSearch ?? { title: "", keywords: "", location: "", experienceLevel: "any", filters: [] }
+  );
+  const [hasSearched, setHasSearched] = useState(!!initialSearch?.title || !!initialSearch?.keywords);
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
 
   function updateField<K extends keyof SearchState>(field: K, value: SearchState[K]) {
     setState((prev) => ({ ...prev, [field]: value }));
@@ -190,11 +173,25 @@ export function ExternalJobSearch({ recommendations = [] }: ExternalJobSearchPro
   function handleSearch() {
     if (!state.title.trim() && !state.keywords.trim()) return;
     setHasSearched(true);
+    onSearchExecuted?.({
+      query: state.title,
+      keywords: state.keywords,
+      location: state.location,
+      experience_level: state.experienceLevel,
+      filters: state.filters,
+    });
   }
 
   function applyRecommendation(rec: JobSearchRecommendation) {
     setState((prev) => ({ ...prev, title: rec.title, keywords: rec.keywords }));
     setHasSearched(true);
+    onSearchExecuted?.({
+      query: rec.title,
+      keywords: rec.keywords,
+      location: state.location,
+      experience_level: state.experienceLevel,
+      filters: state.filters,
+    });
   }
 
   const queryDisplay = [buildQuery(state.title, state.keywords), state.location.trim()]
@@ -202,10 +199,10 @@ export function ExternalJobSearch({ recommendations = [] }: ExternalJobSearchPro
     .join(" · ");
 
   const canSearch = state.title.trim() !== "" || state.keywords.trim() !== "";
+  const canSave = state.title.trim() !== "" || state.keywords.trim() !== "" || state.location.trim() !== "";
 
   return (
     <div className="space-y-6">
-      {/* Section header */}
       <div className="flex items-start gap-3">
         <div className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10">
           <Globe className="h-4 w-4 text-primary" />
@@ -216,7 +213,6 @@ export function ExternalJobSearch({ recommendations = [] }: ExternalJobSearchPro
         </div>
       </div>
 
-      {/* AI-powered recommendations */}
       {recommendations.length > 0 && (
         <div className="rounded-lg border bg-muted/30 p-4">
           <div className="mb-3 flex items-center gap-2">
@@ -243,7 +239,6 @@ export function ExternalJobSearch({ recommendations = [] }: ExternalJobSearchPro
         </div>
       )}
 
-      {/* Search form */}
       <div className="space-y-4">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-1.5">
@@ -275,10 +270,7 @@ export function ExternalJobSearch({ recommendations = [] }: ExternalJobSearchPro
           </div>
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">{t("experienceLabel")}</Label>
-            <Select
-              value={state.experienceLevel}
-              onValueChange={(v) => updateField("experienceLevel", v)}
-            >
+            <Select value={state.experienceLevel} onValueChange={(v) => updateField("experienceLevel", v)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -293,7 +285,6 @@ export function ExternalJobSearch({ recommendations = [] }: ExternalJobSearchPro
           </div>
         </div>
 
-        {/* Filter chips */}
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-xs font-medium text-muted-foreground">{t("filtersLabel")}:</span>
           {filterOptions.map(({ key, label }) => (
@@ -313,13 +304,23 @@ export function ExternalJobSearch({ recommendations = [] }: ExternalJobSearchPro
           ))}
         </div>
 
-        <Button onClick={handleSearch} disabled={!canSearch} className="w-full sm:w-auto">
-          <Search className="me-2 h-4 w-4" />
-          {t("searchButton")}
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button onClick={handleSearch} disabled={!canSearch} className="shrink-0">
+            <Search className="me-2 h-4 w-4" />
+            {t("searchButton")}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setSaveDialogOpen(true)}
+            disabled={!canSave}
+            className="shrink-0"
+          >
+            <Bookmark className="me-2 h-4 w-4" />
+            {t("saveSearch")}
+          </Button>
+        </div>
       </div>
 
-      {/* Platform result cards */}
       {hasSearched && (
         <div className="space-y-3">
           <p className="text-sm font-medium text-muted-foreground">{t("resultsTitle")}</p>
@@ -356,9 +357,20 @@ export function ExternalJobSearch({ recommendations = [] }: ExternalJobSearchPro
           </div>
         </div>
       )}
+
+      <SaveSearchDialog
+        open={saveDialogOpen}
+        onOpenChange={setSaveDialogOpen}
+        params={{
+          query: state.title,
+          keywords: state.keywords,
+          location: state.location,
+          experience_level: state.experienceLevel,
+          filters: state.filters,
+        }}
+      />
     </div>
   );
 }
 
-// Expose the filter keys for tests / other consumers.
 export { FILTER_KEYS };

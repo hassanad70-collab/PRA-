@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ScoreRing } from "@/components/shared/score-ring";
+import { JobDiscoveryWidget } from "@/components/candidate/job-discovery-widget";
 import {
   getCandidateApplications,
   getCandidateFullProfile,
@@ -15,23 +16,41 @@ import {
   getLatestAtsScore,
   getRecommendedJobsForCandidate,
 } from "@/lib/queries/candidate";
+import { getSearchHistory } from "@/actions/search-history";
+import { getSavedSearches } from "@/actions/saved-searches";
+import { getJobAlerts } from "@/actions/job-alerts";
 
 export default async function CandidateDashboardPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const user = await getCurrentUser();
   if (!user) redirect({ href: "/login", locale });
 
-  const [{ candidate, resumes }, applications, recommendations, atsScore, t, tShared, tCommon] = await Promise.all([
+  const [
+    { candidate, resumes },
+    applications,
+    recommendations,
+    atsScore,
+    recentSearches,
+    savedSearches,
+    alerts,
+    t,
+    tShared,
+    tCommon,
+  ] = await Promise.all([
     getCandidateFullProfile(user.id),
     getCandidateApplications(user.id),
     getRecommendedJobsForCandidate(user.id, 5),
     getLatestAtsScore(user.id),
+    getSearchHistory(5),
+    getSavedSearches(),
+    getJobAlerts(),
     getTranslations("Candidate.Dashboard"),
     getTranslations("Candidate.Shared"),
     getTranslations("Common"),
   ]);
 
   const activeApplications = applications.filter((a) => !["rejected", "withdrawn"].includes(a.status));
+  const activeAlerts = alerts.filter((a) => a.is_active).length;
 
   return (
     <div className="space-y-8">
@@ -135,29 +154,37 @@ export default async function CandidateDashboardPage({ params }: { params: Promi
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Briefcase className="h-4 w-4" /> {t("recentApplications")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {applications.length === 0 && (
-              <p className="py-8 text-center text-sm text-muted-foreground">{t("noApplications")}</p>
-            )}
-            {applications.slice(0, 5).map((app) => (
-              <div key={app.id} className="flex items-center justify-between rounded-xl border border-border p-3">
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium">{app.job?.title}</p>
-                  <p className="truncate text-xs text-muted-foreground">{app.job?.company?.name}</p>
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Briefcase className="h-4 w-4" /> {t("recentApplications")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {applications.length === 0 && (
+                <p className="py-8 text-center text-sm text-muted-foreground">{t("noApplications")}</p>
+              )}
+              {applications.slice(0, 5).map((app) => (
+                <div key={app.id} className="flex items-center justify-between rounded-xl border border-border p-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium">{app.job?.title}</p>
+                    <p className="truncate text-xs text-muted-foreground">{app.job?.company?.name}</p>
+                  </div>
+                  <Badge variant="secondary" className="capitalize">
+                    {app.status.replace("_", " ")}
+                  </Badge>
                 </div>
-                <Badge variant="secondary" className="capitalize">
-                  {app.status.replace("_", " ")}
-                </Badge>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+              ))}
+            </CardContent>
+          </Card>
+
+          <JobDiscoveryWidget
+            recentSearches={recentSearches}
+            savedSearches={savedSearches}
+            activeAlerts={activeAlerts}
+          />
+        </div>
       </div>
 
       {!resumes.length && (
