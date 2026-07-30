@@ -41,12 +41,16 @@ export interface Profile {
   email: string;
   avatar_url: string | null;
   phone: string | null;
+  company_id: string | null;
   is_active: boolean;
   last_seen_at: string | null;
   deleted_at: string | null;
   created_at: string;
   updated_at: string;
 }
+
+export type SubscriptionPlan = "free" | "starter" | "professional" | "enterprise";
+export type SubscriptionStatus = "active" | "trialing" | "past_due" | "cancelled" | "suspended";
 
 export interface Company {
   id: string;
@@ -59,6 +63,10 @@ export interface Company {
   description: string | null;
   headquarters: string | null;
   founded_year: number | null;
+  country: string | null;
+  timezone: string;
+  subscription_plan: SubscriptionPlan;
+  subscription_status: SubscriptionStatus;
   is_verified: boolean;
   is_active: boolean;
   deleted_at: string | null;

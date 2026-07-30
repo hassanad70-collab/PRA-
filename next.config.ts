@@ -20,6 +20,8 @@ const nextConfig: NextConfig = {
   },
   serverExternalPackages: ["pdf-parse", "mammoth"],
   experimental: {
+    // Enables forbidden() and unauthorized() navigation interrupts (Next.js 15)
+    authInterrupts: true,
     serverActions: {
       // Next.js's default is 1MB. uploadResume() advertises and validates a
       // 10MB resume limit, but with the default in place, every upload

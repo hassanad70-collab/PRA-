@@ -32,6 +32,9 @@ export default async function AdminCompanyDetailPage({ params }: { params: Promi
             )}
           </div>
           <p className="mt-1 text-sm text-muted-foreground">{company.industry ?? "No industry set"}</p>
+          <p className="mt-0.5 text-xs text-muted-foreground capitalize">
+            {company.subscription_plan} plan · {company.subscription_status.replace("_", " ")}
+          </p>
         </div>
         <CompanyActionsMenu companyId={company.id} isActive={company.is_active} deletedAt={company.deleted_at} />
       </div>

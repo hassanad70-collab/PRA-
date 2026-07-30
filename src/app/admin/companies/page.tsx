@@ -63,6 +63,7 @@ export default async function AdminCompaniesPage({
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>Industry</TableHead>
+                <TableHead>Plan</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Created</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -71,7 +72,7 @@ export default async function AdminCompaniesPage({
             <TableBody>
               {result.rows.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} className="py-10 text-center text-sm text-muted-foreground">
+                  <TableCell colSpan={6} className="py-10 text-center text-sm text-muted-foreground">
                     No companies match these filters.
                   </TableCell>
                 </TableRow>
@@ -84,6 +85,7 @@ export default async function AdminCompaniesPage({
                     </Link>
                   </TableCell>
                   <TableCell className="text-muted-foreground">{(company.industry as string) ?? "—"}</TableCell>
+                  <TableCell className="capitalize text-muted-foreground">{(company.subscription_plan as string) ?? "free"}</TableCell>
                   <TableCell>
                     {company.deleted_at ? (
                       <Badge variant="destructive">Deleted</Badge>

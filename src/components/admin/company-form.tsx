@@ -12,6 +12,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { createCompany, updateCompany } from "@/actions/admin-companies";
 import type { Company } from "@/types/database";
 
+const SUBSCRIPTION_PLANS = ["free", "starter", "professional", "enterprise"] as const;
+const SUBSCRIPTION_STATUSES = ["active", "trialing", "past_due", "cancelled", "suspended"] as const;
+
 export function CompanyForm({ company }: { company?: Company }) {
   const router = useRouter();
   const [isPending, startTransition] = React.useTransition();
@@ -57,9 +60,58 @@ export function CompanyForm({ company }: { company?: Company }) {
         </div>
       </div>
 
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-2">
+          <Label htmlFor="country">Country</Label>
+          <Input id="country" name="country" defaultValue={company?.country ?? ""} placeholder="United Kingdom" />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="timezone">Timezone</Label>
+          <Input id="timezone" name="timezone" defaultValue={company?.timezone ?? "UTC"} placeholder="Europe/London" />
+        </div>
+      </div>
+
       <div className="space-y-2">
         <Label htmlFor="headquarters">Headquarters</Label>
-        <Input id="headquarters" name="headquarters" defaultValue={company?.headquarters ?? ""} placeholder="San Francisco, CA" />
+        <Input
+          id="headquarters"
+          name="headquarters"
+          defaultValue={company?.headquarters ?? ""}
+          placeholder="London, UK"
+        />
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-2">
+          <Label htmlFor="subscriptionPlan">Subscription plan</Label>
+          <select
+            id="subscriptionPlan"
+            name="subscriptionPlan"
+            defaultValue={company?.subscription_plan ?? "free"}
+            className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm shadow-sm capitalize"
+          >
+            {SUBSCRIPTION_PLANS.map((plan) => (
+              <option key={plan} value={plan} className="capitalize">
+                {plan.charAt(0).toUpperCase() + plan.slice(1)}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="subscriptionStatus">Subscription status</Label>
+          <select
+            id="subscriptionStatus"
+            name="subscriptionStatus"
+            defaultValue={company?.subscription_status ?? "active"}
+            className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm shadow-sm"
+          >
+            {SUBSCRIPTION_STATUSES.map((status) => (
+              <option key={status} value={status}>
+                {status.replace("_", " ").replace(/^\w/, (c) => c.toUpperCase())}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div className="space-y-2">

@@ -55,6 +55,10 @@ export async function createCompany(formData: FormData): Promise<CompanyActionRe
       headquarters: data.headquarters || null,
       founded_year: data.foundedYear ?? null,
       description: data.description || null,
+      country: data.country || null,
+      timezone: data.timezone || "UTC",
+      subscription_plan: data.subscriptionPlan ?? "free",
+      subscription_status: data.subscriptionStatus ?? "active",
       created_by: ctx.userId,
     })
     .select("id")
@@ -99,6 +103,10 @@ export async function updateCompany(companyId: string, formData: FormData): Prom
       headquarters: data.headquarters || null,
       founded_year: data.foundedYear ?? null,
       description: data.description || null,
+      country: data.country || null,
+      timezone: data.timezone || "UTC",
+      ...(data.subscriptionPlan && { subscription_plan: data.subscriptionPlan }),
+      ...(data.subscriptionStatus && { subscription_status: data.subscriptionStatus }),
     })
     .eq("id", companyId);
 
