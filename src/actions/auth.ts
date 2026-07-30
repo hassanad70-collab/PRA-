@@ -77,7 +77,7 @@ export async function registerCandidate(formData: FormData): Promise<ActionResul
   if (candidateError) return { success: false, error: candidateError.message };
 
   // Queue welcome email (fire-and-forget via the email queue worker).
-  const platformUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.pratalent.com";
+  const platformUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   queueTemplateEmail("welcome", { email, name: fullName }, {
     candidate_name: fullName,
     platform_url: platformUrl,
@@ -166,7 +166,7 @@ export async function registerRecruiter(formData: FormData): Promise<ActionResul
   if (recruiterError) return { success: false, error: recruiterError.message };
 
   // Queue welcome email for new recruiters (non-blocking).
-  const platformUrlR = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.pratalent.com";
+  const platformUrlR = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   queueTemplateEmail("welcome", { email, name: fullName }, {
     candidate_name: fullName,
     platform_url: platformUrlR,
@@ -266,7 +266,8 @@ export async function logout() {
   const supabase = await createClient();
   await supabase.auth.signOut();
   revalidatePath("/", "layout");
-  redirect("/login");
+  const locale = await getRedirectLocale();
+  redirect(`/${locale}/login`);
 }
 
 export async function requestPasswordReset(formData: FormData): Promise<ActionResult> {

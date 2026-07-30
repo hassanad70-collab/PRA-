@@ -4,12 +4,15 @@ import { claimNextJob, markComplete, markFailed } from "@/lib/queue";
 
 const MAX_JOBS_PER_INVOCATION = 5;
 const CRON_SECRET = process.env.CRON_SECRET;
+// VERCEL_ENV is "production", "preview", or "development" on any Vercel
+// deployment. Require CRON_SECRET on all hosted environments so preview
+// branches are not left open. Local `next dev` has no VERCEL_ENV and skips
+// the requirement so development still works without configuration.
+const IS_HOSTED = !!process.env.VERCEL_ENV;
 
 export async function GET(req: Request) {
-  // In production, CRON_SECRET is mandatory. Vercel injects it automatically
-  // on cron invocations (Pro+). Without it, anyone could trigger job processing.
-  if (process.env.VERCEL_ENV === "production" && !CRON_SECRET) {
-    console.error("CRON_SECRET is not set in production — cron endpoint disabled for safety");
+  if (IS_HOSTED && !CRON_SECRET) {
+    console.error("CRON_SECRET is not configured — cron endpoint disabled for safety");
     return NextResponse.json({ error: "Cron secret not configured" }, { status: 503 });
   }
 
@@ -73,7 +76,7 @@ async function processJob(
       ]);
       const email = authUser?.email;
       if (!email) throw new Error(`No email for candidate ${alert.candidate_id}`);
-      const platformUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.pratalent.com";
+      const platformUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
       await queueTemplateEmail("job_alert", { email, name: profile?.full_name }, {
         candidate_name: profile?.full_name ?? "Candidate",
         search_name: alert.name,
@@ -101,7 +104,7 @@ async function processJob(
       const candidateId = payload.candidate_id as string;
       if (!candidateId) throw new Error("weekly_digest_send job missing candidate_id");
       const admin = createAdminClient();
-      const platformUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.pratalent.com";
+      const platformUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
       const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
       const [
         { data: profile },

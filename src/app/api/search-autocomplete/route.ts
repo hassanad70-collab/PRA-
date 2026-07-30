@@ -1,12 +1,18 @@
 import { NextResponse } from "next/server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
+import { rateLimitByIp } from "@/lib/rate-limit";
 
 const VALID_FIELDS = new Set(["title", "keywords", "location"]);
 const MIN_TERM_LEN = 2;
 const MAX_SUGGESTIONS = 8;
 
 export async function GET(req: Request) {
+  const limit = await rateLimitByIp("autocomplete", 60, 60_000);
+  if (!limit.allowed) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
   const { searchParams } = new URL(req.url);
   const q = (searchParams.get("q") ?? "").trim();
   const field = searchParams.get("field") ?? "title";

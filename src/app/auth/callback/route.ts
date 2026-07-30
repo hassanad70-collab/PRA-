@@ -56,7 +56,7 @@ export async function GET(request: Request) {
           if (email) {
             try {
               const { queueTemplateEmail } = await import("@/lib/email");
-              const platformUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.pratalent.com";
+              const platformUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
               await queueTemplateEmail("welcome", { email, name: candidateName }, {
                 candidate_name: candidateName,
                 platform_url: platformUrl,

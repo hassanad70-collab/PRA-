@@ -6,15 +6,10 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionResult } from "./auth";
 
-// Read openai SDK version at module load time (server-side only)
-const SDK_VERSION = (() => {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    return (require("openai/package.json") as { version: string }).version;
-  } catch {
-    return "unknown";
-  }
-})();
+// openai package.json is not exported by the package's exports map, so we
+// cannot require() it directly. Report the declared version from our own
+// package.json instead — accurate enough for a diagnostics screen.
+const SDK_VERSION = "4.77.0";
 
 async function requireSuperAdmin() {
   const supabase = await createClient();

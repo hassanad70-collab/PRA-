@@ -8,8 +8,36 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 // regresses again.
 const withBundleAnalyzer = createBundleAnalyzer({ enabled: process.env.ANALYZE === "true" });
 
+const securityHeaders = [
+  // Prevent the page from being embedded in an iframe (clickjacking).
+  { key: "X-Frame-Options", value: "SAMEORIGIN" },
+  // Prevent browsers from MIME-sniffing a response away from the declared type.
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  // Send only origin (no path/query) in the Referer header when crossing origins.
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  // Restrict browser feature access — deny what this app never needs.
+  {
+    key: "Permissions-Policy",
+    value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+  },
+  // Enforce HTTPS for 1 year; include subdomains.
+  // Only sent in production — local dev is plain HTTP.
+  ...(process.env.VERCEL_ENV === "production"
+    ? [{ key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" }]
+    : []),
+];
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  async headers() {
+    return [
+      {
+        // Apply to every route.
+        source: "/(.*)",
+        headers: securityHeaders,
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {
