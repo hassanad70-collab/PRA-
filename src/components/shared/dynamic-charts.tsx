@@ -30,6 +30,21 @@ export const TopSkillsChart = dynamic(
   { ssr: false, loading: () => <ChartSkeleton /> }
 );
 
+export const MonthlyGrowthChart = dynamic(
+  () => import("@/components/admin/charts/analytics-charts").then((m) => m.MonthlyGrowthChart),
+  { ssr: false, loading: () => <ChartSkeleton /> }
+);
+
+export const AtsDistributionChart = dynamic(
+  () => import("@/components/admin/charts/analytics-charts").then((m) => m.AtsDistributionChart),
+  { ssr: false, loading: () => <ChartSkeleton /> }
+);
+
+export const DailyActivityChart = dynamic(
+  () => import("@/components/admin/charts/analytics-charts").then((m) => m.DailyActivityChart),
+  { ssr: false, loading: () => <ChartSkeleton /> }
+);
+
 export const TrendChart = dynamic(
   () => import("@/components/recruiter/charts/trend-chart").then((m) => m.TrendChart),
   { ssr: false, loading: () => <ChartSkeleton /> }

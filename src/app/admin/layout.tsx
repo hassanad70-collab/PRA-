@@ -6,6 +6,11 @@ import { getCurrentUser } from "@/lib/queries/candidate";
 
 const NAV_ITEMS: NavItem[] = [
   { href: "/admin/dashboard", label: "Dashboard", icon: "LayoutDashboard" },
+  { href: "/admin/analytics", label: "Analytics", icon: "BarChart3" },
+  { href: "/admin/billing", label: "Billing", icon: "CreditCard" },
+  { href: "/admin/feature-flags", label: "Feature Flags", icon: "Flag" },
+  { href: "/admin/queue", label: "Job Queue", icon: "ListTodo" },
+  { href: "/admin/email", label: "Email", icon: "Mail" },
   { href: "/admin/users", label: "Users", icon: "Users" },
   { href: "/admin/companies", label: "Companies", icon: "Building2" },
   { href: "/admin/recruiters", label: "Recruiters", icon: "UserCog" },

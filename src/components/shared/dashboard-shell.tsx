@@ -10,9 +10,13 @@ import {
   Briefcase,
   Building2,
   Calendar,
+  CreditCard,
   FileText,
+  Flag,
   GraduationCap,
   LayoutDashboard,
+  ListTodo,
+  Mail,
   Menu,
   ScrollText,
   Search,
@@ -58,6 +62,10 @@ const ICON_MAP = {
   Settings,
   Calendar,
   BarChart3,
+  CreditCard,
+  Flag,
+  ListTodo,
+  Mail,
 } as const;
 
 export type IconName = keyof typeof ICON_MAP;
