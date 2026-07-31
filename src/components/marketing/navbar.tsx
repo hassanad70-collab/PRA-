@@ -50,7 +50,7 @@ export function Navbar() {
           {t("brand")}
         </Link>
 
-        <nav className="hidden items-center gap-8 lg:flex">
+        <nav className="hidden items-center gap-8 lg:flex" aria-label="Main navigation">
           {ROUTE_LINKS.map((link) => (
             <Link
               key={link.href}
@@ -85,14 +85,14 @@ export function Navbar() {
         <div className="flex items-center gap-2 lg:hidden">
           <LanguageSwitcher />
           <ThemeToggle />
-          <Button variant="ghost" size="icon" onClick={() => setOpen((v) => !v)} aria-label={tNav("toggleMenu")}>
+          <Button variant="ghost" size="icon" onClick={() => setOpen((v) => !v)} aria-label={tNav("toggleMenu")} aria-expanded={open} aria-controls="mobile-menu">
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
         </div>
       </div>
 
       {open && (
-        <div className="glass border-t border-border lg:hidden">
+        <div id="mobile-menu" className="glass border-t border-border lg:hidden">
           <div className="container flex flex-col gap-4 py-6">
             {ROUTE_LINKS.map((link) => (
               <Link key={link.href} href={link.href} className="text-sm font-medium" onClick={() => setOpen(false)}>

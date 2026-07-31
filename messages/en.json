@@ -35,6 +35,12 @@
     "linkedin": "LinkedIn",
     "backToSignIn": "Back to sign in",
     "somethingWentWrong": "Something went wrong",
+    "unexpectedErrorDescription": "We encountered an unexpected error. Please try again or contact support if the problem persists.",
+    "pageNotFound": "Page not found",
+    "pageNotFoundDescription": "The page you're looking for doesn't exist or has been moved.",
+    "goHome": "Go Home",
+    "goBack": "Go Back",
+    "tryAgain": "Try Again",
     "remote": "Remote",
     "browseAllJobs": "Browse all jobs",
     "employmentType": {

@@ -35,6 +35,12 @@
     "linkedin": "LinkedIn",
     "backToSignIn": "العودة لتسجيل الدخول",
     "somethingWentWrong": "حدث خطأ ما",
+    "unexpectedErrorDescription": "واجهنا خطأ غير متوقع. يرجى المحاولة مرة أخرى أو التواصل مع الدعم إذا استمر المشكل.",
+    "pageNotFound": "الصفحة غير موجودة",
+    "pageNotFoundDescription": "الصفحة التي تبحث عنها غير موجودة أو تم نقلها.",
+    "goHome": "الصفحة الرئيسية",
+    "goBack": "رجوع",
+    "tryAgain": "حاول مرة أخرى",
     "remote": "عن بُعد",
     "browseAllJobs": "تصفح كل الوظائف",
     "employmentType": {

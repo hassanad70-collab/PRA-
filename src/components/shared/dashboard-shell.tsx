@@ -179,7 +179,7 @@ export function DashboardShell({ navItems, user, children, settingsHref, labels 
             <ThemeToggle />
           </div>
         </header>
-        <main className="min-w-0 flex-1 p-4 lg:p-8">{children}</main>
+        <main id="main-content" className="min-w-0 flex-1 p-4 lg:p-8">{children}</main>
       </div>
     </div>
   );

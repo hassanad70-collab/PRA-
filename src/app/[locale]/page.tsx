@@ -45,7 +45,7 @@ export default async function HomePage() {
         they all use.
       */}
       <LazyMotion features={domAnimation}>
-        <main className="flex-1">
+        <main id="main-content" className="flex-1">
           <Hero />
           <TrustedCompanies />
           <AtsCheckerTeaser />

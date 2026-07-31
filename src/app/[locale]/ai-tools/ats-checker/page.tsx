@@ -37,7 +37,7 @@ export default async function AtsCheckerPage({ params }: { params: Promise<{ loc
     <div className="flex min-h-screen flex-col">
       <JsonLd data={softwareApplicationSchema(PATH)} />
       <Navbar />
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         <div className="container max-w-3xl py-16">
           <div className="text-center">
             <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{t("title")}</h1>

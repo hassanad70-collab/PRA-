@@ -1,17 +1,14 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { trackEvent } from "@/lib/analytics/track";
+import { rateLimitByIp } from "@/lib/rate-limit";
 
-/**
- * Readiness for continuous performance monitoring (v1.1.5): captures each
- * Core Web Vital into the same analytics_events table every other event in
- * this app already uses (see src/lib/analytics/track.ts), rather than
- * standing up a separate metrics pipeline. A later phase can layer a real
- * dashboard/alerting on top of this table without changing how metrics get
- * here. Deliberately minimal -- no sampling, dashboard, or alerting logic
- * is added in this phase.
- */
 export async function POST(request: NextRequest) {
+  const limit = await rateLimitByIp("web-vitals", 30, 60_000);
+  if (!limit.allowed) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
   const body = await request.json().catch(() => null);
   if (!body || typeof body.name !== "string" || typeof body.value !== "number") {
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 });

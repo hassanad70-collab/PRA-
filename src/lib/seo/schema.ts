@@ -4,6 +4,9 @@ function siteUrl() {
   return process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 }
 
+const ORG_DESCRIPTION =
+  "Enterprise AI Recruitment & Talent Intelligence System — AI resume screening, talent matching, and HR analytics that cuts manual recruitment work by over 80%.";
+
 /** Site-wide Organization + WebSite JSON-LD, rendered once in the root layout. */
 export function organizationAndWebsiteSchema() {
   const url = siteUrl();
@@ -13,6 +16,11 @@ export function organizationAndWebsiteSchema() {
       "@type": "Organization",
       name: SITE_NAME,
       url,
+      description: ORG_DESCRIPTION,
+      logo: {
+        "@type": "ImageObject",
+        url: `${url}/opengraph-image`,
+      },
     },
     {
       "@context": "https://schema.org",
