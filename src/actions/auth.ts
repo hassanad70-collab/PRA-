@@ -14,8 +14,11 @@ import { createClient } from "@/lib/supabase/server";
 import { slugify } from "@/lib/utils";
 import {
   candidateRegisterSchema,
+  completeProfileSchema,
   forgotPasswordSchema,
   loginSchema,
+  phoneOtpSchema,
+  phoneSchema,
   recruiterRegisterSchema,
   resetPasswordSchema,
 } from "@/lib/validations/auth";
@@ -315,7 +318,7 @@ export async function resetPassword(formData: FormData): Promise<ActionResult> {
   return { success: true };
 }
 
-export async function signInWithOAuth(provider: "google" | "linkedin_oidc") {
+export async function signInWithOAuth(provider: "google") {
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
@@ -327,4 +330,139 @@ export async function signInWithOAuth(provider: "google" | "linkedin_oidc") {
   }
 
   redirect(data.url);
+}
+
+export async function sendPhoneOtp(formData: FormData): Promise<ActionResult> {
+  const phone = formData.get("phone");
+  const parsed = phoneSchema.safeParse({ phone });
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.flatten().fieldErrors.phone?.[0] ?? "Invalid phone number" };
+  }
+
+  // Rate limit: 5 OTP sends per phone per 10 minutes across IPs to throttle abuse.
+  const rateLimit = await rateLimitByIpAndTarget("phone-otp", parsed.data.phone, 5, 10 * 60 * 1000);
+  if (!rateLimit.allowed) {
+    return { success: false, error: "Too many OTP requests. Please wait a few minutes before trying again." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signInWithOtp({ phone: parsed.data.phone });
+
+  if (error) {
+    if (error.message.toLowerCase().includes("sms") || error.message.toLowerCase().includes("provider")) {
+      return { success: false, error: "SMS delivery failed. Check that phone auth is enabled in your Supabase project." };
+    }
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+export async function verifyPhoneOtp(formData: FormData): Promise<ActionResult> {
+  const parsed = phoneOtpSchema.safeParse({
+    phone: formData.get("phone"),
+    token: formData.get("token"),
+  });
+
+  if (!parsed.success) {
+    const errs = parsed.error.flatten().fieldErrors;
+    return { success: false, error: errs.token?.[0] ?? errs.phone?.[0] ?? "Invalid input" };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.verifyOtp({
+    phone: parsed.data.phone,
+    token: parsed.data.token,
+    type: "sms",
+  });
+
+  if (error) {
+    return { success: false, error: "Invalid or expired code. Please check the code and try again." };
+  }
+
+  const userId = data.user?.id;
+  if (!userId) return { success: false, error: "Authentication failed. Please try again." };
+
+  const admin = createAdminClient();
+
+  // Check whether this is a first-time phone login by looking for a candidates row.
+  const { data: existingCandidate } = await admin
+    .from("candidates")
+    .select("id")
+    .eq("id", userId)
+    .maybeSingle();
+
+  const isNewUser = !existingCandidate;
+
+  if (isNewUser) {
+    // Ensure candidates row exists so the dashboard doesn't 404.
+    await admin.from("candidates").insert({ id: userId });
+  }
+
+  revalidatePath("/", "layout");
+  const locale = await getRedirectLocale();
+
+  if (isNewUser) {
+    redirect(`/${locale}/complete-profile`);
+  }
+
+  redirect(`/${locale}/candidate/dashboard`);
+}
+
+export async function completeProfile(formData: FormData): Promise<ActionResult> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: "You must be signed in." };
+
+  const parsed = completeProfileSchema.safeParse({
+    fullName: formData.get("fullName"),
+    city: formData.get("city"),
+    country: formData.get("country"),
+    currentPosition: formData.get("currentPosition"),
+    yearsOfExperience: formData.get("yearsOfExperience"),
+    phone: formData.get("phone") ?? "",
+  });
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      fieldErrors: Object.fromEntries(
+        Object.entries(parsed.error.flatten().fieldErrors).map(([k, v]) => [k, v?.[0] ?? ""])
+      ),
+    };
+  }
+
+  const { fullName, city, country, currentPosition, yearsOfExperience, phone } = parsed.data;
+  const admin = createAdminClient();
+
+  // Update the profile row (full_name, and phone if the user doesn't have one yet).
+  const profileUpdate: Record<string, unknown> = { full_name: fullName };
+  if (phone && !user.phone) profileUpdate.phone = phone;
+
+  const { error: profileErr } = await admin
+    .from("profiles")
+    .update(profileUpdate)
+    .eq("id", user.id);
+
+  if (profileErr) return { success: false, error: profileErr.message };
+
+  // Update the candidates row with the essential onboarding fields.
+  const { error: candidateErr } = await admin
+    .from("candidates")
+    .update({
+      city,
+      country,
+      current_position: currentPosition,
+      years_of_experience: yearsOfExperience,
+    })
+    .eq("id", user.id);
+
+  if (candidateErr) return { success: false, error: candidateErr.message };
+
+  // Recompute profile completion score (best-effort, non-blocking).
+  try { await supabase.rpc("recompute_profile_completion", { p_candidate_id: user.id }); } catch { /* non-fatal */ }
+
+  revalidatePath("/", "layout");
+  const locale = await getRedirectLocale();
+  redirect(`/${locale}/candidate/dashboard`);
 }

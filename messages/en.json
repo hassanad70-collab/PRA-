@@ -15,7 +15,9 @@
     "login": { "title": "Sign In", "description": "Sign in to your PRA Talent Intelligence account." },
     "register": { "title": "Create Account", "description": "Create your free PRA Talent Intelligence account." },
     "forgotPassword": { "title": "Forgot Password", "description": "Reset your PRA Talent Intelligence account password." },
-    "resetPassword": { "title": "Reset Password", "description": "Set a new password for your PRA Talent Intelligence account." }
+    "resetPassword": { "title": "Reset Password", "description": "Set a new password for your PRA Talent Intelligence account." },
+    "phoneLogin": { "title": "Sign In with Mobile", "description": "Sign in to your PRA Talent Intelligence account using your mobile number." },
+    "completeProfile": { "title": "Complete Your Profile", "description": "Finish setting up your PRA Talent Intelligence account." }
   },
   "Common": {
     "brand": "PRA Talent Intelligence",
@@ -32,7 +34,8 @@
     "createFreeAccount": "Create your free account",
     "orContinueWith": "Or continue with",
     "google": "Google",
-    "linkedin": "LinkedIn",
+    "mobile": "Mobile",
+    "optional": "optional",
     "backToSignIn": "Back to sign in",
     "somethingWentWrong": "Something went wrong",
     "unexpectedErrorDescription": "We encountered an unexpected error. Please try again or contact support if the problem persists.",
@@ -304,6 +307,39 @@
       "confirmPassword": "Confirm password",
       "submit": "Update password",
       "successToast": "Password updated. Please sign in again."
+    },
+    "PhoneLogin": {
+      "title": "Continue with mobile",
+      "subtitle": "Enter your mobile number to receive a verification code",
+      "countryLabel": "Country",
+      "phoneLabel": "Mobile number",
+      "phonePlaceholderHint": "Enter the national number without the country code",
+      "sendOtpButton": "Send verification code",
+      "secureNote": "A one-time code will be sent via SMS. Standard messaging rates may apply.",
+      "orSignIn": "Or sign in with",
+      "emailLink": "email & password",
+      "enterPhoneNumber": "Please enter your mobile number",
+      "verifyTitle": "Enter the code",
+      "verifySubtitle": "We sent a 6-digit code to",
+      "otpLabel": "Verification code",
+      "verifyButton": "Verify and continue",
+      "changeNumber": "Change number",
+      "resendCode": "Resend code",
+      "resendIn": "Resend in {seconds}s",
+      "codeSent": "A new code has been sent",
+      "enterFullCode": "Please enter the full 6-digit code"
+    },
+    "CompleteProfile": {
+      "title": "Complete your profile",
+      "subtitle": "A few more details to personalise your experience and match you to the right opportunities",
+      "fullName": "Full name",
+      "phone": "Mobile number",
+      "city": "City",
+      "country": "Country",
+      "selectCountry": "Select country",
+      "jobTitle": "Current or most recent job title",
+      "yearsOfExperience": "Years of experience",
+      "submit": "Complete setup"
     }
   },
   "Candidate": {

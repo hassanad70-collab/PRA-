@@ -15,7 +15,9 @@
     "login": { "title": "تسجيل الدخول", "description": "سجّل الدخول إلى حسابك على PRA لذكاء المواهب." },
     "register": { "title": "إنشاء حساب", "description": "أنشئ حسابك المجاني على PRA لذكاء المواهب." },
     "forgotPassword": { "title": "نسيت كلمة المرور", "description": "أعد تعيين كلمة مرور حسابك على PRA لذكاء المواهب." },
-    "resetPassword": { "title": "إعادة تعيين كلمة المرور", "description": "عيّن كلمة مرور جديدة لحسابك على PRA لذكاء المواهب." }
+    "resetPassword": { "title": "إعادة تعيين كلمة المرور", "description": "عيّن كلمة مرور جديدة لحسابك على PRA لذكاء المواهب." },
+    "phoneLogin": { "title": "الدخول برقم الجوال", "description": "سجّل الدخول إلى حسابك على PRA لذكاء المواهب باستخدام رقم جوالك." },
+    "completeProfile": { "title": "أكمل ملفك الشخصي", "description": "أنهِ إعداد حسابك على PRA لذكاء المواهب." }
   },
   "Common": {
     "brand": "PRA Talent Intelligence",
@@ -32,7 +34,8 @@
     "createFreeAccount": "أنشئ حسابك المجاني",
     "orContinueWith": "أو تابع باستخدام",
     "google": "Google",
-    "linkedin": "LinkedIn",
+    "mobile": "الجوال",
+    "optional": "اختياري",
     "backToSignIn": "العودة لتسجيل الدخول",
     "somethingWentWrong": "حدث خطأ ما",
     "unexpectedErrorDescription": "واجهنا خطأ غير متوقع. يرجى المحاولة مرة أخرى أو التواصل مع الدعم إذا استمر المشكل.",
@@ -304,6 +307,39 @@
       "confirmPassword": "تأكيد كلمة المرور",
       "submit": "تحديث كلمة المرور",
       "successToast": "تم تحديث كلمة المرور. يرجى تسجيل الدخول مرة أخرى."
+    },
+    "PhoneLogin": {
+      "title": "تسجيل الدخول برقم الجوال",
+      "subtitle": "أدخل رقم جوالك لاستقبال رمز التحقق",
+      "countryLabel": "الدولة",
+      "phoneLabel": "رقم الجوال",
+      "phonePlaceholderHint": "أدخل الرقم المحلي بدون رمز الدولة",
+      "sendOtpButton": "إرسال رمز التحقق",
+      "secureNote": "سيُرسَل رمز لمرة واحدة عبر رسالة نصية. قد تُطبَّق رسوم الرسائل العادية.",
+      "orSignIn": "أو سجّل الدخول باستخدام",
+      "emailLink": "البريد الإلكتروني وكلمة المرور",
+      "enterPhoneNumber": "يرجى إدخال رقم جوالك",
+      "verifyTitle": "أدخل الرمز",
+      "verifySubtitle": "لقد أرسلنا رمزاً مكوناً من 6 أرقام إلى",
+      "otpLabel": "رمز التحقق",
+      "verifyButton": "التحقق والمتابعة",
+      "changeNumber": "تغيير الرقم",
+      "resendCode": "إعادة إرسال الرمز",
+      "resendIn": "إعادة الإرسال خلال {seconds} ث",
+      "codeSent": "تم إرسال رمز جديد",
+      "enterFullCode": "يرجى إدخال الرمز الكامل المكون من 6 أرقام"
+    },
+    "CompleteProfile": {
+      "title": "أكمل ملفك الشخصي",
+      "subtitle": "بضعة تفاصيل إضافية لتخصيص تجربتك ومطابقتك بالفرص المناسبة",
+      "fullName": "الاسم الكامل",
+      "phone": "رقم الجوال",
+      "city": "المدينة",
+      "country": "الدولة",
+      "selectCountry": "اختر الدولة",
+      "jobTitle": "المسمى الوظيفي الحالي أو الأخير",
+      "yearsOfExperience": "سنوات الخبرة",
+      "submit": "إكمال الإعداد"
     }
   },
   "Candidate": {

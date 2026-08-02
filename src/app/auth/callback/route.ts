@@ -38,6 +38,8 @@ export async function GET(request: Request) {
       // not the candidates row (that is normally done by registerCandidate).
       // Create it here if missing so the candidate dashboard doesn't 404.
       const role = profile?.role ?? "candidate";
+      let isNewCandidate = false;
+
       if (role === "candidate") {
         const { data: candidateRow } = await admin
           .from("candidates")
@@ -47,6 +49,7 @@ export async function GET(request: Request) {
 
         if (!candidateRow) {
           await admin.from("candidates").insert({ id: userId });
+          isNewCandidate = true;
 
           // Queue a welcome email for brand-new OAuth registrations.
           const email = sessionData.user.email;
@@ -66,6 +69,12 @@ export async function GET(request: Request) {
             }
           }
         }
+      }
+
+      // New Google OAuth candidates go to profile completion first so they can
+      // add location, job title, and experience before their dashboard loads.
+      if (role === "candidate" && isNewCandidate) {
+        return NextResponse.redirect(`${origin}/${locale}/complete-profile`);
       }
 
       const destination =
