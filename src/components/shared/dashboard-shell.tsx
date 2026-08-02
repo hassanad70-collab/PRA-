@@ -21,6 +21,7 @@ import {
   ScrollText,
   Search,
   Settings,
+  ShieldCheck,
   Sparkles,
   User,
   UserCog,
@@ -66,6 +67,7 @@ const ICON_MAP = {
   Flag,
   ListTodo,
   Mail,
+  ShieldCheck,
 } as const;
 
 export type IconName = keyof typeof ICON_MAP;

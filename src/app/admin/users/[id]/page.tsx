@@ -1,21 +1,28 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Shield } from "lucide-react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AssignRoleDialog, RemoveRoleButton } from "@/components/admin/assign-role-dialog";
 import { EditUserForm } from "@/components/admin/edit-user-form";
 import { UserRowActions } from "@/components/admin/user-row-actions";
 import { UserStatusBadge } from "@/components/admin/user-status-badge";
 import { ChangeRoleDialog } from "@/components/shared/dynamic-dialogs";
-import { getAdminUserDetail } from "@/lib/queries/admin";
+import { getActiveCompaniesLite, getAdminUserDetail } from "@/lib/queries/admin";
+import { getPlatformRoles, getUserRoleAssignments } from "@/lib/queries/rbac";
 import { formatDate, initials } from "@/lib/utils";
 import type { UserRole } from "@/types/database";
 
 export default async function AdminUserDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const detail = await getAdminUserDetail(id);
+  const [detail, roleAssignments, allRoles, allCompanies] = await Promise.all([
+    getAdminUserDetail(id),
+    getUserRoleAssignments(id),
+    getPlatformRoles(),
+    getActiveCompaniesLite(),
+  ]);
   if (!detail?.profile) notFound();
 
   const { profile, recruiter, candidate } = detail;
@@ -120,6 +127,59 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
           </CardContent>
         </Card>
       )}
+
+      {/* RBAC role assignments */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Shield className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-base">RBAC Role Assignments</CardTitle>
+          </div>
+          <AssignRoleDialog
+            userId={profile.id}
+            availableRoles={allRoles}
+            availableCompanies={allCompanies}
+          />
+        </CardHeader>
+        <CardContent>
+          {roleAssignments.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No RBAC roles assigned yet. Use &quot;Assign Role&quot; to grant fine-grained permissions.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {roleAssignments.map((a) => (
+                <div
+                  key={a.id}
+                  className="flex items-center justify-between rounded-lg border border-border px-3 py-2.5"
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="h-2.5 w-2.5 rounded-full shrink-0"
+                      style={{ backgroundColor: a.role.color }}
+                    />
+                    <div>
+                      <p className="text-sm font-medium">{a.role.display_name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {a.company ? `Company: ${a.company.name}` : "Platform-level"}
+                        {" · "}Assigned {formatDate(a.assigned_at)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {a.role.is_system && (
+                      <Badge variant="secondary" className="h-4 px-1.5 text-[10px]">
+                        System
+                      </Badge>
+                    )}
+                    <RemoveRoleButton assignment={a} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
