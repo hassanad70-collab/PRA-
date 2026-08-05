@@ -9,23 +9,24 @@ export function Footer() {
   const tFooter = useTranslations("Footer");
 
   const FOOTER_LINKS = {
-    [tFooter("productTitle")]: [
+    "Career Tools": [
       { label: t("atsChecker"), href: "/ai-tools/ats-checker" },
-      { label: t("features"), href: "#features" },
-      { label: t("howItWorks"), href: "#how-it-works" },
-      { label: t("aiRecruitment"), href: "#ai" },
-      { label: tFooter("pricing"), href: "#" },
+      { label: "AI Resume Builder", href: "/ai-tools/resume-builder" },
+      { label: "Cover Letter Generator", href: "/ai-tools/cover-letter" },
+      { label: "Interview Preparation", href: "/ai-tools/interview-prep" },
+      { label: "AI Career Advisor", href: "/ai-tools/career-advisor" },
+    ],
+    "For Employers": [
+      { label: "For Companies", href: "/companies" },
+      { label: "Platform Features", href: "/companies#features" },
+      { label: "Pricing", href: "/companies#pricing" },
+      { label: "Book a Demo", href: "/companies#contact" },
     ],
     [tFooter("companyTitle")]: [
       { label: tFooter("about"), href: "#" },
-      { label: tFooter("careers"), href: "#" },
-      { label: tFooter("blog"), href: "#" },
       { label: tFooter("contact"), href: "#" },
-    ],
-    [tFooter("legalTitle")]: [
       { label: tFooter("privacyPolicy"), href: "#" },
       { label: tFooter("termsOfService"), href: "#" },
-      { label: tFooter("security"), href: "#" },
     ],
   };
 

@@ -85,16 +85,16 @@
   },
   "Home": {
     "Hero": {
-      "eyebrow": "AI-powered recruitment, reimagined",
-      "title": "Hire smarter with an <highlight>AI Talent Intelligence</highlight> platform",
-      "subtitle": "PRA screens, ranks, and matches every candidate automatically — cutting manual recruitment work by more than 80%. One platform for your ATS, resume intelligence, and hiring analytics.",
-      "startHiring": "Start hiring free",
+      "eyebrow": "Your AI-powered career toolkit",
+      "title": "Land your dream job with <highlight>AI career tools</highlight>",
+      "subtitle": "ATS checker, AI resume builder, cover letter generator, interview prep, and career advisor — all AI-powered and free to try. No account required.",
+      "startHiring": "Get started free",
       "tryAtsChecker": "Try the free ATS Checker",
       "stats": [
-        { "value": "80%+", "label": "less manual work" },
-        { "value": "<48h", "label": "avg. time to shortlist" },
-        { "value": "1M+", "label": "resumes parsed" },
-        { "value": "99.9%", "label": "platform uptime" }
+        { "value": "95%", "label": "ATS pass rate" },
+        { "value": "3x", "label": "more interview callbacks" },
+        { "value": "10s", "label": "to check your resume" },
+        { "value": "100%", "label": "free to try" }
       ]
     },
     "Trusted": {

@@ -27,25 +27,25 @@ export const AI_TOOLS: AIToolListing[] = [
   {
     key: "resume_builder",
     icon: FilePenLine,
-    status: "coming-soon",
-    href: null,
+    status: "live",
+    href: "/ai-tools/resume-builder",
   },
   {
     key: "cover_letter_generator",
     icon: Mail,
-    status: "coming-soon",
-    href: null,
+    status: "live",
+    href: "/ai-tools/cover-letter",
   },
   {
     key: "interview_prep",
     icon: MessagesSquare,
-    status: "coming-soon",
-    href: null,
+    status: "live",
+    href: "/ai-tools/interview-prep",
   },
   {
     key: "career_advisor",
     icon: Compass,
-    status: "coming-soon",
-    href: null,
+    status: "live",
+    href: "/ai-tools/career-advisor",
   },
 ];
