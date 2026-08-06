@@ -5,7 +5,11 @@ import { Badge } from "@/components/ui/badge";
 import { Footer } from "@/components/marketing/footer";
 import { Navbar } from "@/components/marketing/navbar";
 import { CoverLetterTool } from "@/components/ai-tools/cover-letter-tool";
+import { WorkspaceCoverLetter } from "@/components/workspace/workspace-cover-letter";
 import type { AppLocale } from "@/i18n/routing";
+import { getCurrentUser } from "@/lib/queries/candidate";
+import { getWorkspaceResume } from "@/lib/workspace/resume-context";
+import { listCoverLetters } from "@/lib/workspace/queries";
 import { buildMetadata } from "@/lib/seo/metadata";
 
 const PATH = "/ai-tools/cover-letter";
@@ -20,7 +24,22 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   });
 }
 
-export default function CoverLetterPage() {
+export default async function CoverLetterPage() {
+  const user = await getCurrentUser();
+  const isCandidate = user?.role === "candidate";
+
+  let workspaceResumeText: string | null = null;
+  let savedCoverLetters: Awaited<ReturnType<typeof listCoverLetters>> = [];
+
+  if (isCandidate) {
+    const [resume, letters] = await Promise.all([
+      getWorkspaceResume(user.id),
+      listCoverLetters(user.id),
+    ]);
+    workspaceResumeText = resume?.raw_text ?? null;
+    savedCoverLetters = letters;
+  }
+
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
@@ -35,11 +54,19 @@ export default function CoverLetterPage() {
               The cover letter that <span className="gradient-text">gets you noticed</span>
             </h1>
             <p className="mt-3 text-muted-foreground">
-              Paste your background and the job description — AI writes a compelling, tailored cover letter in seconds.
-              Free, no account needed.
+              {isCandidate
+                ? "Your workspace resume is pre-loaded. Results are saved to your account automatically."
+                : "Paste your background and the job description — AI writes a compelling, tailored cover letter in seconds. Free, no account needed."}
             </p>
           </div>
-          <CoverLetterTool />
+          {isCandidate ? (
+            <WorkspaceCoverLetter
+              workspaceResumeText={workspaceResumeText}
+              initialSaved={savedCoverLetters}
+            />
+          ) : (
+            <CoverLetterTool />
+          )}
         </div>
       </main>
       <Footer />

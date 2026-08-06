@@ -5,7 +5,11 @@ import { Badge } from "@/components/ui/badge";
 import { Footer } from "@/components/marketing/footer";
 import { Navbar } from "@/components/marketing/navbar";
 import { InterviewPrepTool } from "@/components/ai-tools/interview-prep-tool";
+import { WorkspaceInterviewPrep } from "@/components/workspace/workspace-interview-prep";
 import type { AppLocale } from "@/i18n/routing";
+import { getCurrentUser } from "@/lib/queries/candidate";
+import { getWorkspaceResume } from "@/lib/workspace/resume-context";
+import { listInterviewSessions } from "@/lib/workspace/queries";
 import { buildMetadata } from "@/lib/seo/metadata";
 
 const PATH = "/ai-tools/interview-prep";
@@ -20,7 +24,22 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   });
 }
 
-export default function InterviewPrepPage() {
+export default async function InterviewPrepPage() {
+  const user = await getCurrentUser();
+  const isCandidate = user?.role === "candidate";
+
+  let workspaceResumeText: string | null = null;
+  let savedSessions: Awaited<ReturnType<typeof listInterviewSessions>> = [];
+
+  if (isCandidate) {
+    const [resume, sessions] = await Promise.all([
+      getWorkspaceResume(user.id),
+      listInterviewSessions(user.id),
+    ]);
+    workspaceResumeText = resume?.raw_text ?? null;
+    savedSessions = sessions;
+  }
+
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
@@ -35,11 +54,19 @@ export default function InterviewPrepPage() {
               Walk in <span className="gradient-text">fully prepared</span>
             </h1>
             <p className="mt-3 text-muted-foreground">
-              AI generates role-specific questions, suggested answers, and coaching tips based on
-              the actual job description. Free — no account needed.
+              {isCandidate
+                ? "Your workspace resume is pre-loaded. Prep sessions are saved to your account automatically."
+                : "AI generates role-specific questions, suggested answers, and coaching tips based on the actual job description. Free — no account needed."}
             </p>
           </div>
-          <InterviewPrepTool />
+          {isCandidate ? (
+            <WorkspaceInterviewPrep
+              workspaceResumeText={workspaceResumeText}
+              initialSaved={savedSessions}
+            />
+          ) : (
+            <InterviewPrepTool />
+          )}
         </div>
       </main>
       <Footer />

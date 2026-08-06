@@ -627,3 +627,60 @@ export interface ImportFieldDiff {
   importedValue: unknown;
   hasConflict: boolean;
 }
+
+// ============================================================
+// AI Career Workspace (migration 0042)
+// ============================================================
+
+export interface AiWorkspaceResume {
+  id: string;
+  user_id: string;
+  file_name: string | null;
+  raw_text: string;
+  parsed_json: Record<string, unknown> | null;
+  source: "paste" | "upload";
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AiCoverLetter {
+  id: string;
+  user_id: string;
+  title: string;
+  company_name: string | null;
+  position: string | null;
+  hiring_manager: string | null;
+  tone: string | null;
+  length: string | null;
+  job_description: string | null;
+  result_json: Record<string, unknown>;
+  is_favorite: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AiInterviewSession {
+  id: string;
+  user_id: string;
+  title: string;
+  position: string | null;
+  company: string | null;
+  experience_level: string | null;
+  job_description: string | null;
+  result_json: Record<string, unknown>;
+  is_favorite: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AiCareerReport {
+  id: string;
+  user_id: string;
+  title: string;
+  current_role: string | null;
+  target_role: string | null;
+  result_json: Record<string, unknown>;
+  is_favorite: boolean;
+  created_at: string;
+  updated_at: string;
+}
