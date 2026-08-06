@@ -1,12 +1,11 @@
-import { redirect } from "@/i18n/navigation";
+import { redirect, Link } from "@/i18n/navigation";
 import { ArrowLeft, PenLine, Plus } from "lucide-react";
-import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getCurrentUser } from "@/lib/queries/candidate";
-import { getResumeDrafts } from "@/lib/queries/resume-builder";
+import { getActiveDrafts } from "@/lib/queries/studio";
 import { formatDate } from "@/lib/utils";
 import { CreateDraftButton } from "@/components/candidate/resume-builder/create-draft-button";
 
@@ -15,7 +14,7 @@ export default async function ResumeStudioPage({ params }: { params: Promise<{ l
   const user = await getCurrentUser();
   if (!user) redirect({ href: "/login", locale });
 
-  const drafts = await getResumeDrafts(user.id);
+  const drafts = await getActiveDrafts(user.id);
 
   return (
     // Fixed overlay that sits above the dashboard shell
@@ -24,7 +23,7 @@ export default async function ResumeStudioPage({ params }: { params: Promise<{ l
       <header className="flex h-14 shrink-0 items-center justify-between border-b border-border bg-card px-4 lg:px-6">
         <div className="flex items-center gap-3">
           <Link
-            href="/candidate/workspace"
+            href={{ pathname: "/candidate/workspace" }}
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -86,7 +85,7 @@ export default async function ResumeStudioPage({ params }: { params: Promise<{ l
                 </div>
 
                 {drafts.map((draft) => (
-                  <Link key={draft.id} href={`/${locale}/candidate/resume-builder/${draft.id}`}>
+                  <Link key={draft.id} href={`/candidate/workspace/studio/${draft.id}` as Parameters<typeof Link>[0]["href"]}>
                     <Card className="h-full cursor-pointer transition-all hover:shadow-md hover:border-primary/30">
                       <CardContent className="flex flex-col justify-between gap-4 pt-6 h-full min-h-[160px]">
                         <div>

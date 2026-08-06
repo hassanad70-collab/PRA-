@@ -32,6 +32,14 @@ export function getSectionLabels(t: Translate): Record<ResumeSectionType, string
     projects: t("labels.projects"),
     achievements: t("labels.achievements"),
     social_links: t("labels.socialLinks"),
+    // Studio-extended section types (migration 0044) — not in the resume builder,
+    // so these use static strings rather than translation keys.
+    volunteer: "Volunteer Experience",
+    publications: "Publications",
+    references: "References",
+    interests: "Interests",
+    awards: "Awards & Honors",
+    courses: "Courses & Training",
   };
 }
 

@@ -555,7 +555,14 @@ export type ResumeSectionType =
   | "languages"
   | "projects"
   | "achievements"
-  | "social_links";
+  | "social_links"
+  // Studio-extended section types (migration 0044)
+  | "volunteer"
+  | "publications"
+  | "references"
+  | "interests"
+  | "awards"
+  | "courses";
 
 // Only these three go through the 'ai_suggested' state -- everything else
 // is profile-sourced or manually edited, never AI-rewritten (the AI must
@@ -575,9 +582,38 @@ export interface ResumeDraft {
   finalized_docx_url: string | null;
   /** Lightweight version counter (Unit C) -- incremented each successful finalize, not a full content snapshot. */
   version: number;
+  // Studio fields (migration 0044)
+  template: string;
+  job_description_text: string | null;
+  archived: boolean;
   created_at: string;
   updated_at: string;
 }
+
+/** Point-in-time snapshot of all sections for a draft (migration 0044) */
+export interface ResumeDraftVersion {
+  id: string;
+  draft_id: string;
+  candidate_id: string;
+  label: string | null;
+  sections_snapshot: ResumeDraftSection[];
+  template: string;
+  created_at: string;
+}
+
+export type SectionAiOperation =
+  | "generate"
+  | "rewrite"
+  | "improve"
+  | "expand"
+  | "shorten"
+  | "grammar"
+  | "ats_optimize"
+  | "keyword_match"
+  | "professional_tone"
+  | "achievement_suggestions"
+  | "action_verbs"
+  | "industry_keywords";
 
 /** Per-section-type content shapes -- deliberately mirror ParsedResumeData's
  * existing field shapes so import/merge logic and AI prompts can share
@@ -604,6 +640,45 @@ export interface ResumeSectionContentMap {
     portfolio_url?: string;
     website_url?: string;
   };
+  // Studio-extended section types (migration 0044)
+  volunteer: Array<{
+    organization?: string;
+    role?: string;
+    location?: string;
+    start_date?: string;
+    end_date?: string;
+    is_current?: boolean;
+    description?: string;
+  }>;
+  publications: Array<{
+    title?: string;
+    publisher?: string;
+    date?: string;
+    url?: string;
+    description?: string;
+  }>;
+  references: Array<{
+    name?: string;
+    title?: string;
+    company?: string;
+    relationship?: string;
+    email?: string;
+    phone?: string;
+  }>;
+  interests: { items: string[] };
+  awards: Array<{
+    title?: string;
+    issuer?: string;
+    date?: string;
+    description?: string;
+  }>;
+  courses: Array<{
+    name?: string;
+    provider?: string;
+    date?: string;
+    certificate_url?: string;
+    description?: string;
+  }>;
 }
 
 export interface ResumeDraftSection<T extends ResumeSectionType = ResumeSectionType> {
