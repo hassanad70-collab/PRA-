@@ -47,6 +47,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
+import { CommandPalette, type PaletteItem } from "@/components/shared/command-palette";
 import { logout } from "@/actions/auth";
 import { cn, initials } from "@/lib/utils";
 
@@ -142,6 +143,15 @@ export function DashboardShell({ navItems, navGroups, user, children, settingsHr
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
+  const paletteItems = React.useMemo<PaletteItem[]>(() => {
+    if (navGroups) {
+      return navGroups.flatMap((g) =>
+        g.items.map((i) => ({ href: i.href, label: i.label, group: g.label }))
+      );
+    }
+    return (navItems ?? []).map((i) => ({ href: i.href, label: i.label }));
+  }, [navGroups, navItems]);
+
   const closeMenu = React.useCallback(() => setMobileOpen(false), []);
 
   const SidebarNav = navGroups ? (
@@ -229,7 +239,8 @@ export function DashboardShell({ navItems, navGroups, user, children, settingsHr
           >
             <Menu className="h-5 w-5" />
           </Button>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
+            <CommandPalette items={paletteItems} />
             {headerExtra}
             <ThemeToggle />
           </div>
