@@ -59,9 +59,9 @@ CREATE TABLE IF NOT EXISTS ai_interview_sessions (
 CREATE TABLE IF NOT EXISTS ai_career_reports (
   id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id      uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  title        text NOT NULL DEFAULT 'Career Report',
-  current_role text,
-  target_role  text,
+  title            text NOT NULL DEFAULT 'Career Report',
+  current_job_role text,
+  target_role      text,
   result_json  jsonb NOT NULL,            -- stores the GuestCareerResult structure
   is_favorite  boolean NOT NULL DEFAULT false,
   created_at   timestamptz NOT NULL DEFAULT now(),

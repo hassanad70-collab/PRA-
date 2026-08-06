@@ -266,7 +266,7 @@ export async function generateAndSaveCareerReportAction(
   const title = input.title ?? `Career Report — ${input.currentRole}`;
   const saved = await createCareerReport(user.id, {
     title,
-    current_role: input.currentRole,
+    current_job_role: input.currentRole,
     target_role: input.targetRole ?? null,
     result_json: result as unknown as Record<string, unknown>,
     is_favorite: false,

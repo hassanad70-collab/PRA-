@@ -220,7 +220,7 @@ function SavedReportCard({
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium truncate">{item.title}</p>
         <p className="text-xs text-muted-foreground mt-0.5">
-          {item.current_role && <span className="capitalize">{item.current_role}</span>}
+          {item.current_job_role && <span className="capitalize">{item.current_job_role}</span>}
           {item.target_role && <span> → {item.target_role}</span>}
           {" · "}
           <Clock className="inline h-3 w-3" />{" "}

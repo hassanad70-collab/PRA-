@@ -677,7 +677,7 @@ export interface AiCareerReport {
   id: string;
   user_id: string;
   title: string;
-  current_role: string | null;
+  current_job_role: string | null;
   target_role: string | null;
   result_json: Record<string, unknown>;
   is_favorite: boolean;
