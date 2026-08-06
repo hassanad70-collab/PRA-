@@ -344,14 +344,30 @@
   },
   "Candidate": {
     "Nav": {
-      "dashboard": "Dashboard",
+      "dashboard": "Overview",
       "profile": "Profile",
       "resumeAts": "Resume Intelligence",
       "applications": "Applications",
       "interviews": "Interviews",
       "settings": "Settings",
       "signOut": "Sign out",
-      "openMenu": "Open menu"
+      "openMenu": "Open menu",
+      "aiWorkspaceGroup": "AI Career Workspace",
+      "aiAssistant": "AI Assistant",
+      "myResumes": "My Resumes",
+      "resumeStudio": "Resume Studio",
+      "atsChecker": "ATS Resume Checker",
+      "coverLetters": "Cover Letters",
+      "interviewPrep": "Interview Preparation",
+      "careerAdvisor": "Career Advisor",
+      "jobsGroup": "Jobs",
+      "jobMatching": "Job Matching",
+      "savedJobs": "Saved Jobs",
+      "personalGroup": "Personal",
+      "documents": "Documents",
+      "favorites": "Favorites",
+      "careerAnalytics": "Career Analytics",
+      "notifications": "Notifications"
     },
     "Shared": {
       "resume": "Resume",

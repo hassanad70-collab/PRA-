@@ -164,7 +164,7 @@ test.describe("Candidate portal internationalization", () => {
     await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
     await expect(page).toHaveURL(/\/en\/candidate\/dashboard$/, { timeout: 15_000 });
 
-    await page.getByRole("link", { name: "Profile" }).click();
+    await page.goto("/en/candidate/profile");
     await expect(page).toHaveURL(/\/en\/candidate\/profile$/);
 
     await page.getByRole("button", { name: "Change language" }).click();
@@ -206,8 +206,8 @@ test.describe("Candidate portal internationalization", () => {
     await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
     await expect(page).toHaveURL(/\/en\/candidate\/dashboard$/, { timeout: 15_000 });
 
-    for (const name of ["Dashboard", "Profile", "Resume Intelligence", "Browse Jobs", "Applications", "Interviews"]) {
-      const href = await page.getByRole("link", { name }).getAttribute("href");
+    for (const name of ["Overview", "AI Assistant", "ATS Resume Checker", "Browse Jobs", "Applications", "Interviews", "Settings"]) {
+      const href = await page.getByRole("link", { name, exact: true }).getAttribute("href");
       expect(href, `${name} nav link should be locale-prefixed`).toMatch(/^\/en\/candidate\//);
     }
   });

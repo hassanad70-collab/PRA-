@@ -6,23 +6,32 @@ import { usePathname } from "next/navigation";
 import {
   Activity,
   BarChart3,
+  Bell,
   Bookmark,
+  Bot,
   Briefcase,
   Building2,
   Calendar,
   CreditCard,
+  FileStack,
   FileText,
   Flag,
+  FolderOpen,
   GraduationCap,
   LayoutDashboard,
+  LineChart,
   ListTodo,
   Mail,
   Menu,
+  Mic,
+  PenLine,
   ScrollText,
   Search,
   Settings,
   ShieldCheck,
   Sparkles,
+  Star,
+  Target,
   User,
   UserCog,
   Users,
@@ -49,25 +58,35 @@ import { cn, initials } from "@/lib/utils";
 // boundary, via this registry.
 const ICON_MAP = {
   Activity,
-  LayoutDashboard,
-  User,
-  FileText,
-  Search,
-  Bookmark,
-  Briefcase,
-  Users,
-  Building2,
-  UserCog,
-  GraduationCap,
-  ScrollText,
-  Settings,
-  Calendar,
   BarChart3,
+  Bell,
+  Bookmark,
+  Bot,
+  Briefcase,
+  Building2,
+  Calendar,
   CreditCard,
+  FileStack,
+  FileText,
   Flag,
+  FolderOpen,
+  GraduationCap,
+  LayoutDashboard,
+  LineChart,
   ListTodo,
   Mail,
+  Mic,
+  PenLine,
+  ScrollText,
+  Search,
+  Settings,
   ShieldCheck,
+  Sparkles,
+  Star,
+  Target,
+  User,
+  UserCog,
+  Users,
 } as const;
 
 export type IconName = keyof typeof ICON_MAP;
@@ -78,8 +97,16 @@ export interface NavItem {
   icon: IconName;
 }
 
+export interface NavGroup {
+  label?: string;
+  items: NavItem[];
+}
+
 interface DashboardShellProps {
-  navItems: NavItem[];
+  /** Flat nav for recruiter/admin (backward compat). Exactly one of navItems or navGroups must be provided. */
+  navItems?: NavItem[];
+  /** Grouped nav for candidate AI Career Workspace. */
+  navGroups?: NavGroup[];
   user: { full_name: string; email: string; role: string };
   children: React.ReactNode;
   /** Locale-aware where needed -- each layout resolves its own destination (see CandidateLayout). */
@@ -91,9 +118,56 @@ interface DashboardShellProps {
 
 const DEFAULT_LABELS = { settings: "Settings", signOut: "Sign out", openMenu: "Open menu" };
 
-export function DashboardShell({ navItems, user, children, settingsHref, labels = DEFAULT_LABELS, headerExtra }: DashboardShellProps) {
+function NavLink({ item, pathname, onClick }: { item: NavItem; pathname: string; onClick?: () => void }) {
+  const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+  const Icon = ICON_MAP[item.icon];
+  return (
+    <Link
+      href={item.href}
+      onClick={onClick}
+      className={cn(
+        "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+        active
+          ? "bg-primary/10 text-primary"
+          : "text-muted-foreground hover:bg-accent hover:text-foreground"
+      )}
+    >
+      <Icon className="h-4 w-4 shrink-0" />
+      {item.label}
+    </Link>
+  );
+}
+
+export function DashboardShell({ navItems, navGroups, user, children, settingsHref, labels = DEFAULT_LABELS, headerExtra }: DashboardShellProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = React.useState(false);
+
+  const closeMenu = React.useCallback(() => setMobileOpen(false), []);
+
+  const SidebarNav = navGroups ? (
+    <nav className="flex-1 overflow-y-auto px-3 py-2">
+      {navGroups.map((group, gi) => (
+        <div key={gi} className={gi > 0 ? "mt-4" : ""}>
+          {group.label && (
+            <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
+              {group.label}
+            </p>
+          )}
+          <div className="space-y-0.5">
+            {group.items.map((item) => (
+              <NavLink key={item.href} item={item} pathname={pathname} onClick={closeMenu} />
+            ))}
+          </div>
+        </div>
+      ))}
+    </nav>
+  ) : (
+    <nav className="flex-1 space-y-1 px-3 py-2">
+      {(navItems ?? []).map((item) => (
+        <NavLink key={item.href} item={item} pathname={pathname} onClick={closeMenu} />
+      ))}
+    </nav>
+  );
 
   const SidebarContent = (
     <div className="flex h-full flex-col">
@@ -104,28 +178,7 @@ export function DashboardShell({ navItems, user, children, settingsHref, labels 
         <span className="text-sm">PRA Talent Intelligence</span>
       </Link>
 
-      <nav className="flex-1 space-y-1 px-3 py-2">
-        {navItems.map((item) => {
-          const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
-          const Icon = ICON_MAP[item.icon];
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setMobileOpen(false)}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                active
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
-              )}
-            >
-              <Icon className="h-4 w-4" />
-              {item.label}
-            </Link>
-          );
-        })}
-      </nav>
+      {SidebarNav}
 
       <div className="border-t border-border p-3">
         <DropdownMenu>
@@ -161,7 +214,7 @@ export function DashboardShell({ navItems, user, children, settingsHref, labels 
       {mobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
-          <aside className="absolute inset-y-0 left-0 w-72 bg-card">{SidebarContent}</aside>
+          <aside className="absolute inset-y-0 left-0 w-72 overflow-y-auto bg-card">{SidebarContent}</aside>
         </div>
       )}
 

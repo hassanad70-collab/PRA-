@@ -13,12 +13,21 @@ test.describe("Candidate workflow", () => {
     const errors: string[] = [];
     page.on("pageerror", (err) => errors.push(err.message));
 
-    await expect(page.getByRole("link", { name: "Dashboard" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Profile" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Resume Intelligence" })).toBeVisible();
+    // Root nav item
+    await expect(page.getByRole("link", { name: "Overview" })).toBeVisible();
+
+    // AI Career Workspace group
+    await expect(page.getByRole("link", { name: "AI Assistant", exact: true })).toBeVisible();
+    await expect(page.getByRole("link", { name: "ATS Resume Checker" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Resume Studio" })).toBeVisible();
+
+    // Jobs group
     await expect(page.getByRole("link", { name: "Browse Jobs" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Applications" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Interviews" })).toBeVisible();
+
+    // Personal group
+    await expect(page.getByRole("link", { name: "Settings" })).toBeVisible();
 
     expect(errors).toEqual([]);
   });
@@ -31,9 +40,9 @@ test.describe("Candidate workflow", () => {
     await expect(page.getByText(/Past \(\d+\)/)).toBeVisible();
   });
 
-  test("can navigate to profile and see the profile editor", async ({ page }) => {
-    await page.getByRole("link", { name: "Profile" }).click();
-    await expect(page).toHaveURL(/\/candidate\/profile$/);
+  test("can navigate to settings (profile) via nav", async ({ page }) => {
+    await page.getByRole("link", { name: "Settings" }).click();
+    await expect(page).toHaveURL(/\/candidate\/settings$/);
   });
 
   test("can browse jobs from within the authenticated area", async ({ page }) => {

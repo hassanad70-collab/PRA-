@@ -344,14 +344,30 @@
   },
   "Candidate": {
     "Nav": {
-      "dashboard": "لوحة التحكم",
+      "dashboard": "نظرة عامة",
       "profile": "الملف الشخصي",
       "resumeAts": "ذكاء السيرة الذاتية",
       "applications": "طلباتي",
       "interviews": "المقابلات",
       "settings": "الإعدادات",
       "signOut": "تسجيل الخروج",
-      "openMenu": "فتح القائمة"
+      "openMenu": "فتح القائمة",
+      "aiWorkspaceGroup": "مساحة العمل الذكية",
+      "aiAssistant": "المساعد الذكي",
+      "myResumes": "سيرتي الذاتية",
+      "resumeStudio": "استوديو السيرة الذاتية",
+      "atsChecker": "فحص توافق ATS",
+      "coverLetters": "خطابات التقديم",
+      "interviewPrep": "التحضير للمقابلة",
+      "careerAdvisor": "المستشار المهني",
+      "jobsGroup": "الوظائف",
+      "jobMatching": "مطابقة الوظائف",
+      "savedJobs": "الوظائف المحفوظة",
+      "personalGroup": "الشخصية",
+      "documents": "المستندات",
+      "favorites": "المفضلة",
+      "careerAnalytics": "تحليلات المسار المهني",
+      "notifications": "الإشعارات"
     },
     "Shared": {
       "resume": "السيرة الذاتية",

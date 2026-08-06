@@ -26,7 +26,7 @@ export default async function AtsCheckerPage({ params }: { params: Promise<{ loc
   const user = await getCurrentUser();
   // /candidate/resume now lives inside the [locale] tree (as of the
   // Candidate Portal Internationalization unit).
-  if (user?.role === "candidate") redirect({ href: "/candidate/resume", locale });
+  if (user?.role === "candidate") redirect({ href: "/candidate/workspace/ats-checker", locale });
 
   const guestSessionId = await readGuestSessionId();
   await trackEvent("ats_checker_page_view", { guestSessionId });
