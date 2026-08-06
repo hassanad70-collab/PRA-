@@ -87,7 +87,7 @@ export default async function AdminCandidatesPage({
                     </TableCell>
                     <TableCell className="text-muted-foreground">{formatDate(candidate.created_at as string)}</TableCell>
                     <TableCell className="text-right">
-                      <UserRowActions userId={profile.id} isActive={profile.is_active} deletedAt={profile.deleted_at} />
+                      <UserRowActions userId={profile.id} isActive={profile.is_active} isLocked={false} deletedAt={profile.deleted_at} />
                     </TableCell>
                   </TableRow>
                 );

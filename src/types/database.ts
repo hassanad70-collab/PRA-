@@ -42,7 +42,11 @@ export interface Profile {
   avatar_url: string | null;
   phone: string | null;
   company_id: string | null;
+  department: string | null;
   is_active: boolean;
+  is_locked: boolean;
+  locked_at: string | null;
+  force_password_reset: boolean;
   last_seen_at: string | null;
   deleted_at: string | null;
   created_at: string;

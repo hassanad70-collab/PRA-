@@ -35,7 +35,7 @@ export default async function AdminCandidateDetailPage({ params }: { params: Pro
             </div>
           </div>
         </div>
-        <UserRowActions userId={profile.id} isActive={profile.is_active} deletedAt={profile.deleted_at} />
+        <UserRowActions userId={profile.id} isActive={profile.is_active} isLocked={false} deletedAt={profile.deleted_at} />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">

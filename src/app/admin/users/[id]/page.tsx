@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Shield } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Clock, Lock, RotateCcw, Shield } from "lucide-react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AssignRoleDialog, RemoveRoleButton } from "@/components/admin/assign-role-dialog";
 import { EditUserForm } from "@/components/admin/edit-user-form";
+import { LockBadge, RoleBadge } from "@/components/admin/create-user-modal";
 import { UserRowActions } from "@/components/admin/user-row-actions";
 import { UserStatusBadge } from "@/components/admin/user-status-badge";
 import { ChangeRoleDialog } from "@/components/shared/dynamic-dialogs";
@@ -33,50 +34,108 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
         <ArrowLeft className="h-4 w-4" /> Back to users
       </Link>
 
+      {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <Avatar className="h-14 w-14">
-            <AvatarFallback className="text-lg">{initials(profile.full_name)}</AvatarFallback>
+            <AvatarFallback className="text-lg bg-primary/10 text-primary">
+              {initials(profile.full_name)}
+            </AvatarFallback>
           </Avatar>
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">{profile.full_name}</h1>
-            <div className="mt-1 flex items-center gap-2">
-              <Badge variant="outline" className="capitalize">
-                {profile.role.replace("_", " ")}
-              </Badge>
-              <UserStatusBadge isActive={profile.is_active} deletedAt={profile.deleted_at} />
+            <div className="mt-1.5 flex flex-wrap items-center gap-2">
+              <RoleBadge role={profile.role} />
+              {profile.is_locked
+                ? <LockBadge />
+                : <UserStatusBadge isActive={profile.is_active} deletedAt={profile.deleted_at} />
+              }
+              {profile.force_password_reset && (
+                <Badge variant="outline" className="text-[10px] border-amber-300 text-amber-600">
+                  <RotateCcw className="mr-1 h-3 w-3" /> Reset pending
+                </Badge>
+              )}
             </div>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {profile.role !== "candidate" && <ChangeRoleDialog userId={profile.id} currentRole={profile.role as UserRole} />}
-          <UserRowActions userId={profile.id} isActive={profile.is_active} deletedAt={profile.deleted_at} />
+          {profile.role !== "candidate" && (
+            <ChangeRoleDialog userId={profile.id} currentRole={profile.role as UserRole} />
+          )}
+          <UserRowActions
+            userId={profile.id}
+            isActive={profile.is_active}
+            isLocked={profile.is_locked ?? false}
+            deletedAt={profile.deleted_at}
+          />
         </div>
       </div>
 
+      {/* Lock warning banner */}
+      {profile.is_locked && (
+        <div className="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3">
+          <Lock className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
+          <div>
+            <p className="text-sm font-medium text-destructive">Account locked</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              This account was locked{profile.locked_at ? ` on ${formatDate(profile.locked_at)}` : ""}. All sessions have been terminated.
+              Use the Actions menu to unlock.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Force password reset banner */}
+      {profile.force_password_reset && !profile.is_locked && (
+        <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800/40 dark:bg-amber-950/20 px-4 py-3">
+          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
+          <div>
+            <p className="text-sm font-medium text-amber-800 dark:text-amber-400">Password reset pending</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              A password reset email has been sent. The flag will clear once the user resets their password.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Account details */}
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Account details</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <EditUserForm userId={profile.id} fullName={profile.full_name} phone={profile.phone} />
+          <EditUserForm
+            userId={profile.id}
+            fullName={profile.full_name}
+            phone={profile.phone}
+            department={profile.department}
+            companyId={profile.company_id}
+            companies={allCompanies}
+          />
           <div className="grid gap-4 border-t border-border pt-6 text-sm sm:grid-cols-3">
             <div>
               <p className="text-muted-foreground">Email</p>
               <p className="mt-1 font-medium">{profile.email}</p>
             </div>
             <div>
-              <p className="text-muted-foreground">Joined</p>
+              <p className="text-muted-foreground flex items-center gap-1">
+                <Clock className="h-3.5 w-3.5" /> Joined
+              </p>
               <p className="mt-1 font-medium">{formatDate(profile.created_at)}</p>
             </div>
             <div>
-              <p className="text-muted-foreground">Last seen</p>
-              <p className="mt-1 font-medium">{profile.last_seen_at ? formatDate(profile.last_seen_at) : "Never"}</p>
+              <p className="text-muted-foreground flex items-center gap-1">
+                <Clock className="h-3.5 w-3.5" /> Last seen
+              </p>
+              <p className="mt-1 font-medium">
+                {profile.last_seen_at ? formatDate(profile.last_seen_at) : "Never"}
+              </p>
             </div>
           </div>
         </CardContent>
       </Card>
 
+      {/* Recruiter details */}
       {recruiter && (
         <Card>
           <CardHeader>
@@ -94,13 +153,14 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
               <p className="mt-1 font-medium">{recruiter.job_title ?? "—"}</p>
             </div>
             <div>
-              <p className="text-muted-foreground">Role</p>
-              <p className="mt-1 font-medium capitalize">{recruiter.role}</p>
+              <p className="text-muted-foreground">Department</p>
+              <p className="mt-1 font-medium capitalize">{recruiter.department ?? profile.department ?? "—"}</p>
             </div>
           </CardContent>
         </Card>
       )}
 
+      {/* Candidate details */}
       {candidate && (
         <Card>
           <CardHeader>
@@ -168,9 +228,7 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
                   </div>
                   <div className="flex items-center gap-2">
                     {a.role.is_system && (
-                      <Badge variant="secondary" className="h-4 px-1.5 text-[10px]">
-                        System
-                      </Badge>
+                      <Badge variant="secondary" className="h-4 px-1.5 text-[10px]">System</Badge>
                     )}
                     <RemoveRoleButton assignment={a} />
                   </div>

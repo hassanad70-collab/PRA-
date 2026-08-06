@@ -1,15 +1,14 @@
 import Link from "next/link";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Pagination } from "@/components/admin/pagination";
-import { UserRowActions } from "@/components/admin/user-row-actions";
-import { UserStatusBadge } from "@/components/admin/user-status-badge";
-import { getAdminUsers } from "@/lib/queries/admin";
-import { formatDate } from "@/lib/utils";
+import { CreateUserModal } from "@/components/admin/create-user-modal";
+import { UsersTableClient } from "@/components/admin/users-table-client";
+import { getActiveCompaniesLite, getAdminUsers } from "@/lib/queries/admin";
+import { getCurrentUser } from "@/lib/queries/candidate";
+import type { AdminUserSortKey } from "@/lib/queries/admin";
 import type { UserRole } from "@/types/database";
 
 const ROLES: UserRole[] = ["candidate", "recruiter", "hr_manager", "super_admin"];
@@ -17,27 +16,54 @@ const ROLES: UserRole[] = ["candidate", "recruiter", "hr_manager", "super_admin"
 export default async function AdminUsersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ search?: string; role?: string; status?: string; page?: string }>;
+  searchParams: Promise<{
+    search?: string;
+    role?: string;
+    status?: string;
+    sortBy?: string;
+    sortDir?: string;
+    page?: string;
+  }>;
 }) {
   const params = await searchParams;
   const page = Number(params.page ?? "1") || 1;
+  const sortBy = (params.sortBy ?? "created_at") as AdminUserSortKey;
+  const sortDir = (params.sortDir === "asc" ? "asc" : "desc") as "asc" | "desc";
 
-  const result = await getAdminUsers({
-    search: params.search,
-    role: params.role as UserRole | undefined,
-    status: params.status as "active" | "disabled" | "deleted" | undefined,
-    page,
-  });
+  const [result, companies, currentUser] = await Promise.all([
+    getAdminUsers({
+      search: params.search,
+      role: params.role as UserRole | undefined,
+      status: params.status as "active" | "disabled" | "deleted" | "locked" | undefined,
+      sortBy,
+      sortDir,
+      page,
+    }),
+    getActiveCompaniesLite(),
+    getCurrentUser(),
+  ]);
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Users</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Every account on the platform, across every role.</p>
+      {/* Header */}
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Identity Management</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {result.total.toLocaleString()} user{result.total !== 1 ? "s" : ""} across all roles. Create, manage, and audit every account on the platform.
+          </p>
+        </div>
+        <CreateUserModal companies={companies} />
       </div>
 
-      <form className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <Input name="search" defaultValue={params.search} placeholder="Search by name or email…" className="sm:max-w-sm" />
+      {/* Filters */}
+      <form className="flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-wrap">
+        <Input
+          name="search"
+          defaultValue={params.search}
+          placeholder="Search name or email…"
+          className="sm:max-w-xs"
+        />
         <select
           name="role"
           defaultValue={params.role ?? ""}
@@ -46,7 +72,7 @@ export default async function AdminUsersPage({
           <option value="">All roles</option>
           {ROLES.map((r) => (
             <option key={r} value={r}>
-              {r.replace("_", " ")}
+              {r.replace(/_/g, " ")}
             </option>
           ))}
         </select>
@@ -57,71 +83,56 @@ export default async function AdminUsersPage({
         >
           <option value="">All statuses</option>
           <option value="active">Active</option>
-          <option value="disabled">Disabled</option>
+          <option value="disabled">Suspended</option>
+          <option value="locked">Locked</option>
           <option value="deleted">Deleted</option>
         </select>
+        {/* Preserve sort params when filtering */}
+        {params.sortBy && <input type="hidden" name="sortBy" value={params.sortBy} />}
+        {params.sortDir && <input type="hidden" name="sortDir" value={params.sortDir} />}
         <Button type="submit" variant="outline">
           Filter
         </Button>
+        {(params.search || params.role || params.status) && (
+          <Link href="/admin/users" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            Clear filters
+          </Link>
+        )}
       </form>
 
-      <Card>
-        <CardContent className="pt-6">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Joined</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {result.rows.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={6} className="py-10 text-center text-sm text-muted-foreground">
-                    No users match these filters.
-                  </TableCell>
-                </TableRow>
-              )}
-              {result.rows.map((user) => (
-                <TableRow key={user.id as string}>
-                  <TableCell className="font-medium">
-                    <Link href={`/admin/users/${user.id}`} className="hover:underline">
-                      {user.full_name as string}
-                    </Link>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">{user.email as string}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className="capitalize">
-                      {(user.role as string).replace("_", " ")}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <UserStatusBadge isActive={user.is_active as boolean} deletedAt={user.deleted_at as string | null} />
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">{formatDate(user.created_at as string)}</TableCell>
-                  <TableCell className="text-right">
-                    <UserRowActions
-                      userId={user.id as string}
-                      isActive={user.is_active as boolean}
-                      deletedAt={user.deleted_at as string | null}
-                    />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+      {/* Stats row */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {[
+          { label: "Total", value: result.total },
+          { label: "Page", value: `${page} / ${result.pageCount}` },
+          { label: "Sort", value: `${sortBy.replace("_", " ")} ${sortDir}` },
+          { label: "Showing", value: `${result.rows.length} of ${result.total}` },
+        ].map(({ label, value }) => (
+          <div key={label} className="rounded-lg border border-border bg-card px-4 py-3">
+            <p className="text-xs text-muted-foreground">{label}</p>
+            <p className="mt-0.5 text-sm font-semibold capitalize">{value}</p>
+          </div>
+        ))}
+      </div>
 
-          <Pagination
-            page={result.page}
-            pageCount={result.pageCount}
-            total={result.total}
-            basePath="/admin/users"
-            searchParams={params}
+      {/* Table */}
+      <Card>
+        <CardContent className="pt-4 pb-2 px-0">
+          <UsersTableClient
+            rows={result.rows}
+            sortBy={sortBy}
+            sortDir={sortDir}
+            currentUserId={currentUser?.id ?? ""}
           />
+          <div className="px-4 pt-2">
+            <Pagination
+              page={result.page}
+              pageCount={result.pageCount}
+              total={result.total}
+              basePath="/admin/users"
+              searchParams={params}
+            />
+          </div>
         </CardContent>
       </Card>
     </div>

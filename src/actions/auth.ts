@@ -23,10 +23,11 @@ import {
   resetPasswordSchema,
 } from "@/lib/validations/auth";
 
-export interface ActionResult {
+export interface ActionResult<T = void> {
   success: boolean;
   error?: string;
   fieldErrors?: Record<string, string>;
+  data?: T;
 }
 
 function getSiteUrl() {

@@ -135,33 +135,66 @@ const DEFAULT_PAGE_SIZE = 20;
 // Users (cross-role)
 // ---------------------------------------------------------------------------
 
+export type AdminUserSortKey = "full_name" | "email" | "role" | "created_at" | "last_seen_at";
+
 export interface AdminUserFilters {
   search?: string;
   role?: UserRole;
-  status?: "active" | "disabled" | "deleted";
+  status?: "active" | "disabled" | "deleted" | "locked";
+  sortBy?: AdminUserSortKey;
+  sortDir?: "asc" | "desc";
   page?: number;
   pageSize?: number;
 }
 
-export async function getAdminUsers(filters: AdminUserFilters): Promise<Paginated<Record<string, unknown>>> {
+export interface AdminUserRow {
+  id: string;
+  full_name: string;
+  email: string;
+  phone: string | null;
+  role: string;
+  department: string | null;
+  is_active: boolean;
+  is_locked: boolean;
+  locked_at: string | null;
+  force_password_reset: boolean;
+  last_seen_at: string | null;
+  deleted_at: string | null;
+  created_at: string;
+  company_id: string | null;
+  company_name: string | null;
+}
+
+export async function getAdminUsers(filters: AdminUserFilters): Promise<Paginated<AdminUserRow>> {
   const supabase = await createClient();
   const page = Math.max(filters.page ?? 1, 1);
   const pageSize = filters.pageSize ?? DEFAULT_PAGE_SIZE;
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
+  const sortBy: AdminUserSortKey = filters.sortBy ?? "created_at";
+  const ascending = (filters.sortDir ?? "desc") === "asc";
 
-  let query = supabase.from("profiles").select("*", { count: "exact" });
+  let query = supabase
+    .from("profiles")
+    .select("id, full_name, email, phone, role, department, is_active, is_locked, locked_at, force_password_reset, last_seen_at, deleted_at, created_at, company_id, company:companies(name)", { count: "exact" });
 
   if (filters.search) query = query.or(`full_name.ilike.%${filters.search}%,email.ilike.%${filters.search}%`);
   if (filters.role) query = query.eq("role", filters.role);
   if (filters.status === "deleted") query = query.not("deleted_at", "is", null);
   else if (filters.status === "disabled") query = query.eq("is_active", false).is("deleted_at", null);
-  else if (filters.status === "active") query = query.eq("is_active", true).is("deleted_at", null);
+  else if (filters.status === "locked") query = query.eq("is_locked", true);
+  else if (filters.status === "active") query = query.eq("is_active", true).is("deleted_at", null).eq("is_locked", false);
 
-  const { data, count, error } = await query.order("created_at", { ascending: false }).range(from, to);
+  const { data, count, error } = await query.order(sortBy, { ascending }).range(from, to);
   if (error) console.error("getAdminUsers failed", error);
 
-  return { rows: data ?? [], total: count ?? 0, page, pageSize, pageCount: Math.max(Math.ceil((count ?? 0) / pageSize), 1) };
+  const rows = (data ?? []).map((r) => ({
+    ...r,
+    company_name: (r.company as unknown as { name: string } | null)?.name ?? null,
+    company: undefined,
+  })) as AdminUserRow[];
+
+  return { rows, total: count ?? 0, page, pageSize, pageCount: Math.max(Math.ceil((count ?? 0) / pageSize), 1) };
 }
 
 export async function getAdminUserDetail(userId: string) {

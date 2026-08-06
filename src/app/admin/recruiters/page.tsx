@@ -99,7 +99,7 @@ export default async function AdminRecruitersPage({
                           currentCompanyId={recruiter.company_id as string}
                           companies={companies}
                         />
-                        <UserRowActions userId={profile.id} isActive={profile.is_active} deletedAt={profile.deleted_at} />
+                        <UserRowActions userId={profile.id} isActive={profile.is_active} isLocked={false} deletedAt={profile.deleted_at} />
                       </div>
                     </TableCell>
                   </TableRow>
