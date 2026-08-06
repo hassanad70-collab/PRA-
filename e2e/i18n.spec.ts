@@ -6,12 +6,12 @@ import { TEST_USERS } from "./global-setup";
 test.describe("Internationalization (English / Arabic)", () => {
   test("homepage works in both languages with correct lang/dir", async ({ page }) => {
     await page.goto("/en");
-    await expect(page.getByRole("heading", { name: /hire smarter/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /land your dream job/i })).toBeVisible();
     expect(await page.locator("html").getAttribute("lang")).toBe("en");
     expect(await page.locator("html").getAttribute("dir")).toBe("ltr");
 
     await page.goto("/ar");
-    await expect(page.getByRole("heading", { name: /وظّف بذكاء أكبر/ })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /احصل على وظيفة أحلامك/ })).toBeVisible();
     expect(await page.locator("html").getAttribute("lang")).toBe("ar");
     expect(await page.locator("html").getAttribute("dir")).toBe("rtl");
   });

@@ -6,7 +6,7 @@ import { TEST_JOB_SLUG } from "./global-setup";
 test.describe("Public (unauthenticated) access", () => {
   test("landing page is public", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByRole("heading", { name: /hire smarter/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /land your dream job/i })).toBeVisible();
   });
 
   test("job browsing is public and lists published jobs without requiring login", async ({ page }) => {
