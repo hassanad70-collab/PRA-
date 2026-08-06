@@ -176,7 +176,7 @@ export async function getAdminUsers(filters: AdminUserFilters): Promise<Paginate
 
   let query = supabase
     .from("profiles")
-    .select("id, full_name, email, phone, role, department, is_active, is_locked, locked_at, force_password_reset, last_seen_at, deleted_at, created_at, company_id, company:companies(name)", { count: "exact" });
+    .select("id, full_name, email, phone, role, department, is_active, is_locked, locked_at, force_password_reset, last_seen_at, deleted_at, created_at, company_id, company:companies!profiles_company_id_fkey(name)", { count: "exact" });
 
   if (filters.search) query = query.or(`full_name.ilike.%${filters.search}%,email.ilike.%${filters.search}%`);
   if (filters.role) query = query.eq("role", filters.role);

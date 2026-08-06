@@ -44,7 +44,7 @@ test.describe("Authorization / route protection", () => {
 
     await page.goto("/admin/users");
     await expect(page).toHaveURL(/\/admin\/users$/);
-    await expect(page.getByRole("heading", { name: "Users" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Identity Management" })).toBeVisible();
   });
 
   test("an authenticated user is redirected away from /login and /register (already signed in)", async ({ page }) => {

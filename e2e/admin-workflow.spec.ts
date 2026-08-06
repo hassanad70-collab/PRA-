@@ -22,7 +22,7 @@ test.describe("Admin workflow", () => {
 
   test("can view the users list across every role", async ({ page }) => {
     await page.goto("/admin/users");
-    await expect(page.getByRole("heading", { name: "Users" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Identity Management" })).toBeVisible();
     await expect(page.getByText(TEST_USERS.candidate.email)).toBeVisible();
     await expect(page.getByText(TEST_USERS.recruiter.email)).toBeVisible();
   });
