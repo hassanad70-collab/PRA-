@@ -8,6 +8,7 @@ import { ResumeHealthChecklist } from "@/components/candidate/resume-intelligenc
 import { RewriteOptimizePanel } from "@/components/candidate/resume-intelligence/rewrite-optimize-panel";
 import { SuggestionHistoryList } from "@/components/candidate/resume-intelligence/suggestion-history-list";
 import { ResumeUpload } from "@/components/candidate/resume-upload";
+import { ResumeHeatmap } from "@/components/workspace/resume-heatmap";
 import { getCandidateFullProfile, getCurrentUser, getLatestAtsScore } from "@/lib/queries/candidate";
 import { getSuggestionHistory } from "@/lib/resume-intelligence/suggestion-events";
 import { runStructuralChecks } from "@/lib/resume-intelligence/structural-checks";
@@ -72,6 +73,13 @@ export default async function WorkspaceAtsCheckerPage({ params }: { params: Prom
       )}
 
       {atsScore && scoredResume?.raw_text && <RewriteOptimizePanel />}
+
+      {atsScore && scoredResume?.parsed_data && (
+        <ResumeHeatmap
+          parsedData={scoredResume.parsed_data}
+          atsScore={atsScore}
+        />
+      )}
 
       <SuggestionHistoryList events={suggestionHistory} />
     </div>

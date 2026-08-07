@@ -7,6 +7,7 @@ import { parseResumeText } from "@/lib/ai/resume-parser";
 import { generateCoverLetter, type CoverLetterInput, type CoverLetterResult } from "@/lib/ai/cover-letter";
 import { generateGuestInterviewPrep, type GuestInterviewInput, type GuestInterviewResult } from "@/lib/ai/guest-interview-prep";
 import { generateGuestCareerAdvice, type GuestCareerInput, type GuestCareerResult } from "@/lib/ai/guest-career-advisor";
+import { getSalaryEstimate, type SalaryInput } from "@/lib/ai/salary-insights";
 import { saveWorkspaceResume, deleteWorkspaceResume } from "@/lib/workspace/resume-context";
 import {
   createCoverLetter,
@@ -19,10 +20,12 @@ import {
   toggleInterviewSessionFavorite,
   toggleCareerReportFavorite,
   updateCoverLetterTitle,
+  createSalaryEstimate,
+  deleteSalaryEstimate,
 } from "@/lib/workspace/queries";
 import { rateLimitByIp } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
-import type { AiCoverLetter, AiInterviewSession, AiCareerReport } from "@/types/database";
+import type { AiCoverLetter, AiInterviewSession, AiCareerReport, AiSalaryEstimate } from "@/types/database";
 
 export interface WorkspaceActionResult<T = void> {
   success: boolean;
@@ -338,4 +341,47 @@ export async function generateCareerAdviceGuestAction(
   const result = await generateGuestCareerAdvice(input);
   if (!result) return { success: false, error: "AI generation failed. Please try again." };
   return { success: true, data: result };
+}
+
+// ============================================================
+// Salary Insights (Unit E)
+// ============================================================
+
+export async function generateSalaryInsightsAction(
+  input: SalaryInput
+): Promise<WorkspaceActionResult<AiSalaryEstimate>> {
+  const user = await requireAuth();
+  if (!user) return { success: false, error: "You must be signed in." };
+
+  const rl = await rateLimitByIp("salary-insights", 30, 60_000);
+  if (!rl.allowed) return { success: false, error: "Too many requests. Please wait a moment." };
+
+  if (!input.targetRole?.trim()) {
+    return { success: false, error: "Target role is required." };
+  }
+
+  try {
+    const estimate = await getSalaryEstimate(input);
+    const saved = await createSalaryEstimate(user.id, {
+      target_role: input.targetRole,
+      location: input.location ?? null,
+      years_experience: input.yearsExperience ?? null,
+      result: estimate,
+    });
+    if (!saved) return { success: false, error: "Failed to save estimate. Please try again." };
+    revalidatePath("/candidate/workspace/salary");
+    return { success: true, data: saved };
+  } catch {
+    return { success: false, error: "AI generation failed. Please try again." };
+  }
+}
+
+export async function deleteSalaryEstimateAction(
+  id: string
+): Promise<WorkspaceActionResult> {
+  const user = await requireAuth();
+  if (!user) return { success: false, error: "You must be signed in." };
+  await deleteSalaryEstimate(id, user.id);
+  revalidatePath("/candidate/workspace/salary");
+  return { success: true };
 }

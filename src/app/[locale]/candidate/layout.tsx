@@ -44,6 +44,7 @@ export default async function CandidateLayout({
         { href: w("/cover-letters"), label: tNav("coverLetters"),  icon: "Mail" },
         { href: w("/interview-prep"),label: tNav("interviewPrep"), icon: "Mic" },
         { href: w("/career-advisor"),label: tNav("careerAdvisor"), icon: "Sparkles" },
+        { href: w("/salary"),        label: tNav("salaryInsights"), icon: "DollarSign" },
       ],
     },
     {

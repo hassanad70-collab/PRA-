@@ -2,17 +2,19 @@ import { redirect } from "@/i18n/navigation";
 
 import { getCurrentUser } from "@/lib/queries/candidate";
 import { getWorkspaceResume } from "@/lib/workspace/resume-context";
-import { listCareerReports } from "@/lib/workspace/queries";
+import { listCareerReports, getSkillsGap } from "@/lib/workspace/queries";
 import { WorkspaceCareerAdvisor } from "@/components/workspace/workspace-career-advisor";
+import { SkillsGapAnalyzer } from "@/components/workspace/skills-gap-analyzer";
 
 export default async function WorkspaceCareerAdvisorPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const user = await getCurrentUser();
   if (!user) redirect({ href: "/login", locale });
 
-  const [resume, savedReports] = await Promise.all([
+  const [resume, savedReports, { gaps: skillGaps, totalMatches }] = await Promise.all([
     getWorkspaceResume(user.id),
     listCareerReports(user.id),
+    getSkillsGap(user.id),
   ]);
 
   return (
@@ -28,6 +30,8 @@ export default async function WorkspaceCareerAdvisorPage({ params }: { params: P
         workspaceResumeText={resume?.raw_text ?? null}
         initialSaved={savedReports}
       />
+
+      <SkillsGapAnalyzer gaps={skillGaps} totalMatches={totalMatches} />
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
-import type { AiCoverLetter, AiInterviewSession, AiCareerReport } from "@/types/database";
+import type { AiCoverLetter, AiInterviewSession, AiCareerReport, AiSalaryEstimate, SkillGapEntry } from "@/types/database";
 
 // ============================================================
 // Cover Letters
@@ -188,6 +188,79 @@ export async function deleteCareerReport(id: string, userId: string): Promise<bo
     .eq("id", id)
     .eq("user_id", userId);
   return !error;
+}
+
+// ============================================================
+// Salary Estimates (Unit E, migration 0045)
+// ============================================================
+
+export async function listSalaryEstimates(userId: string): Promise<AiSalaryEstimate[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("ai_salary_estimates")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+  return (data ?? []) as AiSalaryEstimate[];
+}
+
+export async function createSalaryEstimate(
+  userId: string,
+  payload: Omit<AiSalaryEstimate, "id" | "user_id" | "created_at">
+): Promise<AiSalaryEstimate | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("ai_salary_estimates")
+    .insert({ ...payload, user_id: userId })
+    .select()
+    .single();
+  if (error) { console.error("createSalaryEstimate:", error.message); return null; }
+  return data as AiSalaryEstimate;
+}
+
+export async function deleteSalaryEstimate(id: string, userId: string): Promise<boolean> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("ai_salary_estimates")
+    .delete()
+    .eq("id", id)
+    .eq("user_id", userId);
+  return !error;
+}
+
+// ============================================================
+// Skills Gap (Unit D, derived from job_matches.missing_skills)
+// ============================================================
+
+export async function getSkillsGap(candidateId: string): Promise<{ gaps: SkillGapEntry[]; totalMatches: number }> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("job_matches")
+    .select("missing_skills")
+    .eq("candidate_id", candidateId)
+    .not("missing_skills", "is", null);
+
+  if (!data || data.length === 0) return { gaps: [], totalMatches: 0 };
+
+  const freq: Record<string, number> = {};
+  for (const row of data) {
+    for (const skill of (row.missing_skills as string[]) ?? []) {
+      const key = skill.trim().toLowerCase();
+      if (key) freq[key] = (freq[key] ?? 0) + 1;
+    }
+  }
+
+  const total = data.length;
+  const gaps = Object.entries(freq)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 15)
+    .map(([skill, count]) => ({
+      skill: skill.charAt(0).toUpperCase() + skill.slice(1),
+      count,
+      pct: Math.round((count / total) * 100),
+    }));
+
+  return { gaps, totalMatches: total };
 }
 
 // ============================================================

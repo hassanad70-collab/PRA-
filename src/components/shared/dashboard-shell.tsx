@@ -13,6 +13,7 @@ import {
   Building2,
   Calendar,
   CreditCard,
+  DollarSign,
   FileStack,
   FileText,
   Flag,
@@ -67,6 +68,7 @@ const ICON_MAP = {
   Building2,
   Calendar,
   CreditCard,
+  DollarSign,
   FileStack,
   FileText,
   Flag,
@@ -219,7 +221,7 @@ export function DashboardShell({ navItems, navGroups, user, children, settingsHr
 
   return (
     <div className="flex min-h-screen">
-      <aside className="hidden w-64 shrink-0 border-r border-border bg-card lg:block">{SidebarContent}</aside>
+      <aside className="hidden w-64 shrink-0 border-r border-border bg-card lg:block lg:h-screen lg:sticky lg:top-0 lg:overflow-hidden">{SidebarContent}</aside>
 
       {mobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">

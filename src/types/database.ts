@@ -763,3 +763,29 @@ export interface AiCareerReport {
   created_at: string;
   updated_at: string;
 }
+
+/** Salary estimate record (Unit E, migration 0045) */
+export interface AiSalaryEstimate {
+  id: string;
+  user_id: string;
+  target_role: string;
+  location: string | null;
+  years_experience: number | null;
+  result: {
+    min: number;
+    median: number;
+    max: number;
+    currency: string;
+    context: string;
+    market_notes: string[];
+    disclaimer: string;
+  };
+  created_at: string;
+}
+
+/** Aggregated skills gap entry (Unit D, derived from job_matches.missing_skills) */
+export interface SkillGapEntry {
+  skill: string;
+  count: number;
+  pct: number;
+}
