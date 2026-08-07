@@ -42,8 +42,9 @@ export default async function CandidateLayout({
         { href: w("/studio"),        label: tNav("resumeStudio"),  icon: "PenLine" },
         { href: w("/ats-checker"),   label: tNav("atsChecker"),    icon: "Target" },
         { href: w("/cover-letters"), label: tNav("coverLetters"),  icon: "Mail" },
-        { href: w("/interview-prep"),label: tNav("interviewPrep"), icon: "Mic" },
-        { href: w("/career-advisor"),  label: tNav("careerAdvisor"),     icon: "Sparkles" },
+        { href: w("/interview-prep"),    label: tNav("interviewPrep"),     icon: "Mic" },
+        { href: w("/interview-center"), label: tNav("interviewCenter"),   icon: "Brain" },
+        { href: w("/career-advisor"),   label: tNav("careerAdvisor"),     icon: "Sparkles" },
         { href: w("/salary"),          label: tNav("salaryInsights"),    icon: "DollarSign" },
         { href: w("/linkedin"),        label: tNav("linkedinOptimizer"), icon: "Share2" },
       ],
@@ -51,10 +52,11 @@ export default async function CandidateLayout({
     {
       label: tNav("jobsGroup"),
       items: [
-        { href: p("/jobs"),         label: tCommon("browseJobs"),   icon: "Search" },
-        { href: p("/saved-jobs"),   label: tNav("savedJobs"),       icon: "Bookmark" },
-        { href: p("/applications"), label: tNav("applications"),    icon: "Briefcase" },
-        { href: p("/interviews"),   label: tNav("interviews"),      icon: "Calendar" },
+        { href: p("/jobs"),              label: tCommon("browseJobs"),        icon: "Search" },
+        { href: p("/saved-jobs"),        label: tNav("savedJobs"),            icon: "Bookmark" },
+        { href: p("/applications"),      label: tNav("applications"),         icon: "Briefcase" },
+        { href: w("/app-intelligence"),  label: tNav("appIntelligence"),      icon: "BarChart2" },
+        { href: p("/interviews"),        label: tNav("interviews"),           icon: "Calendar" },
       ],
     },
     {

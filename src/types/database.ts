@@ -819,3 +819,78 @@ export interface AiLinkedInSuggestion {
   };
   created_at: string;
 }
+
+// ============================================================
+// Candidate Intelligence Platform (v1.4, migration 0047)
+// ============================================================
+
+export type MockInterviewType = "hr" | "technical" | "behavioral" | "star" | "case_study" | "company";
+
+export interface MockInterviewEvaluation {
+  score: number;
+  communication: number;
+  technical: number;
+  confidence: number;
+  grammar: number;
+  feedback: string;
+}
+
+export interface MockInterviewMessage {
+  role: "assistant" | "user";
+  content: string;
+  evaluation?: MockInterviewEvaluation;
+}
+
+export interface MockInterviewScores {
+  overall: number;
+  communication: number;
+  confidence: number;
+  technical: number;
+  grammar: number;
+  leadership: number;
+}
+
+export interface MockInterviewSession {
+  id: string;
+  user_id: string;
+  interview_type: MockInterviewType;
+  target_role: string;
+  company_name: string | null;
+  job_description: string | null;
+  experience_level: string | null;
+  messages: MockInterviewMessage[];
+  scores: MockInterviewScores | null;
+  strengths: string[] | null;
+  weaknesses: string[] | null;
+  coaching_tips: string[] | null;
+  ai_summary: string | null;
+  readiness_score: number | null;
+  question_count: number;
+  status: "active" | "completed";
+  created_at: string;
+  updated_at: string;
+}
+
+/** Aggregated application metrics for the intelligence dashboard */
+export interface ApplicationAnalytics {
+  totals: {
+    applications: number;
+    screened: number;
+    interviewed: number;
+    offered: number;
+    hired: number;
+    rejected: number;
+  };
+  rates: {
+    interviewRate: number;
+    offerRate: number;
+    successRate: number;
+    rejectionRate: number;
+  };
+  avgAtsScore: number | null;
+  coverLetterUsage: { used: number; total: number };
+  funnel: Array<{ stage: string; count: number; pct: number }>;
+  atsHistory: Array<{ date: string; score: number; resumeName: string }>;
+  weeklyApplications: number;
+  prevWeekApplications: number;
+}

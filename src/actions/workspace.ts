@@ -11,6 +11,8 @@ import { getSalaryEstimate, type SalaryInput } from "@/lib/ai/salary-insights";
 import { generatePortfolioItemDescription } from "@/lib/ai/portfolio-ai";
 import { optimizeLinkedInText, type LinkedInOptimizerInput } from "@/lib/ai/linkedin-optimizer";
 import { runAIScreening, type ScreeningResultAI } from "@/lib/ai/screening";
+import { generateApplicationInsights, estimateWinProbability, type AppInsightsResult, type WinProbabilityResult } from "@/lib/ai/application-insights";
+import { generateFirstQuestion } from "@/lib/ai/mock-interview";
 import { saveWorkspaceResume, deleteWorkspaceResume } from "@/lib/workspace/resume-context";
 import {
   createCoverLetter,
@@ -31,11 +33,15 @@ import {
   updatePortfolioSettings,
   createLinkedInSuggestion,
   deleteLinkedInSuggestion,
+  createMockInterviewSession,
+  updateMockInterviewSession,
+  deleteMockInterviewSession,
 } from "@/lib/workspace/queries";
+import { getApplicationAnalytics } from "@/lib/workspace/application-analytics";
 import { getLatestAtsScore } from "@/lib/queries/candidate";
 import { rateLimitByIp } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
-import type { AiCoverLetter, AiInterviewSession, AiCareerReport, AiSalaryEstimate, PortfolioItem, AiLinkedInSuggestion, ParsedResumeData } from "@/types/database";
+import type { AiCoverLetter, AiInterviewSession, AiCareerReport, AiSalaryEstimate, PortfolioItem, AiLinkedInSuggestion, ParsedResumeData, MockInterviewSession, MockInterviewType, MockInterviewMessage, MockInterviewScores, ApplicationAnalytics } from "@/types/database";
 
 export interface WorkspaceActionResult<T = void> {
   success: boolean;
@@ -558,4 +564,163 @@ export async function runRecruiterSimulationAction(
   );
 
   return { success: true, data: result };
+}
+
+// ============================================================
+// Application Intelligence (v1.4)
+// ============================================================
+
+export async function getApplicationAnalyticsAction(): Promise<WorkspaceActionResult<ApplicationAnalytics>> {
+  const user = await requireAuth();
+  if (!user) return { success: false, error: "You must be signed in." };
+  const analytics = await getApplicationAnalytics(user.id);
+  return { success: true, data: analytics };
+}
+
+export async function generateApplicationInsightsAction(
+  recentRoles: string[]
+): Promise<WorkspaceActionResult<AppInsightsResult>> {
+  const user = await requireAuth();
+  if (!user) return { success: false, error: "You must be signed in." };
+  const analytics = await getApplicationAnalytics(user.id);
+  const result = await generateApplicationInsights(analytics, recentRoles);
+  return { success: true, data: result };
+}
+
+export async function estimateWinProbabilityAction(
+  applicationId: string,
+  atsScore: number | null,
+  matchScore: number | null,
+  role: string,
+  currentStatus: string,
+): Promise<WorkspaceActionResult<WinProbabilityResult>> {
+  const user = await requireAuth();
+  if (!user) return { success: false, error: "You must be signed in." };
+  void applicationId;
+  const result = await estimateWinProbability(atsScore, matchScore, role, currentStatus);
+  return { success: true, data: result };
+}
+
+// ============================================================
+// Mock Interview Sessions (v1.4)
+// ============================================================
+
+export async function generateFirstQuestionAction(
+  type: MockInterviewType,
+  targetRole: string,
+  company?: string,
+  jobDescription?: string,
+  xpLevel?: string,
+): Promise<WorkspaceActionResult<string>> {
+  const user = await requireAuth();
+  if (!user) return { success: false, error: "You must be signed in." };
+  const question = await generateFirstQuestion(type, targetRole, company, jobDescription, xpLevel);
+  return { success: true, data: question };
+}
+
+export async function startMockInterviewAction(setup: {
+  interview_type: MockInterviewType;
+  target_role: string;
+  company_name?: string;
+  job_description?: string;
+  experience_level?: string;
+  firstMessage: string;
+}): Promise<WorkspaceActionResult<MockInterviewSession>> {
+  const user = await requireAuth();
+  if (!user) return { success: false, error: "You must be signed in." };
+
+  const firstMsg: MockInterviewMessage = { role: "assistant", content: setup.firstMessage };
+
+  const session = await createMockInterviewSession(user.id, {
+    interview_type: setup.interview_type,
+    target_role: setup.target_role,
+    company_name: setup.company_name ?? null,
+    job_description: setup.job_description ?? null,
+    experience_level: setup.experience_level ?? null,
+    messages: [firstMsg],
+    scores: null,
+    strengths: null,
+    weaknesses: null,
+    coaching_tips: null,
+    ai_summary: null,
+    readiness_score: null,
+    question_count: 0,
+    status: "active",
+  });
+
+  if (!session) return { success: false, error: "Failed to create interview session." };
+  revalidatePath("/candidate/workspace/interview-center", "page");
+  return { success: true, data: session };
+}
+
+export async function appendInterviewTurnAction(
+  sessionId: string,
+  userMessage: string,
+  assistantMessage: string,
+  evaluation: MockInterviewMessage["evaluation"] | null,
+): Promise<WorkspaceActionResult> {
+  const user = await requireAuth();
+  if (!user) return { success: false, error: "You must be signed in." };
+
+  const supabase = await createClient();
+  const { data: session } = await supabase
+    .from("ai_mock_interview_sessions")
+    .select("messages, question_count")
+    .eq("id", sessionId)
+    .eq("user_id", user.id)
+    .single();
+
+  if (!session) return { success: false, error: "Session not found." };
+
+  const userMsg: MockInterviewMessage = {
+    role: "user",
+    content: userMessage,
+    ...(evaluation ? { evaluation } : {}),
+  };
+  const assistantMsg: MockInterviewMessage = { role: "assistant", content: assistantMessage };
+
+  const updatedMessages = [...(session.messages as MockInterviewMessage[]), userMsg, assistantMsg];
+
+  const ok = await updateMockInterviewSession(sessionId, user.id, {
+    messages: updatedMessages,
+    question_count: (session.question_count as number) + 1,
+  });
+
+  return ok ? { success: true } : { success: false, error: "Failed to save turn." };
+}
+
+export async function completeMockInterviewAction(
+  sessionId: string,
+  report: {
+    scores: MockInterviewScores;
+    strengths: string[];
+    weaknesses: string[];
+    coaching_tips: string[];
+    ai_summary: string;
+    readiness_score: number;
+  },
+): Promise<WorkspaceActionResult> {
+  const user = await requireAuth();
+  if (!user) return { success: false, error: "You must be signed in." };
+
+  const ok = await updateMockInterviewSession(sessionId, user.id, {
+    scores: report.scores,
+    strengths: report.strengths,
+    weaknesses: report.weaknesses,
+    coaching_tips: report.coaching_tips,
+    ai_summary: report.ai_summary,
+    readiness_score: report.readiness_score,
+    status: "completed",
+  });
+
+  revalidatePath("/candidate/workspace/interview-center", "page");
+  return ok ? { success: true } : { success: false, error: "Failed to complete session." };
+}
+
+export async function deleteMockInterviewAction(sessionId: string): Promise<WorkspaceActionResult> {
+  const user = await requireAuth();
+  if (!user) return { success: false, error: "You must be signed in." };
+  const ok = await deleteMockInterviewSession(sessionId, user.id);
+  revalidatePath("/candidate/workspace/interview-center", "page");
+  return ok ? { success: true } : { success: false, error: "Failed to delete session." };
 }

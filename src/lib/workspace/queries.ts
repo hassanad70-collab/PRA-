@@ -1,7 +1,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
-import type { AiCoverLetter, AiInterviewSession, AiCareerReport, AiSalaryEstimate, SkillGapEntry, PortfolioItem, AiLinkedInSuggestion } from "@/types/database";
+import type { AiCoverLetter, AiInterviewSession, AiCareerReport, AiSalaryEstimate, SkillGapEntry, PortfolioItem, AiLinkedInSuggestion, MockInterviewSession } from "@/types/database";
 
 // ============================================================
 // Cover Letters
@@ -388,6 +388,69 @@ export async function deleteLinkedInSuggestion(id: string, userId: string): Prom
   const supabase = await createClient();
   const { error } = await supabase
     .from("ai_linkedin_suggestions")
+    .delete()
+    .eq("id", id)
+    .eq("user_id", userId);
+  return !error;
+}
+
+// ============================================================
+// Mock Interview Sessions (v1.4, migration 0047)
+// ============================================================
+
+export async function listMockInterviewSessions(userId: string): Promise<MockInterviewSession[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("ai_mock_interview_sessions")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+  return (data ?? []) as MockInterviewSession[];
+}
+
+export async function getMockInterviewSession(id: string, userId: string): Promise<MockInterviewSession | null> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("ai_mock_interview_sessions")
+    .select("*")
+    .eq("id", id)
+    .eq("user_id", userId)
+    .single();
+  return (data as MockInterviewSession) ?? null;
+}
+
+export async function createMockInterviewSession(
+  userId: string,
+  payload: Omit<MockInterviewSession, "id" | "user_id" | "created_at" | "updated_at">
+): Promise<MockInterviewSession | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("ai_mock_interview_sessions")
+    .insert({ ...payload, user_id: userId })
+    .select()
+    .single();
+  if (error) { console.error("createMockInterviewSession:", error.message); return null; }
+  return data as MockInterviewSession;
+}
+
+export async function updateMockInterviewSession(
+  id: string,
+  userId: string,
+  updates: Partial<Omit<MockInterviewSession, "id" | "user_id" | "created_at">>
+): Promise<boolean> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("ai_mock_interview_sessions")
+    .update({ ...updates, updated_at: new Date().toISOString() })
+    .eq("id", id)
+    .eq("user_id", userId);
+  return !error;
+}
+
+export async function deleteMockInterviewSession(id: string, userId: string): Promise<boolean> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("ai_mock_interview_sessions")
     .delete()
     .eq("id", id)
     .eq("user_id", userId);

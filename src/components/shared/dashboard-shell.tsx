@@ -5,10 +5,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Activity,
+  BarChart2,
   BarChart3,
   Bell,
   Bookmark,
   Bot,
+  Brain,
   Briefcase,
   Building2,
   Calendar,
@@ -62,10 +64,12 @@ import { cn, initials } from "@/lib/utils";
 // boundary, via this registry.
 const ICON_MAP = {
   Activity,
+  BarChart2,
   BarChart3,
   Bell,
   Bookmark,
   Bot,
+  Brain,
   Briefcase,
   Building2,
   Calendar,
