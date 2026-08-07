@@ -43,8 +43,9 @@ export default async function CandidateLayout({
         { href: w("/ats-checker"),   label: tNav("atsChecker"),    icon: "Target" },
         { href: w("/cover-letters"), label: tNav("coverLetters"),  icon: "Mail" },
         { href: w("/interview-prep"),label: tNav("interviewPrep"), icon: "Mic" },
-        { href: w("/career-advisor"),label: tNav("careerAdvisor"), icon: "Sparkles" },
-        { href: w("/salary"),        label: tNav("salaryInsights"), icon: "DollarSign" },
+        { href: w("/career-advisor"),  label: tNav("careerAdvisor"),     icon: "Sparkles" },
+        { href: w("/salary"),          label: tNav("salaryInsights"),    icon: "DollarSign" },
+        { href: w("/linkedin"),        label: tNav("linkedinOptimizer"), icon: "Share2" },
       ],
     },
     {
@@ -59,6 +60,7 @@ export default async function CandidateLayout({
     {
       label: tNav("personalGroup"),
       items: [
+        { href: w("/portfolio"),    label: tNav("portfolio"),       icon: "Globe" },
         { href: w("/documents"),    label: tNav("documents"),       icon: "FolderOpen" },
         { href: w("/favorites"),    label: tNav("favorites"),       icon: "Star" },
         { href: w("/analytics"),    label: tNav("careerAnalytics"), icon: "LineChart" },

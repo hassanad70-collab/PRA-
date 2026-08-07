@@ -789,3 +789,33 @@ export interface SkillGapEntry {
   count: number;
   pct: number;
 }
+
+/** Portfolio item (Unit F, migration 0046) */
+export interface PortfolioItem {
+  id: string;
+  candidate_id: string;
+  title: string;
+  description: string | null;
+  file_url: string | null;
+  link_url: string | null;
+  type: "project" | "publication" | "design" | "other";
+  technologies: string[];
+  thumbnail_url: string | null;
+  display_order: number;
+  created_at: string;
+}
+
+/** LinkedIn optimizer suggestion (Unit F, migration 0046) */
+export interface AiLinkedInSuggestion {
+  id: string;
+  user_id: string;
+  target_type: "about" | "headline" | "experience" | "skills_summary";
+  original_text: string;
+  target_role: string | null;
+  result_json: {
+    improved: string;
+    changes: string[];
+    keywords: string[];
+  };
+  created_at: string;
+}

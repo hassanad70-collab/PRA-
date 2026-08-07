@@ -1,7 +1,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
-import type { AiCoverLetter, AiInterviewSession, AiCareerReport, AiSalaryEstimate, SkillGapEntry } from "@/types/database";
+import type { AiCoverLetter, AiInterviewSession, AiCareerReport, AiSalaryEstimate, SkillGapEntry, PortfolioItem, AiLinkedInSuggestion } from "@/types/database";
 
 // ============================================================
 // Cover Letters
@@ -261,6 +261,137 @@ export async function getSkillsGap(candidateId: string): Promise<{ gaps: SkillGa
     }));
 
   return { gaps, totalMatches: total };
+}
+
+// ============================================================
+// Portfolio (Unit F)
+// ============================================================
+
+export async function listPortfolioItems(candidateId: string): Promise<PortfolioItem[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("portfolio_items")
+    .select("*")
+    .eq("candidate_id", candidateId)
+    .order("display_order", { ascending: true })
+    .order("created_at", { ascending: true });
+  return (data ?? []) as PortfolioItem[];
+}
+
+export async function upsertPortfolioItem(
+  candidateId: string,
+  item: Omit<PortfolioItem, "id" | "candidate_id" | "created_at"> & { id?: string }
+): Promise<PortfolioItem | null> {
+  const supabase = await createClient();
+  const payload = { ...item, candidate_id: candidateId };
+  const { data, error } = await supabase
+    .from("portfolio_items")
+    .upsert(payload, { onConflict: "id" })
+    .select()
+    .single();
+  if (error) { console.error("upsertPortfolioItem:", error.message); return null; }
+  return data as PortfolioItem;
+}
+
+export async function deletePortfolioItem(id: string, candidateId: string): Promise<boolean> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("portfolio_items")
+    .delete()
+    .eq("id", id)
+    .eq("candidate_id", candidateId);
+  return !error;
+}
+
+export async function getPortfolioSettings(candidateId: string): Promise<{ isPublic: boolean; slug: string | null }> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("candidates")
+    .select("portfolio_is_public, portfolio_slug")
+    .eq("id", candidateId)
+    .single();
+  return { isPublic: data?.portfolio_is_public ?? false, slug: data?.portfolio_slug ?? null };
+}
+
+export async function updatePortfolioSettings(
+  candidateId: string,
+  settings: { isPublic: boolean; slug?: string }
+): Promise<boolean> {
+  const supabase = await createClient();
+  const update: Record<string, unknown> = { portfolio_is_public: settings.isPublic };
+  if (settings.slug !== undefined) update.portfolio_slug = settings.slug;
+  const { error } = await supabase
+    .from("candidates")
+    .update(update)
+    .eq("id", candidateId);
+  return !error;
+}
+
+export async function getPublicPortfolio(slug: string): Promise<{
+  candidateName: string;
+  headline: string | null;
+  items: PortfolioItem[];
+} | null> {
+  const supabase = await createClient();
+  const { data: candidate } = await supabase
+    .from("candidates")
+    .select("id, headline, portfolio_is_public, profiles!inner(full_name)")
+    .eq("portfolio_slug", slug)
+    .eq("portfolio_is_public", true)
+    .single();
+
+  if (!candidate) return null;
+
+  const profile = candidate.profiles as unknown as { full_name: string };
+  const { data: items } = await supabase
+    .from("portfolio_items")
+    .select("*")
+    .eq("candidate_id", candidate.id)
+    .order("display_order", { ascending: true });
+
+  return {
+    candidateName: profile.full_name,
+    headline: candidate.headline,
+    items: (items ?? []) as PortfolioItem[],
+  };
+}
+
+// ============================================================
+// LinkedIn Optimizer (Unit F)
+// ============================================================
+
+export async function listLinkedInSuggestions(userId: string): Promise<AiLinkedInSuggestion[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("ai_linkedin_suggestions")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+  return (data ?? []) as AiLinkedInSuggestion[];
+}
+
+export async function createLinkedInSuggestion(
+  userId: string,
+  payload: Omit<AiLinkedInSuggestion, "id" | "user_id" | "created_at">
+): Promise<AiLinkedInSuggestion | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("ai_linkedin_suggestions")
+    .insert({ ...payload, user_id: userId })
+    .select()
+    .single();
+  if (error) { console.error("createLinkedInSuggestion:", error.message); return null; }
+  return data as AiLinkedInSuggestion;
+}
+
+export async function deleteLinkedInSuggestion(id: string, userId: string): Promise<boolean> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("ai_linkedin_suggestions")
+    .delete()
+    .eq("id", id)
+    .eq("user_id", userId);
+  return !error;
 }
 
 // ============================================================

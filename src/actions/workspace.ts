@@ -8,6 +8,9 @@ import { generateCoverLetter, type CoverLetterInput, type CoverLetterResult } fr
 import { generateGuestInterviewPrep, type GuestInterviewInput, type GuestInterviewResult } from "@/lib/ai/guest-interview-prep";
 import { generateGuestCareerAdvice, type GuestCareerInput, type GuestCareerResult } from "@/lib/ai/guest-career-advisor";
 import { getSalaryEstimate, type SalaryInput } from "@/lib/ai/salary-insights";
+import { generatePortfolioItemDescription } from "@/lib/ai/portfolio-ai";
+import { optimizeLinkedInText, type LinkedInOptimizerInput } from "@/lib/ai/linkedin-optimizer";
+import { runAIScreening, type ScreeningResultAI } from "@/lib/ai/screening";
 import { saveWorkspaceResume, deleteWorkspaceResume } from "@/lib/workspace/resume-context";
 import {
   createCoverLetter,
@@ -22,10 +25,17 @@ import {
   updateCoverLetterTitle,
   createSalaryEstimate,
   deleteSalaryEstimate,
+  upsertPortfolioItem,
+  deletePortfolioItem,
+  getPortfolioSettings,
+  updatePortfolioSettings,
+  createLinkedInSuggestion,
+  deleteLinkedInSuggestion,
 } from "@/lib/workspace/queries";
+import { getLatestAtsScore } from "@/lib/queries/candidate";
 import { rateLimitByIp } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
-import type { AiCoverLetter, AiInterviewSession, AiCareerReport, AiSalaryEstimate } from "@/types/database";
+import type { AiCoverLetter, AiInterviewSession, AiCareerReport, AiSalaryEstimate, PortfolioItem, AiLinkedInSuggestion, ParsedResumeData } from "@/types/database";
 
 export interface WorkspaceActionResult<T = void> {
   success: boolean;
@@ -384,4 +394,168 @@ export async function deleteSalaryEstimateAction(
   await deleteSalaryEstimate(id, user.id);
   revalidatePath("/candidate/workspace/salary");
   return { success: true };
+}
+
+// ============================================================
+// Portfolio (Unit F)
+// ============================================================
+
+export async function savePortfolioItemAction(
+  item: Omit<PortfolioItem, "id" | "candidate_id" | "created_at"> & { id?: string }
+): Promise<WorkspaceActionResult<PortfolioItem>> {
+  const user = await requireAuth();
+  if (!user) return { success: false, error: "You must be signed in." };
+  if (!item.title?.trim()) return { success: false, error: "Title is required." };
+
+  const saved = await upsertPortfolioItem(user.id, item);
+  if (!saved) return { success: false, error: "Failed to save portfolio item." };
+  revalidatePath("/candidate/workspace/portfolio");
+  return { success: true, data: saved };
+}
+
+export async function deletePortfolioItemAction(id: string): Promise<WorkspaceActionResult> {
+  const user = await requireAuth();
+  if (!user) return { success: false, error: "You must be signed in." };
+  await deletePortfolioItem(id, user.id);
+  revalidatePath("/candidate/workspace/portfolio");
+  return { success: true };
+}
+
+export async function generatePortfolioDescriptionAction(
+  title: string,
+  technologies: string[],
+  type: string
+): Promise<WorkspaceActionResult<string>> {
+  const user = await requireAuth();
+  if (!user) return { success: false, error: "You must be signed in." };
+
+  const rl = await rateLimitByIp("portfolio-ai", 30, 60_000);
+  if (!rl.allowed) return { success: false, error: "Too many requests. Please wait a moment." };
+
+  const description = await generatePortfolioItemDescription(title, technologies, type);
+  return { success: true, data: description };
+}
+
+export async function updatePortfolioVisibilityAction(
+  isPublic: boolean
+): Promise<WorkspaceActionResult<{ slug: string | null }>> {
+  const user = await requireAuth();
+  if (!user) return { success: false, error: "You must be signed in." };
+
+  const current = await getPortfolioSettings(user.id);
+
+  let slug = current.slug;
+  if (isPublic && !slug) {
+    const supabase = await createClient();
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("full_name")
+      .eq("id", user.id)
+      .single();
+    const baseName = (profile?.full_name ?? "portfolio")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    const suffix = Math.random().toString(36).slice(2, 8);
+    slug = `${baseName}-${suffix}`;
+  }
+
+  await updatePortfolioSettings(user.id, { isPublic, slug: slug ?? undefined });
+  revalidatePath("/candidate/workspace/portfolio");
+  return { success: true, data: { slug: isPublic ? slug : current.slug } };
+}
+
+// ============================================================
+// LinkedIn Optimizer (Unit F)
+// ============================================================
+
+export async function generateLinkedInOptimizationAction(
+  input: LinkedInOptimizerInput
+): Promise<WorkspaceActionResult<AiLinkedInSuggestion>> {
+  const user = await requireAuth();
+  if (!user) return { success: false, error: "You must be signed in." };
+
+  const rl = await rateLimitByIp("linkedin-optimizer", 20, 60_000);
+  if (!rl.allowed) return { success: false, error: "Too many requests. Please wait a moment." };
+
+  if (!input.originalText?.trim() || input.originalText.trim().length < 10) {
+    return { success: false, error: "Please paste your LinkedIn text (at least 10 characters)." };
+  }
+
+  try {
+    const result = await optimizeLinkedInText(input);
+    const saved = await createLinkedInSuggestion(user.id, {
+      target_type: input.targetType,
+      original_text: input.originalText,
+      target_role: input.targetRole ?? null,
+      result_json: result,
+    });
+    if (!saved) return { success: false, error: "Failed to save suggestion." };
+    revalidatePath("/candidate/workspace/linkedin");
+    return { success: true, data: saved };
+  } catch {
+    return { success: false, error: "AI optimization failed. Please try again." };
+  }
+}
+
+export async function deleteLinkedInSuggestionAction(id: string): Promise<WorkspaceActionResult> {
+  const user = await requireAuth();
+  if (!user) return { success: false, error: "You must be signed in." };
+  await deleteLinkedInSuggestion(id, user.id);
+  revalidatePath("/candidate/workspace/linkedin");
+  return { success: true };
+}
+
+// ============================================================
+// Recruiter View Simulation (Unit F)
+// ============================================================
+
+export async function runRecruiterSimulationAction(
+  jobDescription: string
+): Promise<WorkspaceActionResult<ScreeningResultAI>> {
+  const user = await requireAuth();
+  if (!user) return { success: false, error: "You must be signed in." };
+
+  if (!jobDescription.trim() || jobDescription.trim().length < 50) {
+    return { success: false, error: "Please provide a job description (at least 50 characters)." };
+  }
+
+  const supabase = await createClient();
+
+  const atsScore = await getLatestAtsScore(user.id);
+  if (!atsScore) {
+    return { success: false, error: "Upload and score your resume on the ATS Checker page first." };
+  }
+
+  const { data: resume } = await supabase
+    .from("resumes")
+    .select("parsed_data")
+    .eq("id", atsScore.resume_id)
+    .single();
+
+  const parsedData = (resume?.parsed_data ?? {}) as ParsedResumeData;
+
+  const { data: candidate } = await supabase
+    .from("candidates")
+    .select("years_of_experience")
+    .eq("id", user.id)
+    .single();
+  const yearsExp = Number(candidate?.years_of_experience ?? 0);
+
+  const result = await runAIScreening(
+    {
+      title: "Target Position",
+      description: jobDescription,
+      requirements: null,
+      required_skills: [],
+      nice_to_have_skills: null,
+      experience_level: "mid",
+      min_experience_years: 0,
+      education_requirement: null,
+    },
+    parsedData,
+    yearsExp
+  );
+
+  return { success: true, data: result };
 }

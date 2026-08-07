@@ -9,6 +9,7 @@ import { RewriteOptimizePanel } from "@/components/candidate/resume-intelligence
 import { SuggestionHistoryList } from "@/components/candidate/resume-intelligence/suggestion-history-list";
 import { ResumeUpload } from "@/components/candidate/resume-upload";
 import { ResumeHeatmap } from "@/components/workspace/resume-heatmap";
+import { RecruiterSimClient } from "@/components/workspace/recruiter-sim-client";
 import { getCandidateFullProfile, getCurrentUser, getLatestAtsScore } from "@/lib/queries/candidate";
 import { getSuggestionHistory } from "@/lib/resume-intelligence/suggestion-events";
 import { runStructuralChecks } from "@/lib/resume-intelligence/structural-checks";
@@ -80,6 +81,8 @@ export default async function WorkspaceAtsCheckerPage({ params }: { params: Prom
           atsScore={atsScore}
         />
       )}
+
+      <RecruiterSimClient hasResume={!!atsScore} />
 
       <SuggestionHistoryList events={suggestionHistory} />
     </div>
