@@ -894,3 +894,78 @@ export interface ApplicationAnalytics {
   weeklyApplications: number;
   prevWeekApplications: number;
 }
+
+// ============================================================
+// Employer Intelligence Platform (v1.5, migration 0048)
+// ============================================================
+
+export interface SavedCandidate {
+  id: string;
+  recruiter_id: string;
+  candidate_id: string;
+  notes: string | null;
+  tags: string[];
+  created_at: string;
+}
+
+export interface SavedCandidateWithProfile extends SavedCandidate {
+  candidate: Candidate & { profile: Profile };
+}
+
+export interface CompanyProfile {
+  id: string;
+  company_id: string;
+  about: string | null;
+  culture: string | null;
+  banner_url: string | null;
+  website: string | null;
+  headquarters: string | null;
+  company_size: string | null;
+  founded_year: number | null;
+  benefits: string[];
+  social_links: {
+    linkedin?: string;
+    twitter?: string;
+    github?: string;
+    instagram?: string;
+  };
+  tech_stack: string[];
+  is_published: boolean;
+  updated_at: string;
+}
+
+export interface RecruiterCandidateLabel {
+  id: string;
+  recruiter_id: string;
+  candidate_id: string;
+  label: string;
+  color: string;
+  created_at: string;
+}
+
+export interface CandidateSearchResult {
+  id: string;
+  profile: Pick<Profile, "id" | "full_name" | "email">;
+  current_position: string | null;
+  current_company: string | null;
+  years_of_experience: number;
+  location: string | null;
+  is_open_to_work: boolean;
+  skills: string[];
+  saved: boolean;
+  labels: RecruiterCandidateLabel[];
+}
+
+export interface JobMatchWithCandidate {
+  id: string;
+  job_id: string;
+  candidate_id: string;
+  match_score: number;
+  ai_summary: string | null;
+  strengths: string[] | null;
+  weaknesses: string[] | null;
+  missing_skills: string[] | null;
+  interview_probability: number | null;
+  created_at: string;
+  candidate: Candidate & { profile: Profile };
+}

@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 
 import { redirect } from "@/i18n/navigation";
 
-import { DashboardShell, type NavItem } from "@/components/shared/dashboard-shell";
+import { DashboardShell, type NavGroup } from "@/components/shared/dashboard-shell";
 import { LanguageSwitcher } from "@/components/shared/language-switcher";
 import { CopilotDialog } from "@/components/recruiter/copilot-dialog";
 import { getCurrentUser } from "@/lib/queries/candidate";
@@ -27,20 +27,55 @@ export default async function RecruiterLayout({
     getTranslations("Recruiter.Copilot"),
   ]);
 
-  // DashboardShell renders these with plain next/link (shared with the
-  // non-localized admin portal), so hrefs must carry the locale prefix
-  // themselves rather than relying on locale-aware Link prefixing.
-  const navItems: NavItem[] = [
-    { href: `/${locale}/recruiter/dashboard`, label: tNav("dashboard"), icon: "LayoutDashboard" },
-    { href: `/${locale}/recruiter/jobs`, label: tNav("jobs"), icon: "Briefcase" },
-    { href: `/${locale}/recruiter/interviews`, label: tNav("interviews"), icon: "Calendar" },
-    { href: `/${locale}/recruiter/talent-pool`, label: tNav("talentPool"), icon: "Users" },
-    { href: `/${locale}/recruiter/analytics`, label: tNav("analytics"), icon: "BarChart3" },
+  const p = (path: string) => `/${locale}/recruiter/${path}`;
+
+  const navGroups: NavGroup[] = [
+    {
+      label: tNav("groupWorkspace"),
+      items: [
+        { href: p("dashboard"), label: tNav("dashboard"), icon: "LayoutDashboard" },
+        { href: p("analytics"), label: tNav("analytics"), icon: "BarChart3" },
+        { href: p("ai-assistant"), label: tNav("aiAssistant"), icon: "Bot" },
+      ],
+    },
+    {
+      label: tNav("groupRecruitment"),
+      items: [
+        { href: p("jobs"), label: tNav("jobs"), icon: "Briefcase" },
+        { href: p("pipeline"), label: tNav("pipeline"), icon: "Activity" },
+        { href: p("interviews"), label: tNav("interviews"), icon: "Calendar" },
+      ],
+    },
+    {
+      label: tNav("groupTalent"),
+      items: [
+        { href: p("candidate-search"), label: tNav("candidateSearch"), icon: "Search" },
+        { href: p("talent-pool"), label: tNav("talentPool"), icon: "Users" },
+        { href: p("saved-candidates"), label: tNav("savedCandidates"), icon: "Bookmark" },
+      ],
+    },
+    {
+      label: tNav("groupIntelligence"),
+      items: [
+        { href: p("jobs"), label: tNav("aiMatching"), icon: "Target" },
+        { href: p("resume-intelligence"), label: tNav("resumeIntelligence"), icon: "FileStack" },
+        { href: p("jobs/ai-description"), label: tNav("aiJobDescription"), icon: "Sparkles" },
+      ],
+    },
+    {
+      label: tNav("groupCompany"),
+      items: [
+        { href: p("company-profile"), label: tNav("companyProfile"), icon: "Building2" },
+        { href: p("hiring-team"), label: tNav("hiringTeam"), icon: "UserCog" },
+        { href: p("team"), label: tNav("team"), icon: "Share2" },
+        { href: p("settings"), label: tNav("settings"), icon: "Settings" },
+      ],
+    },
   ];
 
   return (
     <DashboardShell
-      navItems={navItems}
+      navGroups={navGroups}
       user={{ full_name: user.full_name, email: user.email, role: "recruiter" }}
       settingsHref={`/${locale}/recruiter/settings`}
       labels={{ settings: tNav("settings"), signOut: tNav("signOut"), openMenu: tNav("openMenu") }}
