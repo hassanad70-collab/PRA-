@@ -3,12 +3,17 @@ import { getTranslations } from "next-intl/server";
 import { Link, redirect } from "@/i18n/navigation";
 import {
   ArrowUpRight,
+  BarChart2,
   Bot,
+  Brain,
   Briefcase,
   Calendar,
   CheckCircle2,
   Clock,
   FileText,
+  Mic,
+  PenLine,
+  Search,
   Sparkles,
   Star,
   Target,
@@ -433,10 +438,14 @@ export default async function CandidateDashboardPage({ params }: { params: Promi
         <CardContent>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              { href: "/candidate/workspace/assistant", icon: Bot, label: "Ask AI Advisor", color: "text-primary bg-primary/10" },
-              { href: "/candidate/workspace/cover-letters", icon: FileText, label: "Write Cover Letter", color: "text-blue-500 bg-blue-500/10" },
-              { href: "/candidate/workspace/ats-checker", icon: Target, label: "Check ATS Score", color: "text-purple-500 bg-purple-500/10" },
-              { href: "/candidate/workspace/interview-prep", icon: Calendar, label: "Practice Interview", color: "text-emerald-500 bg-emerald-500/10" },
+              { href: "/candidate/workspace/assistant",       icon: Bot,        label: "AI Assistant",            color: "text-primary bg-primary/10" },
+              { href: "/candidate/workspace/studio",          icon: PenLine,    label: "Resume Studio",           color: "text-violet-500 bg-violet-500/10" },
+              { href: "/candidate/workspace/ats-checker",     icon: Target,     label: "ATS Resume Check",        color: "text-orange-500 bg-orange-500/10" },
+              { href: "/candidate/workspace/cover-letters",   icon: FileText,   label: "Cover Letters",           color: "text-blue-500 bg-blue-500/10" },
+              { href: "/candidate/workspace/interview-prep",  icon: Mic,        label: "Interview Prep",          color: "text-emerald-500 bg-emerald-500/10" },
+              { href: "/candidate/workspace/interview-center",icon: Brain,      label: "Interview Intelligence",  color: "text-indigo-500 bg-indigo-500/10" },
+              { href: "/candidate/workspace/app-intelligence",icon: BarChart2,  label: "Application Intelligence",color: "text-teal-500 bg-teal-500/10" },
+              { href: "/candidate/jobs",                      icon: Search,     label: "Browse Jobs",             color: "text-green-500 bg-green-500/10" },
             ].map(({ href, icon: Icon, label, color }) => (
               <Link
                 key={href}

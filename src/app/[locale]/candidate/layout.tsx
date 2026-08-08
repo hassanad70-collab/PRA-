@@ -19,18 +19,20 @@ export default async function CandidateLayout({
   if (!user) redirect({ href: "/login", locale });
 
   const supabase = await createClient();
-  const [{ data: unreadThreads }, unreadNotifsResult, tNav, tCommon] = await Promise.all([
+  const [{ data: unreadThreads }, unreadNotifsResult, offersResult, tNav, tCommon] = await Promise.all([
     supabase
       .from("message_threads")
       .select("candidate_unread_count")
       .eq("candidate_id", user.id)
       .gt("candidate_unread_count", 0),
     supabase.rpc("get_unread_notification_count"),
+    supabase.from("offers").select("*", { count: "exact", head: true }).eq("candidate_id", user.id).eq("status", "pending"),
     getTranslations("Candidate.Nav"),
     getTranslations("Common"),
   ]);
   const unreadMessages = unreadThreads?.reduce((s, t) => s + (t.candidate_unread_count ?? 0), 0) ?? 0;
   const unreadNotifications = (unreadNotifsResult.data as number | null) ?? 0;
+  const pendingOffers = offersResult.count ?? 0;
 
   const p = (path: string) => `/${locale}/candidate${path}`;
   const w = (path: string) => `/${locale}/candidate/workspace${path}`;
@@ -46,40 +48,50 @@ export default async function CandidateLayout({
     },
     {
       label: tNav("aiWorkspaceGroup"),
+      collapsible: true,
       items: [
-        { href: w("/assistant"),     label: tNav("aiAssistant"),   icon: "Bot" },
-        { href: w("/resumes"),       label: tNav("myResumes"),     icon: "FileStack" },
-        { href: w("/studio"),        label: tNav("resumeStudio"),  icon: "PenLine" },
-        { href: w("/ats-checker"),   label: tNav("atsChecker"),    icon: "Target" },
-        { href: w("/cover-letters"), label: tNav("coverLetters"),  icon: "Mail" },
-        { href: w("/interview-prep"),    label: tNav("interviewPrep"),     icon: "Mic" },
-        { href: w("/interview-center"), label: tNav("interviewCenter"),   icon: "Brain" },
-        { href: w("/career-advisor"),   label: tNav("careerAdvisor"),     icon: "Sparkles" },
-        { href: w("/salary"),          label: tNav("salaryInsights"),    icon: "DollarSign" },
-        { href: w("/linkedin"),        label: tNav("linkedinOptimizer"), icon: "Share2" },
+        { href: w("/assistant"),      label: tNav("aiAssistant"),       icon: "Bot",        tag: "ai" },
+        { href: w("/studio"),         label: tNav("resumeStudio"),      icon: "PenLine" },
+        { href: w("/resumes"),        label: tNav("myResumes"),         icon: "FileStack" },
+        { href: w("/ats-checker"),    label: tNav("atsChecker"),        icon: "Target",     tag: "ai" },
+        { href: w("/cover-letters"),  label: tNav("coverLetters"),      icon: "Mail",       tag: "ai" },
+        { href: w("/interview-prep"), label: tNav("interviewPrep"),     icon: "Mic",        tag: "ai" },
+        { href: w("/interview-center"), label: tNav("interviewCenter"), icon: "Brain",      tag: "ai" },
+        { href: w("/career-advisor"), label: tNav("careerAdvisor"),     icon: "Sparkles",   tag: "ai" },
+        { href: w("/salary"),         label: tNav("salaryInsights"),    icon: "DollarSign", tag: "ai" },
+        { href: w("/linkedin"),       label: tNav("linkedinOptimizer"), icon: "Share2",     tag: "ai" },
+        { href: w("/portfolio"),      label: tNav("portfolio"),         icon: "Globe" },
       ],
     },
     {
       label: tNav("jobsGroup"),
+      collapsible: true,
       items: [
-        { href: p("/jobs"),              label: tCommon("browseJobs"),        icon: "Search" },
-        { href: p("/saved-jobs"),        label: tNav("savedJobs"),            icon: "Bookmark" },
-        { href: p("/applications"),      label: tNav("applications"),         icon: "Briefcase" },
-        { href: w("/app-intelligence"),  label: tNav("appIntelligence"),      icon: "BarChart2" },
-        { href: p("/interviews"),        label: tNav("interviews"),           icon: "Calendar" },
-        { href: p("/offers"),            label: tNav("offers"),               icon: "FileText" },
-        { href: p("/messages"),          label: tNav("messages"),             icon: "MessageCircle", badge: unreadMessages },
+        { href: p("/jobs"),              label: tCommon("browseJobs"),      icon: "Search" },
+        { href: p("/saved-jobs"),        label: tNav("savedJobs"),          icon: "Bookmark" },
+        { href: p("/applications"),      label: tNav("applications"),       icon: "Briefcase" },
+        { href: w("/app-intelligence"),  label: tNav("appIntelligence"),    icon: "BarChart2", tag: "ai" },
+        { href: p("/interviews"),        label: tNav("interviews"),         icon: "Calendar" },
+        { href: p("/offers"),            label: tNav("offers"),             icon: "FileText",  badge: pendingOffers },
+        { href: p("/messages"),          label: tNav("messages"),           icon: "MessageCircle", badge: unreadMessages },
       ],
     },
     {
-      label: tNav("personalGroup"),
+      label: tNav("careerGroup"),
+      collapsible: true,
       items: [
-        { href: w("/portfolio"),    label: tNav("portfolio"),       icon: "Globe" },
-        { href: w("/documents"),    label: tNav("documents"),       icon: "FolderOpen" },
-        { href: w("/favorites"),    label: tNav("favorites"),       icon: "Star" },
-        { href: w("/analytics"),    label: tNav("careerAnalytics"), icon: "LineChart" },
-        { href: p("/notifications"),label: tNav("notifications"),   icon: "Bell", badge: unreadNotifications },
-        { href: p("/settings"),     label: tNav("settings"),        icon: "Settings" },
+        { href: w("/documents"),  label: tNav("documents"),       icon: "FolderOpen" },
+        { href: w("/favorites"),  label: tNav("favorites"),       icon: "Star" },
+        { href: w("/analytics"),  label: tNav("careerAnalytics"), icon: "LineChart" },
+      ],
+    },
+    {
+      label: tNav("accountGroup"),
+      collapsible: true,
+      items: [
+        { href: p("/profile"),       label: tNav("profile"),        icon: "User" },
+        { href: p("/notifications"), label: tNav("notifications"),  icon: "Bell",    badge: unreadNotifications },
+        { href: p("/settings"),      label: tNav("settings"),       icon: "Settings" },
       ],
     },
   ];

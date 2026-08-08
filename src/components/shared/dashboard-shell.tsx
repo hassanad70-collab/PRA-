@@ -14,6 +14,7 @@ import {
   Briefcase,
   Building2,
   Calendar,
+  ChevronDown,
   CreditCard,
   DollarSign,
   FileStack,
@@ -109,10 +110,12 @@ export interface NavItem {
   label: string;
   icon: IconName;
   badge?: number;
+  tag?: "ai" | "beta" | "new";
 }
 
 export interface NavGroup {
   label?: string;
+  collapsible?: boolean;
   items: NavItem[];
 }
 
@@ -148,6 +151,16 @@ function NavLink({ item, pathname, onClick }: { item: NavItem; pathname: string;
     >
       <Icon className="h-4 w-4 shrink-0" />
       <span className="flex-1">{item.label}</span>
+      {item.tag && (
+        <span className={cn(
+          "rounded px-1 py-0.5 text-[9px] font-bold uppercase tracking-wider leading-none",
+          item.tag === "ai" && "bg-blue-500/10 text-blue-500",
+          item.tag === "beta" && "bg-amber-500/10 text-amber-500",
+          item.tag === "new" && "bg-emerald-500/10 text-emerald-500",
+        )}>
+          {item.tag === "ai" ? "AI" : item.tag}
+        </span>
+      )}
       {item.badge != null && item.badge > 0 && (
         <span className="ml-auto flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-none text-primary-foreground">
           {item.badge > 99 ? "99+" : item.badge}
@@ -160,6 +173,7 @@ function NavLink({ item, pathname, onClick }: { item: NavItem; pathname: string;
 export function DashboardShell({ navItems, navGroups, user, children, settingsHref, labels = DEFAULT_LABELS, headerExtra }: DashboardShellProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [collapsedGroups, setCollapsedGroups] = React.useState<Set<string>>(new Set());
 
   const paletteItems = React.useMemo<PaletteItem[]>(() => {
     if (navGroups) {
@@ -172,22 +186,66 @@ export function DashboardShell({ navItems, navGroups, user, children, settingsHr
 
   const closeMenu = React.useCallback(() => setMobileOpen(false), []);
 
+  const collapsedGroupsRef = React.useRef(collapsedGroups);
+  collapsedGroupsRef.current = collapsedGroups;
+
+  React.useEffect(() => {
+    if (!navGroups) return;
+    const activeGroup = navGroups.find(
+      (g) =>
+        g.collapsible &&
+        g.label &&
+        g.items.some((i) => pathname === i.href || pathname.startsWith(`${i.href}/`))
+    );
+    if (activeGroup?.label && collapsedGroupsRef.current.has(activeGroup.label)) {
+      setCollapsedGroups((prev) => {
+        const next = new Set(prev);
+        next.delete(activeGroup.label!);
+        return next;
+      });
+    }
+  }, [pathname, navGroups]);
+
+  const toggleGroup = React.useCallback((label: string) => {
+    setCollapsedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(label)) next.delete(label);
+      else next.add(label);
+      return next;
+    });
+  }, []);
+
   const SidebarNav = navGroups ? (
     <nav className="flex-1 overflow-y-auto px-3 py-2">
-      {navGroups.map((group, gi) => (
-        <div key={gi} className={gi > 0 ? "mt-4" : ""}>
-          {group.label && (
-            <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
-              {group.label}
-            </p>
-          )}
-          <div className="space-y-0.5">
-            {group.items.map((item) => (
-              <NavLink key={item.href} item={item} pathname={pathname} onClick={closeMenu} />
-            ))}
+      {navGroups.map((group, gi) => {
+        const open = !group.collapsible || !group.label || !collapsedGroups.has(group.label);
+        return (
+          <div key={gi} className={gi > 0 ? "mt-4" : ""}>
+            {group.label && (
+              group.collapsible ? (
+                <button
+                  onClick={() => toggleGroup(group.label!)}
+                  className="flex w-full items-center justify-between mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+                >
+                  <span>{group.label}</span>
+                  <ChevronDown className={cn("h-3 w-3 transition-transform duration-200", !open && "-rotate-90")} />
+                </button>
+              ) : (
+                <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
+                  {group.label}
+                </p>
+              )
+            )}
+            {open && (
+              <div className="space-y-0.5">
+                {group.items.map((item) => (
+                  <NavLink key={item.href} item={item} pathname={pathname} onClick={closeMenu} />
+                ))}
+              </div>
+            )}
           </div>
-        </div>
-      ))}
+        );
+      })}
     </nav>
   ) : (
     <nav className="flex-1 space-y-1 px-3 py-2">
