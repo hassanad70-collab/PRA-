@@ -12,7 +12,7 @@ test.describe("Resume upload", () => {
     await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
     await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
 
-    await page.goto("/candidate/resume");
+    await page.goto("/candidate/workspace/ats-checker");
     // Wait for the client component to hydrate before driving the file input —
     // setInputFiles() can fire the change event before React has attached its
     // onChange listener, which silently drops the selection (no error, no
@@ -38,7 +38,7 @@ test.describe("Resume upload", () => {
   test("oversized files are rejected client-side with a clear message, not silently dropped", async ({ page }) => {
     await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
     await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
-    await page.goto("/candidate/resume");
+    await page.goto("/candidate/workspace/ats-checker");
     await page.waitForLoadState("networkidle");
 
     // Just over the app's 10MB limit, not so far over that it also trips

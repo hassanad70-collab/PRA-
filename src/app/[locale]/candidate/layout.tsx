@@ -50,13 +50,25 @@ export default async function CandidateLayout({
       label: tNav("aiWorkspaceGroup"),
       collapsible: true,
       items: [
+        {
+          label: tNav("resumeSubGroup"),
+          icon: "FileStack",
+          children: [
+            { href: w("/studio"),      label: tNav("resumeStudio") },
+            { href: w("/resumes"),     label: tNav("myResumes") },
+            { href: w("/ats-checker"), label: tNav("atsChecker"), tag: "ai" },
+          ],
+        },
+        {
+          label: tNav("interviewSubGroup"),
+          icon: "Mic",
+          children: [
+            { href: w("/interview-prep"),   label: tNav("interviewPrep"),   tag: "ai" },
+            { href: w("/interview-center"), label: tNav("interviewCenter"), tag: "ai" },
+          ],
+        },
         { href: w("/assistant"),      label: tNav("aiAssistant"),       icon: "Bot",        tag: "ai" },
-        { href: w("/studio"),         label: tNav("resumeStudio"),      icon: "PenLine" },
-        { href: w("/resumes"),        label: tNav("myResumes"),         icon: "FileStack" },
-        { href: w("/ats-checker"),    label: tNav("atsChecker"),        icon: "Target",     tag: "ai" },
         { href: w("/cover-letters"),  label: tNav("coverLetters"),      icon: "Mail",       tag: "ai" },
-        { href: w("/interview-prep"), label: tNav("interviewPrep"),     icon: "Mic",        tag: "ai" },
-        { href: w("/interview-center"), label: tNav("interviewCenter"), icon: "Brain",      tag: "ai" },
         { href: w("/career-advisor"), label: tNav("careerAdvisor"),     icon: "Sparkles",   tag: "ai" },
         { href: w("/salary"),         label: tNav("salaryInsights"),    icon: "DollarSign", tag: "ai" },
         { href: w("/linkedin"),       label: tNav("linkedinOptimizer"), icon: "Share2",     tag: "ai" },

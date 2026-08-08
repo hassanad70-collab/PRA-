@@ -149,7 +149,7 @@ test.describe("Resume Health Checklist consistency", () => {
 
     await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
     await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
-    await page.goto("/candidate/resume");
+    await page.goto("/candidate/workspace/ats-checker");
 
     await expect(page.getByText("Resume health checklist")).toBeVisible();
     await expect(page.getByText("Email address detected.")).toBeVisible();
@@ -177,7 +177,7 @@ test.describe("Resume Health Checklist consistency", () => {
 
     await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
     await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
-    await page.goto("/candidate/resume");
+    await page.goto("/candidate/workspace/ats-checker");
 
     // The notice must be visible and explain the gap -- not just five
     // unexplained "fail" rows sitting next to a normal-looking ATS score.
@@ -187,12 +187,14 @@ test.describe("Resume Health Checklist consistency", () => {
     await expect(page.getByText("78", { exact: true })).toBeVisible();
 
     // "Your Resumes" list must also surface the distinct status, not the
-    // misleading plain "Completed". Scoped with .first() since other specs
+    // misleading plain "Completed". Navigate to the resumes list page where
+    // parse_status badges are rendered. Scoped with .first() since other specs
     // sharing this same fixture candidate may leave their own resume rows
     // around (each independently gets "completed_partial" too, since no
     // OpenAI key is configured anywhere in this test environment) --
     // this assertion only needs to confirm the label itself renders
     // correctly, not how many resumes currently exist.
+    await page.goto("/candidate/workspace/resumes");
     await expect(page.getByText("Completed partial").first()).toBeVisible();
 
     await admin.from("resumes").delete().eq("id", resumeId);
@@ -208,7 +210,7 @@ test.describe("Resume Health Checklist consistency", () => {
 
     await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
     await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
-    await page.goto("/candidate/resume");
+    await page.goto("/candidate/workspace/ats-checker");
 
     await page.getByRole("button", { name: "Retry extraction" }).click();
     // No OpenAI key in this environment, so this re-runs the same
@@ -230,7 +232,7 @@ test.describe("Resume Health Checklist consistency", () => {
 
     await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
     await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
-    await page.goto("/candidate/resume");
+    await page.goto("/candidate/workspace/ats-checker");
 
     await expect(page.getByText(/rate limit/i)).toBeVisible();
     await expect(page.getByRole("button", { name: "Retry extraction" })).toBeVisible();
@@ -247,7 +249,7 @@ test.describe("Resume Health Checklist consistency", () => {
 
     await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
     await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
-    await page.goto("/candidate/resume");
+    await page.goto("/candidate/workspace/ats-checker");
 
     await expect(page.getByText(/isn't enabled for this environment/i)).toBeVisible();
     // Retrying a missing API key reproduces the exact same fallback every
@@ -266,7 +268,7 @@ test.describe("Resume Health Checklist consistency", () => {
 
     await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
     await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
-    await page.goto("/ar/candidate/resume");
+    await page.goto("/ar/candidate/workspace/ats-checker");
 
     await expect(page.getByText("قائمة فحص صحة السيرة الذاتية")).toBeVisible();
     // Same field-name checks as the English case -- the checklist logic is

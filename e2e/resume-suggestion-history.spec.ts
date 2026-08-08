@@ -32,7 +32,7 @@ test.describe("Resume Intelligence Hub — Suggestion History (Unit C)", () => {
 
     const since = new Date().toISOString();
 
-    await page.goto("/candidate/resume");
+    await page.goto("/candidate/workspace/ats-checker");
     await page.getByRole("heading", { name: "Rewrite & Optimize" }).scrollIntoViewIfNeeded();
     await page.getByRole("button", { name: "Generate suggestions" }).click();
     await expect(page.getByText("Professional summary").first()).toBeVisible({ timeout: 15_000 });
@@ -85,7 +85,7 @@ test.describe("Resume Intelligence Hub — Suggestion History (Unit C)", () => {
 
     const since = new Date().toISOString();
 
-    await page.goto("/candidate/resume");
+    await page.goto("/candidate/workspace/ats-checker");
     await page.getByRole("heading", { name: "Rewrite & Optimize" }).scrollIntoViewIfNeeded();
     await page.getByRole("button", { name: "Generate suggestions" }).click();
     await expect(page.getByText("Professional summary").first()).toBeVisible({ timeout: 15_000 });
@@ -163,12 +163,12 @@ test.describe("Resume Intelligence Hub — Suggestion History (Unit C)", () => {
   });
 
   test("History module renders correctly in both locales", async ({ page }) => {
-    await page.goto("/en/candidate/resume");
+    await page.goto("/en/candidate/workspace/ats-checker");
     const historyCardEn = page.getByTestId("suggestion-history");
     await historyCardEn.scrollIntoViewIfNeeded();
     await expect(historyCardEn.getByRole("heading", { name: "History" })).toBeVisible();
 
-    await page.goto("/ar/candidate/resume");
+    await page.goto("/ar/candidate/workspace/ats-checker");
     const historyCardAr = page.getByTestId("suggestion-history");
     await historyCardAr.scrollIntoViewIfNeeded();
     await expect(historyCardAr.getByRole("heading", { name: "السجل" })).toBeVisible();

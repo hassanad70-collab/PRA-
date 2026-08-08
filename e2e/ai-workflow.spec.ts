@@ -27,7 +27,7 @@ function adminClient() {
 async function uploadAndGetResumeId(page: import("@playwright/test").Page) {
   await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
   await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
-  await page.goto("/candidate/resume");
+  await page.goto("/candidate/workspace/ats-checker");
   // Wait for the client component to hydrate before driving the file input —
   // setInputFiles() can fire the change event before React has attached its
   // onChange listener, which silently drops the selection (no error, no
@@ -68,7 +68,7 @@ test.describe("AI pipeline (resume parsing / ATS scoring / job matching)", () =>
     expect(score!.overall_score).toBeGreaterThanOrEqual(0);
     expect(score!.overall_score).toBeLessThanOrEqual(100);
 
-    await page.goto("/candidate/resume");
+    await page.goto("/candidate/workspace/ats-checker");
     await expect(page.getByText("AI ATS Score")).toBeVisible();
   });
 
@@ -76,7 +76,7 @@ test.describe("AI pipeline (resume parsing / ATS scoring / job matching)", () =>
     const resume = await uploadAndGetResumeId(page);
     test.skip(resume.parse_status !== "completed", `Text extraction did not complete for this run (status: ${resume.parse_status}) — nothing to score.`);
 
-    await page.goto("/candidate/resume");
+    await page.goto("/candidate/workspace/ats-checker");
     await expect(page.getByRole("heading", { name: "Score & Health" })).toBeVisible();
     await expect(page.getByText("Resume health checklist")).toBeVisible();
     // Word count is always computed from raw_text regardless of whether the

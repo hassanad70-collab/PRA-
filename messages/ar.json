@@ -504,7 +504,9 @@
       "careerAnalytics": "تحليلات المسار المهني",
       "notifications": "الإشعارات",
       "offers": "العروض الوظيفية",
-      "messages": "الرسائل"
+      "messages": "الرسائل",
+      "resumeSubGroup": "السيرة الذاتية",
+      "interviewSubGroup": "المقابلات"
     },
     "Shared": {
       "resume": "السيرة الذاتية",

@@ -13,21 +13,25 @@ test.describe("Candidate workflow", () => {
     const errors: string[] = [];
     page.on("pageerror", (err) => errors.push(err.message));
 
+    // Scope all nav assertions to the sidebar to avoid matching duplicate links
+    // in the dashboard Quick Actions section.
+    const sidebar = page.getByRole("complementary");
+
     // Root nav item
-    await expect(page.getByRole("link", { name: "Overview" })).toBeVisible();
+    await expect(sidebar.getByRole("link", { name: "Overview" })).toBeVisible();
 
     // AI Career Workspace group
-    await expect(page.getByRole("link", { name: "AI Assistant", exact: true })).toBeVisible();
-    await expect(page.getByRole("link", { name: "ATS Resume Checker" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Resume Studio" })).toBeVisible();
+    await expect(sidebar.getByRole("link", { name: "AI Assistant" })).toBeVisible();
+    await expect(sidebar.getByRole("link", { name: "ATS Resume Checker" })).toBeVisible();
+    await expect(sidebar.getByRole("link", { name: "Resume Studio" })).toBeVisible();
 
     // Jobs group
-    await expect(page.getByRole("link", { name: "Browse Jobs" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Applications" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Interviews" })).toBeVisible();
+    await expect(sidebar.getByRole("link", { name: "Browse Jobs" })).toBeVisible();
+    await expect(sidebar.getByRole("link", { name: "Applications" })).toBeVisible();
+    await expect(sidebar.getByRole("link", { name: "Interviews" })).toBeVisible();
 
-    // Personal group
-    await expect(page.getByRole("link", { name: "Settings" })).toBeVisible();
+    // Account group
+    await expect(sidebar.getByRole("link", { name: "Settings" })).toBeVisible();
 
     expect(errors).toEqual([]);
   });
@@ -46,7 +50,7 @@ test.describe("Candidate workflow", () => {
   });
 
   test("can browse jobs from within the authenticated area", async ({ page }) => {
-    await page.getByRole("link", { name: "Browse Jobs" }).click();
+    await page.getByRole("complementary").getByRole("link", { name: "Browse Jobs" }).click();
     await expect(page).toHaveURL(/\/candidate\/jobs$/);
     await expect(page.getByRole("heading", { name: "Browse Jobs" })).toBeVisible();
   });

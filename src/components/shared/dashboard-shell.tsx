@@ -31,6 +31,8 @@ import {
   MessageCircle,
   Mic,
   PenLine,
+  Pin,
+  PinOff,
   ScrollText,
   Search,
   Settings,
@@ -42,6 +44,7 @@ import {
   User,
   UserCog,
   Users,
+  X,
 } from "lucide-react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -105,12 +108,24 @@ const ICON_MAP = {
 
 export type IconName = keyof typeof ICON_MAP;
 
-export interface NavItem {
+// ─── Types ──────────────────────────────────────────────────────────────────
+
+export interface SubNavItem {
   href: string;
+  label: string;
+  tag?: "ai" | "beta" | "new";
+  badge?: number;
+}
+
+export interface NavItem {
+  /** Absent when the item is a collapsible section header (has children). */
+  href?: string;
   label: string;
   icon: IconName;
   badge?: number;
   tag?: "ai" | "beta" | "new";
+  /** When present, the item renders as an expandable sub-group. */
+  children?: SubNavItem[];
 }
 
 export interface NavGroup {
@@ -119,138 +134,593 @@ export interface NavGroup {
   items: NavItem[];
 }
 
+// ─── localStorage ─────────────────────────────────────────────────────────────
+
+const LS = {
+  collapsed:      "pra.sidebar.v1.collapsed",
+  collapsedItems: "pra.sidebar.v1.collapsed-items",
+  pinned:         "pra.sidebar.v1.pinned",
+  recent:         "pra.sidebar.v1.recent",
+  lastWorkspace:  "pra.sidebar.v1.last-workspace",
+} as const;
+
+/** Exported so ContinueWidget can read the same key. */
+export const LS_KEY_LAST_WORKSPACE = LS.lastWorkspace;
+
+function lsGet<T>(key: string, fallback: T): T {
+  if (typeof window === "undefined") return fallback;
+  try {
+    const v = window.localStorage.getItem(key);
+    return v !== null ? (JSON.parse(v) as T) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function lsSet(key: string, value: unknown): void {
+  try { window.localStorage.setItem(key, JSON.stringify(value)); } catch { /* quota exceeded */ }
+}
+
+// ─── Props ───────────────────────────────────────────────────────────────────
+
 interface DashboardShellProps {
-  /** Flat nav for recruiter/admin (backward compat). Exactly one of navItems or navGroups must be provided. */
+  /** Flat nav for recruiter/admin (backward compat). */
   navItems?: NavItem[];
-  /** Grouped nav for candidate AI Career Workspace. */
+  /** Grouped nav with search, pinned, recent, and sub-groups for candidate. */
   navGroups?: NavGroup[];
   user: { full_name: string; email: string; role: string };
   children: React.ReactNode;
-  /** Locale-aware where needed -- each layout resolves its own destination (see CandidateLayout). */
   settingsHref: string;
   labels?: { settings: string; signOut: string; openMenu: string };
-  /** Rendered in the header next to the theme toggle (e.g. LanguageSwitcher for the localized candidate portal). */
   headerExtra?: React.ReactNode;
 }
 
 const DEFAULT_LABELS = { settings: "Settings", signOut: "Sign out", openMenu: "Open menu" };
 
-function NavLink({ item, pathname, onClick }: { item: NavItem; pathname: string; onClick?: () => void }) {
-  const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
-  const Icon = ICON_MAP[item.icon];
+// ─── Badge helpers ────────────────────────────────────────────────────────────
+
+function TagBadge({ tag }: { tag: "ai" | "beta" | "new" }) {
+  return (
+    <span className={cn(
+      "rounded px-1 py-0.5 text-[9px] font-bold uppercase tracking-wider leading-none",
+      tag === "ai"   && "bg-blue-500/10 text-blue-500",
+      tag === "beta" && "bg-amber-500/10 text-amber-500",
+      tag === "new"  && "bg-emerald-500/10 text-emerald-500",
+    )}>
+      {tag === "ai" ? "AI" : tag}
+    </span>
+  );
+}
+
+function CountBadge({ count }: { count: number }) {
+  if (count <= 0) return null;
+  return (
+    <span className="flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-none text-primary-foreground">
+      {count > 99 ? "99+" : count}
+    </span>
+  );
+}
+
+// ─── Nav item components ──────────────────────────────────────────────────────
+
+function NavLink({
+  href, label, icon, tag, badge, pathname, onClick, onPin, isPinned,
+}: {
+  href: string;
+  label: string;
+  icon: IconName;
+  tag?: "ai" | "beta" | "new";
+  badge?: number;
+  pathname: string;
+  onClick?: () => void;
+  onPin?: () => void;
+  isPinned?: boolean;
+}) {
+  const active = pathname === href || pathname.startsWith(`${href}/`);
+  const Icon = ICON_MAP[icon];
+  return (
+    <div className="group relative">
+      <Link
+        href={href}
+        onClick={onClick}
+        className={cn(
+          "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+          onPin && "pr-8",
+          active
+            ? "bg-primary/10 text-primary"
+            : "text-muted-foreground hover:bg-accent hover:text-foreground"
+        )}
+      >
+        <Icon className="h-4 w-4 shrink-0" />
+        <span className="flex-1">{label}</span>
+        {tag && <TagBadge tag={tag} />}
+        {badge != null && <CountBadge count={badge} />}
+      </Link>
+      {onPin && (
+        <button
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onPin(); }}
+          className={cn(
+            "absolute right-2 top-1/2 -translate-y-1/2 rounded p-0.5 transition-opacity",
+            "opacity-0 group-hover:opacity-50 hover:!opacity-100",
+            isPinned && "!opacity-40 group-hover:!opacity-70"
+          )}
+          title={isPinned ? "Unpin" : "Pin to top"}
+        >
+          {isPinned
+            ? <PinOff className="h-3 w-3 text-primary" />
+            : <Pin className="h-3 w-3" />
+          }
+        </button>
+      )}
+    </div>
+  );
+}
+
+function SubLink({
+  href, label, tag, badge, pathname, onClick,
+}: {
+  href: string;
+  label: string;
+  tag?: "ai" | "beta" | "new";
+  badge?: number;
+  pathname: string;
+  onClick?: () => void;
+}) {
+  const active = pathname === href || pathname.startsWith(`${href}/`);
   return (
     <Link
-      href={item.href}
+      href={href}
       onClick={onClick}
       className={cn(
-        "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+        "flex items-center gap-2 rounded-md py-1.5 pl-10 pr-3 text-sm transition-colors",
         active
-          ? "bg-primary/10 text-primary"
+          ? "bg-primary/10 font-medium text-primary"
           : "text-muted-foreground hover:bg-accent hover:text-foreground"
       )}
     >
-      <Icon className="h-4 w-4 shrink-0" />
-      <span className="flex-1">{item.label}</span>
-      {item.tag && (
-        <span className={cn(
-          "rounded px-1 py-0.5 text-[9px] font-bold uppercase tracking-wider leading-none",
-          item.tag === "ai" && "bg-blue-500/10 text-blue-500",
-          item.tag === "beta" && "bg-amber-500/10 text-amber-500",
-          item.tag === "new" && "bg-emerald-500/10 text-emerald-500",
-        )}>
-          {item.tag === "ai" ? "AI" : item.tag}
-        </span>
-      )}
-      {item.badge != null && item.badge > 0 && (
-        <span className="ml-auto flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-none text-primary-foreground">
-          {item.badge > 99 ? "99+" : item.badge}
-        </span>
-      )}
+      <span className="h-1 w-1 shrink-0 rounded-full bg-current opacity-40" />
+      <span className="flex-1">{label}</span>
+      {tag && <TagBadge tag={tag} />}
+      {badge != null && <CountBadge count={badge} />}
     </Link>
   );
 }
 
-export function DashboardShell({ navItems, navGroups, user, children, settingsHref, labels = DEFAULT_LABELS, headerExtra }: DashboardShellProps) {
+function SubGroupHeader({
+  item, isOpen, onToggle, pathname,
+}: {
+  item: NavItem;
+  isOpen: boolean;
+  onToggle: () => void;
+  pathname: string;
+}) {
+  const Icon = ICON_MAP[item.icon];
+  const hasActiveChild =
+    item.children?.some((c) => pathname === c.href || pathname.startsWith(`${c.href}/`)) ?? false;
+  return (
+    <button
+      onClick={onToggle}
+      className={cn(
+        "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+        hasActiveChild
+          ? "text-foreground"
+          : "text-muted-foreground hover:bg-accent hover:text-foreground"
+      )}
+    >
+      <Icon className="h-4 w-4 shrink-0" />
+      <span className="flex-1 text-start">{item.label}</span>
+      {item.tag && <TagBadge tag={item.tag} />}
+      <ChevronDown className={cn(
+        "h-3.5 w-3.5 shrink-0 transition-transform duration-200",
+        !isOpen && "-rotate-90"
+      )} />
+    </button>
+  );
+}
+
+// ─── DashboardShell ───────────────────────────────────────────────────────────
+
+export function DashboardShell({
+  navItems, navGroups, user, children, settingsHref,
+  labels = DEFAULT_LABELS, headerExtra,
+}: DashboardShellProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [sidebarSearch, setSidebarSearch] = React.useState("");
+
+  // ── Sidebar preferences — all SSR-safe (init from fallback, hydrate in effect) ──
   const [collapsedGroups, setCollapsedGroups] = React.useState<Set<string>>(new Set());
-
-  const paletteItems = React.useMemo<PaletteItem[]>(() => {
-    if (navGroups) {
-      return navGroups.flatMap((g) =>
-        g.items.map((i) => ({ href: i.href, label: i.label, group: g.label }))
-      );
-    }
-    return (navItems ?? []).map((i) => ({ href: i.href, label: i.label }));
-  }, [navGroups, navItems]);
-
-  const closeMenu = React.useCallback(() => setMobileOpen(false), []);
-
-  const collapsedGroupsRef = React.useRef(collapsedGroups);
-  collapsedGroupsRef.current = collapsedGroups;
+  const [collapsedItems,  setCollapsedItems]  = React.useState<Set<string>>(new Set());
+  const [pinned,          setPinned]          = React.useState<string[]>([]);
+  const [recent,          setRecent]          = React.useState<string[]>([]);
 
   React.useEffect(() => {
-    if (!navGroups) return;
-    const activeGroup = navGroups.find(
-      (g) =>
-        g.collapsible &&
-        g.label &&
-        g.items.some((i) => pathname === i.href || pathname.startsWith(`${i.href}/`))
-    );
-    if (activeGroup?.label && collapsedGroupsRef.current.has(activeGroup.label)) {
-      setCollapsedGroups((prev) => {
-        const next = new Set(prev);
-        next.delete(activeGroup.label!);
-        return next;
-      });
-    }
-  }, [pathname, navGroups]);
+    setCollapsedGroups(new Set(lsGet<string[]>(LS.collapsed, [])));
+    setCollapsedItems (new Set(lsGet<string[]>(LS.collapsedItems, [])));
+    setPinned(lsGet<string[]>(LS.pinned, []));
+    setRecent(lsGet<string[]>(LS.recent, []));
+  }, []);
 
   const toggleGroup = React.useCallback((label: string) => {
     setCollapsedGroups((prev) => {
       const next = new Set(prev);
-      if (next.has(label)) next.delete(label);
-      else next.add(label);
+      if (next.has(label)) { next.delete(label); } else { next.add(label); }
+      lsSet(LS.collapsed, [...next]);
       return next;
     });
   }, []);
 
+  const expandGroup = React.useCallback((label: string) => {
+    setCollapsedGroups((prev) => {
+      if (!prev.has(label)) return prev;
+      const next = new Set(prev);
+      next.delete(label);
+      lsSet(LS.collapsed, [...next]);
+      return next;
+    });
+  }, []);
+
+  const toggleItem = React.useCallback((key: string) => {
+    setCollapsedItems((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) { next.delete(key); } else { next.add(key); }
+      lsSet(LS.collapsedItems, [...next]);
+      return next;
+    });
+  }, []);
+
+  const expandItem = React.useCallback((key: string) => {
+    setCollapsedItems((prev) => {
+      if (!prev.has(key)) return prev;
+      const next = new Set(prev);
+      next.delete(key);
+      lsSet(LS.collapsedItems, [...next]);
+      return next;
+    });
+  }, []);
+
+  const togglePin = React.useCallback((href: string) => {
+    setPinned((prev) => {
+      const next = prev.includes(href)
+        ? prev.filter((h) => h !== href)
+        : [href, ...prev].slice(0, 12);
+      lsSet(LS.pinned, next);
+      return next;
+    });
+  }, []);
+
+  // ── Auto-expand groups/items containing the active path + visit tracking ──
+  React.useEffect(() => {
+    if (!navGroups) return;
+
+    for (const group of navGroups) {
+      if (!group.collapsible || !group.label) continue;
+      const hasActive = group.items.some(
+        (item) =>
+          (item.href && (pathname === item.href || pathname.startsWith(`${item.href}/`))) ||
+          item.children?.some((c) => pathname === c.href || pathname.startsWith(`${c.href}/`))
+      );
+      if (hasActive) expandGroup(group.label);
+    }
+
+    for (const group of navGroups) {
+      for (const item of group.items) {
+        if (item.children?.some((c) => pathname === c.href || pathname.startsWith(`${c.href}/`))) {
+          expandItem(item.label);
+        }
+      }
+    }
+
+    // Find the label + icon for the current path (for recent/last-workspace tracking)
+    const found = (() => {
+      for (const g of navGroups) {
+        for (const item of g.items) {
+          if (item.href && (pathname === item.href || pathname.startsWith(`${item.href}/`)))
+            return { label: item.label, icon: item.icon };
+          const child = item.children?.find(
+            (c) => pathname === c.href || pathname.startsWith(`${c.href}/`)
+          );
+          if (child) return { label: child.label, icon: item.icon };
+        }
+      }
+      return null;
+    })();
+
+    if (found) {
+      setRecent((prev) => {
+        const next = [pathname, ...prev.filter((h) => h !== pathname)].slice(0, 8);
+        lsSet(LS.recent, next);
+        return next;
+      });
+      if (pathname.includes("/workspace/")) {
+        lsSet(LS.lastWorkspace, {
+          href: pathname,
+          label: found.label,
+          icon: found.icon,
+          updatedAt: new Date().toISOString(),
+        });
+      }
+    }
+  }, [pathname, navGroups, expandGroup, expandItem]);
+
+  // Clear search on navigate
+  React.useEffect(() => { setSidebarSearch(""); }, [pathname]);
+
+  // ── Command Palette items (include sub-items) ─────────────────────────────
+  const paletteItems = React.useMemo<PaletteItem[]>(() => {
+    if (navGroups) {
+      return navGroups.flatMap((g) =>
+        g.items.flatMap((i) => {
+          const base = i.href ? [{ href: i.href, label: i.label, group: g.label }] : [];
+          const subs = (i.children ?? []).map((c) => ({
+            href: c.href,
+            label: c.label,
+            group: g.label ?? i.label,
+          }));
+          return [...base, ...subs];
+        })
+      );
+    }
+    return (navItems ?? []).filter((i) => !!i.href).map((i) => ({
+      href: i.href!,
+      label: i.label,
+    }));
+  }, [navGroups, navItems]);
+
+  const closeMenu = React.useCallback(() => setMobileOpen(false), []);
+
+  // ── Resolve href → display info (for pinned/recent sections) ─────────────
+  const findItem = React.useCallback(
+    (href: string) => {
+      if (!navGroups) return null;
+      for (const g of navGroups) {
+        for (const item of g.items) {
+          if (item.href === href)
+            return { href, label: item.label, icon: item.icon, tag: item.tag, badge: item.badge };
+          const child = item.children?.find((c) => c.href === href);
+          if (child)
+            return { href, label: child.label, icon: item.icon, tag: child.tag, badge: child.badge };
+        }
+      }
+      return null;
+    },
+    [navGroups]
+  );
+
+  const pinnedItems = React.useMemo(
+    () =>
+      pinned
+        .map(findItem)
+        .filter(Boolean) as Array<{
+          href: string; label: string; icon: IconName;
+          tag?: "ai" | "beta" | "new"; badge?: number;
+        }>,
+    [pinned, findItem]
+  );
+
+  const recentItems = React.useMemo(
+    () =>
+      recent
+        .filter((h) => h !== pathname)
+        .slice(0, 5)
+        .map(findItem)
+        .filter(Boolean) as Array<{ href: string; label: string; icon: IconName }>,
+    [recent, pathname, findItem]
+  );
+
+  // ── Sidebar search ────────────────────────────────────────────────────────
+  const isSearching = sidebarSearch.trim().length > 0;
+  const searchResults = React.useMemo(() => {
+    if (!navGroups || !isSearching) return [];
+    const q = sidebarSearch.toLowerCase();
+    const out: Array<{
+      href: string; label: string; icon: IconName;
+      tag?: "ai" | "beta" | "new"; badge?: number;
+    }> = [];
+    for (const g of navGroups) {
+      for (const item of g.items) {
+        if (item.href && item.label.toLowerCase().includes(q))
+          out.push({ href: item.href, label: item.label, icon: item.icon, tag: item.tag, badge: item.badge });
+        for (const child of item.children ?? []) {
+          if (child.label.toLowerCase().includes(q))
+            out.push({ href: child.href, label: child.label, icon: item.icon, tag: child.tag, badge: child.badge });
+        }
+      }
+    }
+    return out;
+  }, [navGroups, isSearching, sidebarSearch]);
+
+  // ── SidebarNav ────────────────────────────────────────────────────────────
   const SidebarNav = navGroups ? (
     <nav className="flex-1 overflow-y-auto px-3 py-2">
-      {navGroups.map((group, gi) => {
-        const open = !group.collapsible || !group.label || !collapsedGroups.has(group.label);
-        return (
-          <div key={gi} className={gi > 0 ? "mt-4" : ""}>
-            {group.label && (
-              group.collapsible ? (
-                <button
-                  onClick={() => toggleGroup(group.label!)}
-                  className="flex w-full items-center justify-between mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60 hover:text-muted-foreground transition-colors"
-                >
-                  <span>{group.label}</span>
-                  <ChevronDown className={cn("h-3 w-3 transition-transform duration-200", !open && "-rotate-90")} />
-                </button>
-              ) : (
-                <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
-                  {group.label}
-                </p>
-              )
-            )}
-            {open && (
+
+      {/* Search input */}
+      <div className="relative mb-3">
+        <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+        <input
+          value={sidebarSearch}
+          onChange={(e) => setSidebarSearch(e.target.value)}
+          placeholder="Search…"
+          className="w-full rounded-lg border border-border bg-muted/30 py-1.5 pl-8 pr-7 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary/30"
+        />
+        {sidebarSearch && (
+          <button
+            onClick={() => setSidebarSearch("")}
+            className="absolute right-2 top-1/2 -translate-y-1/2 rounded text-muted-foreground hover:text-foreground"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        )}
+      </div>
+
+      {isSearching ? (
+        /* Flat filtered results */
+        <div className="space-y-0.5">
+          {searchResults.length === 0 ? (
+            <p className="px-3 py-4 text-center text-xs text-muted-foreground">
+              No results for &ldquo;{sidebarSearch}&rdquo;
+            </p>
+          ) : searchResults.map((item) => (
+            <NavLink
+              key={item.href}
+              href={item.href}
+              label={item.label}
+              icon={item.icon}
+              tag={item.tag}
+              badge={item.badge}
+              pathname={pathname}
+              onClick={closeMenu}
+              onPin={() => togglePin(item.href)}
+              isPinned={pinned.includes(item.href)}
+            />
+          ))}
+        </div>
+      ) : (
+        <>
+          {/* Pinned section */}
+          {pinnedItems.length > 0 && (
+            <div className="mb-3">
+              <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
+                Pinned
+              </p>
               <div className="space-y-0.5">
-                {group.items.map((item) => (
-                  <NavLink key={item.href} item={item} pathname={pathname} onClick={closeMenu} />
+                {pinnedItems.map((item) => (
+                  <NavLink
+                    key={item.href}
+                    href={item.href}
+                    label={item.label}
+                    icon={item.icon}
+                    tag={item.tag}
+                    badge={item.badge}
+                    pathname={pathname}
+                    onClick={closeMenu}
+                    onPin={() => togglePin(item.href)}
+                    isPinned
+                  />
                 ))}
               </div>
-            )}
-          </div>
-        );
-      })}
+            </div>
+          )}
+
+          {/* Recent section */}
+          {recentItems.length > 0 && (
+            <div className="mb-3">
+              <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
+                Recent
+              </p>
+              <div className="space-y-0.5">
+                {recentItems.map((item) => (
+                  <NavLink
+                    key={item.href}
+                    href={item.href}
+                    label={item.label}
+                    icon={item.icon}
+                    pathname={pathname}
+                    onClick={closeMenu}
+                    onPin={() => togglePin(item.href)}
+                    isPinned={pinned.includes(item.href)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Groups */}
+          {navGroups.map((group, gi) => {
+            const hasSections = pinnedItems.length > 0 || recentItems.length > 0;
+            const groupOpen =
+              !group.collapsible || !group.label || !collapsedGroups.has(group.label);
+            return (
+              <div key={gi} className={gi > 0 || hasSections ? "mt-3" : undefined}>
+                {group.label && (
+                  group.collapsible ? (
+                    <button
+                      onClick={() => toggleGroup(group.label!)}
+                      className="flex w-full items-center justify-between mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+                    >
+                      <span>{group.label}</span>
+                      <ChevronDown className={cn(
+                        "h-3 w-3 transition-transform duration-200",
+                        !groupOpen && "-rotate-90"
+                      )} />
+                    </button>
+                  ) : (
+                    <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
+                      {group.label}
+                    </p>
+                  )
+                )}
+
+                {groupOpen && (
+                  <div className="space-y-0.5">
+                    {group.items.map((item) => {
+                      // Sub-group item (has children — renders as collapsible section)
+                      if (item.children) {
+                        const itemOpen = !collapsedItems.has(item.label);
+                        return (
+                          <div key={item.label}>
+                            <SubGroupHeader
+                              item={item}
+                              isOpen={itemOpen}
+                              onToggle={() => toggleItem(item.label)}
+                              pathname={pathname}
+                            />
+                            {itemOpen && (
+                              <div className="space-y-0.5">
+                                {item.children.map((child) => (
+                                  <SubLink
+                                    key={child.href}
+                                    href={child.href}
+                                    label={child.label}
+                                    tag={child.tag}
+                                    badge={child.badge}
+                                    pathname={pathname}
+                                    onClick={closeMenu}
+                                  />
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      }
+                      // Leaf item
+                      if (!item.href) return null;
+                      return (
+                        <NavLink
+                          key={item.href}
+                          href={item.href}
+                          label={item.label}
+                          icon={item.icon}
+                          tag={item.tag}
+                          badge={item.badge}
+                          pathname={pathname}
+                          onClick={closeMenu}
+                          onPin={() => togglePin(item.href!)}
+                          isPinned={pinned.includes(item.href)}
+                        />
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </>
+      )}
     </nav>
   ) : (
     <nav className="flex-1 space-y-1 px-3 py-2">
-      {(navItems ?? []).map((item) => (
-        <NavLink key={item.href} item={item} pathname={pathname} onClick={closeMenu} />
+      {(navItems ?? []).filter((i) => !!i.href).map((item) => (
+        <NavLink
+          key={item.href}
+          href={item.href!}
+          label={item.label}
+          icon={item.icon}
+          tag={item.tag}
+          badge={item.badge}
+          pathname={pathname}
+          onClick={closeMenu}
+        />
       ))}
     </nav>
   );
@@ -284,7 +754,10 @@ export function DashboardShell({ navItems, navGroups, user, children, settingsHr
               <Link href={settingsHref}>{labels.settings}</Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => logout()} className="text-destructive focus:text-destructive">
+            <DropdownMenuItem
+              onClick={() => logout()}
+              className="text-destructive focus:text-destructive"
+            >
               {labels.signOut}
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -295,12 +768,16 @@ export function DashboardShell({ navItems, navGroups, user, children, settingsHr
 
   return (
     <div className="flex min-h-screen">
-      <aside className="hidden w-64 shrink-0 border-r border-border bg-card lg:block lg:h-screen lg:sticky lg:top-0 lg:overflow-hidden">{SidebarContent}</aside>
+      <aside className="hidden w-64 shrink-0 border-r border-border bg-card lg:block lg:h-screen lg:sticky lg:top-0 lg:overflow-hidden">
+        {SidebarContent}
+      </aside>
 
       {mobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
-          <aside className="absolute inset-y-0 left-0 w-72 overflow-y-auto bg-card">{SidebarContent}</aside>
+          <aside className="absolute inset-y-0 left-0 w-72 overflow-y-auto bg-card">
+            {SidebarContent}
+          </aside>
         </div>
       )}
 
@@ -321,7 +798,9 @@ export function DashboardShell({ navItems, navGroups, user, children, settingsHr
             <ThemeToggle />
           </div>
         </header>
-        <main id="main-content" className="min-w-0 flex-1 p-4 lg:p-8">{children}</main>
+        <main id="main-content" className="min-w-0 flex-1 p-4 lg:p-8">
+          {children}
+        </main>
       </div>
     </div>
   );

@@ -28,6 +28,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ScoreRing } from "@/components/shared/score-ring";
 import { JobDiscoveryWidget } from "@/components/candidate/job-discovery-widget";
+import { ContinueWidget } from "@/components/candidate/continue-widget";
 import {
   getCandidateApplications,
   getCandidateFullProfile,
@@ -144,6 +145,8 @@ export default async function CandidateDashboardPage({ params }: { params: Promi
         <h1 className="text-2xl font-semibold tracking-tight">{t("welcomeBack", { name: firstName })}</h1>
         <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
       </div>
+
+      <ContinueWidget />
 
       {/* Today's Goal */}
       {todayGoal && (

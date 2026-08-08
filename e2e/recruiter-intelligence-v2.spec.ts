@@ -94,6 +94,13 @@ test.describe.serial("Recruiter Intelligence v2.0", () => {
         ai_summary: "Strong candidate for this role.",
         interview_recommendation: "yes",
         rank_position: 1,
+        // Reset insight fields so Phase 2 always starts with the "Generate" button, not "Regenerate".
+        insight_generated_at: null,
+        hiring_confidence_score: null,
+        risks: null,
+        red_flags: null,
+        suggested_interview_focus: null,
+        suggested_questions: null,
       },
       { onConflict: "application_id" }
     );

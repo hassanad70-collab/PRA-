@@ -190,15 +190,15 @@ test.describe("Candidate portal internationalization", () => {
     expect(await page.locator("html").getAttribute("dir")).toBe("rtl");
   });
 
-  test("Resume Intelligence hub (Unit A) renders its renamed identity correctly in both locales", async ({ page }) => {
+  test("ATS Resume Checker workspace page renders in both locales", async ({ page }) => {
     await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
     await expect(page).toHaveURL(/\/en\/candidate\/dashboard$/, { timeout: 15_000 });
 
-    await page.goto("/en/candidate/resume");
-    await expect(page.getByRole("heading", { name: "Resume Intelligence", level: 1 })).toBeVisible();
+    await page.goto("/en/candidate/workspace/ats-checker");
+    await expect(page.getByRole("heading", { name: "ATS Resume Checker", level: 1 })).toBeVisible();
 
-    await page.goto("/ar/candidate/resume");
-    await expect(page.getByRole("heading", { name: "ذكاء السيرة الذاتية", level: 1 })).toBeVisible();
+    await page.goto("/ar/candidate/workspace/ats-checker");
+    await expect(page.getByRole("heading", { name: "ATS Resume Checker", level: 1 })).toBeVisible();
     expect(await page.locator("html").getAttribute("dir")).toBe("rtl");
   });
 
@@ -206,8 +206,12 @@ test.describe("Candidate portal internationalization", () => {
     await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
     await expect(page).toHaveURL(/\/en\/candidate\/dashboard$/, { timeout: 15_000 });
 
+    // Scope to the sidebar to avoid matching duplicate links in dashboard Quick Actions.
+    // Some nav links have AI/beta tags appended to their accessible name, so use
+    // substring matching (exact: false is the default).
+    const sidebar = page.getByRole("complementary");
     for (const name of ["Overview", "AI Assistant", "ATS Resume Checker", "Browse Jobs", "Applications", "Interviews", "Settings"]) {
-      const href = await page.getByRole("link", { name, exact: true }).getAttribute("href");
+      const href = await sidebar.getByRole("link", { name }).getAttribute("href");
       expect(href, `${name} nav link should be locale-prefixed`).toMatch(/^\/en\/candidate\//);
     }
   });

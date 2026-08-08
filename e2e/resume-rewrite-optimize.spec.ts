@@ -37,7 +37,7 @@ test.describe("Resume Intelligence Hub — Rewrite & Optimize (Unit B)", () => {
     await admin.from("candidate_experience").delete().eq("candidate_id", profile!.id);
     await admin.from("candidate_skills").delete().eq("candidate_id", profile!.id);
 
-    await page.goto("/candidate/resume");
+    await page.goto("/candidate/workspace/ats-checker");
     await page.getByRole("heading", { name: "Rewrite & Optimize" }).scrollIntoViewIfNeeded();
     await page.getByRole("button", { name: "Generate suggestions" }).click();
     await expect(page.getByText(/no new suggestions right now/i)).toBeVisible({ timeout: 15_000 });
@@ -48,7 +48,7 @@ test.describe("Resume Intelligence Hub — Rewrite & Optimize (Unit B)", () => {
     const { data: profile } = await admin.from("profiles").select("id").eq("email", TEST_USERS.candidate.email).single();
     await admin.from("candidates").update({ summary: null }).eq("id", profile!.id);
 
-    await page.goto("/candidate/resume");
+    await page.goto("/candidate/workspace/ats-checker");
     await page.getByRole("heading", { name: "Rewrite & Optimize" }).scrollIntoViewIfNeeded();
     await page.getByRole("button", { name: "Generate suggestions" }).click();
 
@@ -72,7 +72,7 @@ test.describe("Resume Intelligence Hub — Rewrite & Optimize (Unit B)", () => {
     const { data: profile } = await admin.from("profiles").select("id").eq("email", TEST_USERS.candidate.email).single();
     await admin.from("candidates").update({ summary: null }).eq("id", profile!.id);
 
-    await page.goto("/candidate/resume");
+    await page.goto("/candidate/workspace/ats-checker");
     await page.getByRole("heading", { name: "Rewrite & Optimize" }).scrollIntoViewIfNeeded();
     await page.getByRole("button", { name: "Generate suggestions" }).click();
 

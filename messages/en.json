@@ -504,7 +504,9 @@
       "careerAnalytics": "Career Analytics",
       "notifications": "Notifications",
       "offers": "Offers",
-      "messages": "Messages"
+      "messages": "Messages",
+      "resumeSubGroup": "Resume",
+      "interviewSubGroup": "Interview"
     },
     "Shared": {
       "resume": "Resume",

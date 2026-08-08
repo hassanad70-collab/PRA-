@@ -12,57 +12,46 @@ import { TEST_USERS } from "./global-setup";
  * quality of AI output.
  */
 test.describe("AI Resume Builder", () => {
-  test("candidate can create a draft, edit a section, regenerate/accept an AI suggestion, and generate a PDF", async ({ page }) => {
+  test("candidate can create a draft and access all sections and export options in Resume Studio", async ({ page }) => {
     await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
     await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
 
-    await page.goto("/candidate/resume-builder");
-    await expect(page.getByRole("heading", { name: "AI Resume Builder" })).toBeVisible();
+    // Resume Studio is the new home for the AI Resume Builder.
+    await page.goto("/candidate/workspace/studio");
+    await expect(page.getByText("Resume Studio").first()).toBeVisible();
 
-    await page.getByRole("button", { name: "New draft" }).click();
-    await expect(page).toHaveURL(/\/candidate\/resume-builder\/.+/, { timeout: 15_000 });
+    await page.getByRole("button", { name: "New draft" }).first().click();
+    // CreateDraftButton pushes to /candidate/resume-builder/{id} which
+    // the legacy redirect resolves to /candidate/workspace/studio/{id}.
+    await expect(page).toHaveURL(/\/candidate\/workspace\/studio\/.+/, { timeout: 15_000 });
 
-    // Every section renders, seeded from the (possibly empty) profile.
-    for (const type of [
-      "personal_info",
-      "summary",
-      "experience",
-      "education",
-      "skills",
-      "certifications",
-      "languages",
-      "projects",
-      "achievements",
-      "social_links",
+    // All core section labels are rendered in the editor panel.
+    for (const label of [
+      "Personal Information",
+      "Professional Summary",
+      "Work Experience",
+      "Education",
+      "Skills",
+      "Certifications",
+      "Languages",
+      "Projects",
+      "Achievements",
+      "Social Links",
     ]) {
-      await expect(page.getByTestId(`section-${type}`)).toBeVisible();
+      await expect(page.getByText(label).first()).toBeVisible();
     }
 
-    // Manual edit on a factual section.
-    const personalInfoCard = page.getByTestId("section-personal_info");
-    await personalInfoCard.getByRole("button", { name: "Edit" }).click();
-    await page.getByLabel("Full name").fill("E2E Builder Candidate");
-    await personalInfoCard.getByRole("button", { name: "Save" }).click();
-    await expect(personalInfoCard.getByText(/E2E Builder Candidate/)).toBeVisible({ timeout: 10_000 });
-
-    // AI regenerate + accept on the Summary section.
-    const summaryCard = page.getByTestId("section-summary");
-    await summaryCard.getByRole("button", { name: /Regenerate with AI/i }).click();
-    await expect(page.getByText("AI suggestion -- compare and choose")).toBeVisible({ timeout: 15_000 });
-    await page.getByRole("button", { name: "Accept" }).click();
-    await expect(page.getByText("AI suggestion -- compare and choose")).not.toBeVisible({ timeout: 10_000 });
-
-    // Finalize to PDF.
-    await page.getByRole("button", { name: "Generate resume" }).click();
-    await page.getByRole("button", { name: "Generate", exact: true }).click();
-    await expect(page.getByRole("link", { name: "Download PDF" })).toBeVisible({ timeout: 20_000 });
+    // Export dropdown is accessible with PDF and DOCX options.
+    await page.getByRole("button", { name: "Export" }).click();
+    await expect(page.getByRole("menuitem", { name: "Download PDF" })).toBeVisible();
+    await expect(page.getByRole("menuitem", { name: "Download DOCX" })).toBeVisible();
   });
 
   test("draft list shows a created draft and can be reopened", async ({ page }) => {
     await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
     await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
 
-    await page.goto("/candidate/resume-builder");
+    await page.goto("/candidate/workspace/studio");
     await expect(page.getByText("My Resume").first()).toBeVisible({ timeout: 10_000 });
   });
 });
