@@ -7,6 +7,7 @@ import { LanguageSwitcher } from "@/components/shared/language-switcher";
 import { CopilotDialog } from "@/components/recruiter/copilot-dialog";
 import { getCurrentUser } from "@/lib/queries/candidate";
 import { getRecruiterContext } from "@/lib/queries/jobs";
+import { createClient } from "@/lib/supabase/server";
 
 export default async function RecruiterLayout({
   children,
@@ -22,10 +23,17 @@ export default async function RecruiterLayout({
   const recruiter = await getRecruiterContext(user.id);
   if (!recruiter) redirect({ href: "/candidate/dashboard", locale });
 
-  const [tNav, tCopilot] = await Promise.all([
+  const supabase = await createClient();
+  const [{ data: unreadThreads }, tNav, tCopilot] = await Promise.all([
+    supabase
+      .from("message_threads")
+      .select("recruiter_unread_count")
+      .eq("recruiter_id", recruiter.id)
+      .gt("recruiter_unread_count", 0),
     getTranslations("Recruiter.Nav"),
     getTranslations("Recruiter.Copilot"),
   ]);
+  const unreadMessages = unreadThreads?.reduce((s, t) => s + (t.recruiter_unread_count ?? 0), 0) ?? 0;
 
   const p = (path: string) => `/${locale}/recruiter/${path}`;
 
@@ -35,7 +43,7 @@ export default async function RecruiterLayout({
       items: [
         { href: p("dashboard"), label: tNav("dashboard"), icon: "LayoutDashboard" },
         { href: p("analytics"), label: tNav("analytics"), icon: "BarChart3" },
-        { href: p("messages"), label: tNav("messages"), icon: "MessageCircle" },
+        { href: p("messages"), label: tNav("messages"), icon: "MessageCircle", badge: unreadMessages },
         { href: p("ai-assistant"), label: tNav("aiAssistant"), icon: "Bot" },
       ],
     },

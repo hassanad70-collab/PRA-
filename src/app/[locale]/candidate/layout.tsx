@@ -5,6 +5,7 @@ import { redirect } from "@/i18n/navigation";
 import { DashboardShell, type NavGroup } from "@/components/shared/dashboard-shell";
 import { LanguageSwitcher } from "@/components/shared/language-switcher";
 import { getCurrentUser } from "@/lib/queries/candidate";
+import { createClient } from "@/lib/supabase/server";
 
 export default async function CandidateLayout({
   children,
@@ -17,10 +18,19 @@ export default async function CandidateLayout({
   const user = await getCurrentUser();
   if (!user) redirect({ href: "/login", locale });
 
-  const [tNav, tCommon] = await Promise.all([
+  const supabase = await createClient();
+  const [{ data: unreadThreads }, unreadNotifsResult, tNav, tCommon] = await Promise.all([
+    supabase
+      .from("message_threads")
+      .select("candidate_unread_count")
+      .eq("candidate_id", user.id)
+      .gt("candidate_unread_count", 0),
+    supabase.rpc("get_unread_notification_count"),
     getTranslations("Candidate.Nav"),
     getTranslations("Common"),
   ]);
+  const unreadMessages = unreadThreads?.reduce((s, t) => s + (t.candidate_unread_count ?? 0), 0) ?? 0;
+  const unreadNotifications = (unreadNotifsResult.data as number | null) ?? 0;
 
   const p = (path: string) => `/${locale}/candidate${path}`;
   const w = (path: string) => `/${locale}/candidate/workspace${path}`;
@@ -58,7 +68,7 @@ export default async function CandidateLayout({
         { href: w("/app-intelligence"),  label: tNav("appIntelligence"),      icon: "BarChart2" },
         { href: p("/interviews"),        label: tNav("interviews"),           icon: "Calendar" },
         { href: p("/offers"),            label: tNav("offers"),               icon: "FileText" },
-        { href: p("/messages"),          label: tNav("messages"),             icon: "MessageCircle" },
+        { href: p("/messages"),          label: tNav("messages"),             icon: "MessageCircle", badge: unreadMessages },
       ],
     },
     {
@@ -68,7 +78,7 @@ export default async function CandidateLayout({
         { href: w("/documents"),    label: tNav("documents"),       icon: "FolderOpen" },
         { href: w("/favorites"),    label: tNav("favorites"),       icon: "Star" },
         { href: w("/analytics"),    label: tNav("careerAnalytics"), icon: "LineChart" },
-        { href: p("/notifications"),label: tNav("notifications"),   icon: "Bell" },
+        { href: p("/notifications"),label: tNav("notifications"),   icon: "Bell", badge: unreadNotifications },
         { href: p("/settings"),     label: tNav("settings"),        icon: "Settings" },
       ],
     },

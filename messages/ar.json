@@ -1129,7 +1129,10 @@
       "quickActionPostJob": "نشر وظيفة",
       "quickActionViewCandidates": "عرض المرشحين",
       "quickActionInterviews": "المقابلات",
-      "quickActionInviteTeammate": "دعوة زميل"
+      "quickActionInviteTeammate": "دعوة زميل",
+      "activityFeedTitle": "النشاط الأخير",
+      "activityFeedSubtitle": "آخر 24 ساعة",
+      "activityFeedEmpty": "لا يوجد نشاط في آخر 24 ساعة."
     },
     "Shared": {
       "jobStatus": {

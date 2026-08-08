@@ -27,6 +27,7 @@ import {
   getUpcomingInterviews,
 } from "@/lib/queries/dashboard";
 import { getRecruiterContext } from "@/lib/queries/jobs";
+import { getRecentActivity } from "@/lib/queries/activity-feed";
 import { formatDate, formatRelativeTime, initials } from "@/lib/utils";
 
 export default async function RecruiterDashboardPage({ params }: { params: Promise<{ locale: string }> }) {
@@ -37,12 +38,13 @@ export default async function RecruiterDashboardPage({ params }: { params: Promi
   const recruiter = await getRecruiterContext(user.id);
   if (!recruiter) redirect({ href: "/candidate/dashboard", locale });
 
-  const [stats, trend, topSkills, upcomingInterviews, recentHires, t, tShared] = await Promise.all([
+  const [stats, trend, topSkills, upcomingInterviews, recentHires, recentActivity, t, tShared] = await Promise.all([
     getCompanyDashboardStats(recruiter.company_id),
     getMonthlyApplicationTrend(recruiter.company_id),
     getTopSkills(recruiter.company_id),
     getUpcomingInterviews(recruiter.company_id),
     getRecentHires(recruiter.company_id),
+    getRecentActivity(recruiter.company_id),
     getTranslations("Recruiter.Dashboard"),
     getTranslations("Recruiter.Shared"),
   ]);
@@ -191,6 +193,42 @@ export default async function RecruiterDashboardPage({ params }: { params: Promi
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Activity Feed */}
+      <Card>
+        <CardHeader>
+          <div>
+            <CardTitle className="text-base">{t("activityFeedTitle")}</CardTitle>
+            <p className="mt-0.5 text-xs text-muted-foreground">{t("activityFeedSubtitle")}</p>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {recentActivity.length === 0 ? (
+            <p className="py-4 text-center text-sm text-muted-foreground">{t("activityFeedEmpty")}</p>
+          ) : (
+            <div className="space-y-1">
+              {recentActivity.map((item) => (
+                <Link
+                  key={item.id}
+                  href={`/${locale}/recruiter${item.href.replace("/recruiter", "")}`}
+                  className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm hover:bg-accent"
+                >
+                  <span className="shrink-0 text-base">{item.icon}</span>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium">{item.title}</p>
+                    {item.subtitle && (
+                      <p className="truncate text-xs text-muted-foreground">{item.subtitle}</p>
+                    )}
+                  </div>
+                  <span className="shrink-0 text-xs text-muted-foreground">
+                    {formatRelativeTime(item.occurred_at)}
+                  </span>
+                </Link>
+              ))}
             </div>
           )}
         </CardContent>

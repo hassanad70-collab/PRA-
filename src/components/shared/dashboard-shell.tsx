@@ -108,6 +108,7 @@ export interface NavItem {
   href: string;
   label: string;
   icon: IconName;
+  badge?: number;
 }
 
 export interface NavGroup {
@@ -146,7 +147,12 @@ function NavLink({ item, pathname, onClick }: { item: NavItem; pathname: string;
       )}
     >
       <Icon className="h-4 w-4 shrink-0" />
-      {item.label}
+      <span className="flex-1">{item.label}</span>
+      {item.badge != null && item.badge > 0 && (
+        <span className="ml-auto flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-none text-primary-foreground">
+          {item.badge > 99 ? "99+" : item.badge}
+        </span>
+      )}
     </Link>
   );
 }

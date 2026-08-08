@@ -1129,7 +1129,10 @@
       "quickActionPostJob": "Post a job",
       "quickActionViewCandidates": "View candidates",
       "quickActionInterviews": "Interviews",
-      "quickActionInviteTeammate": "Invite teammate"
+      "quickActionInviteTeammate": "Invite teammate",
+      "activityFeedTitle": "Recent Activity",
+      "activityFeedSubtitle": "Last 24 hours",
+      "activityFeedEmpty": "No activity in the last 24 hours."
     },
     "Shared": {
       "jobStatus": {

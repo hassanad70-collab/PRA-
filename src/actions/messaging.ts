@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/queries/candidate";
 import { getRecruiterContext } from "@/lib/queries/jobs";
+import { dispatchNotification } from "@/lib/notifications/dispatch";
 
 // ----------------------------------------------------------------
 // Shared: find or create a thread between a recruiter and candidate
@@ -80,6 +81,20 @@ export async function recruiterSendMessageAction(
   // Simple unread bump — increment candidate_unread_count
   await supabase.rpc("increment_unread" as never, { p_thread_id: threadId, p_role: "candidate" }).maybeSingle();
 
+  // Fire-and-forget: notify candidate of new message
+  dispatchNotification({
+    userId: candidateId,
+    type: "system",
+    title: "New message from recruiter",
+    message: `${recruiter.company?.name ?? "A recruiter"} sent you a message.`,
+    link: "/candidate/messages",
+    email: {
+      subject: "You have a new message on PRA Talent Intelligence",
+      htmlBody: `<p>You have received a new message from <strong>${recruiter.company?.name ?? "a recruiter"}</strong> on PRA Talent Intelligence.</p><p><a href="https://pra-eta-umber.vercel.app/en/candidate/messages">View message</a></p>`,
+      textBody: `You have a new message from ${recruiter.company?.name ?? "a recruiter"} on PRA Talent Intelligence. Visit https://pra-eta-umber.vercel.app/en/candidate/messages to read it.`,
+    },
+  });
+
   revalidatePath("/recruiter/messages");
   return { threadId };
 }
@@ -120,6 +135,20 @@ export async function candidateSendMessageAction(
     .from("message_threads")
     .update({ last_message_at: new Date().toISOString() })
     .eq("id", threadId);
+
+  // Fire-and-forget: notify recruiter of candidate reply
+  dispatchNotification({
+    userId: thread.recruiter_id,
+    type: "system",
+    title: "New message from candidate",
+    message: "A candidate replied to your message.",
+    link: "/recruiter/messages",
+    email: {
+      subject: "A candidate replied on PRA Talent Intelligence",
+      htmlBody: `<p>A candidate has replied to your message on PRA Talent Intelligence.</p><p><a href="https://pra-eta-umber.vercel.app/en/recruiter/messages">View message</a></p>`,
+      textBody: `A candidate replied to your message on PRA Talent Intelligence. Visit https://pra-eta-umber.vercel.app/en/recruiter/messages to read it.`,
+    },
+  });
 
   revalidatePath("/candidate/messages");
 }

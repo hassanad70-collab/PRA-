@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { generateOfferLetter } from "@/lib/ai/offer-letter";
+import { dispatchNotification } from "@/lib/notifications/dispatch";
 import { getCurrentUser } from "@/lib/queries/candidate";
 import { getRecruiterContext } from "@/lib/queries/jobs";
 import { createClient } from "@/lib/supabase/server";
@@ -58,6 +59,20 @@ export async function createOfferAction(input: {
     .single();
 
   if (error || !data) throw new Error(error?.message ?? "Failed to create offer");
+
+  // Fire-and-forget: notify candidate of new offer
+  dispatchNotification({
+    userId: input.candidateId,
+    type: "offer_extended",
+    title: "You have a new job offer",
+    message: `${recruiter.company?.name ?? "A company"} has extended an offer for ${input.offerTitle}.`,
+    link: "/candidate/offers",
+    email: {
+      subject: `Job offer: ${input.offerTitle}`,
+      htmlBody: `<p><strong>${recruiter.company?.name ?? "A company"}</strong> has extended a job offer for <strong>${input.offerTitle}</strong> on PRA Talent Intelligence.</p><p><a href="https://pra-eta-umber.vercel.app/en/candidate/offers">View offer</a></p>`,
+      textBody: `${recruiter.company?.name ?? "A company"} has extended a job offer for ${input.offerTitle}. Visit https://pra-eta-umber.vercel.app/en/candidate/offers to view and respond.`,
+    },
+  });
 
   revalidatePath("/recruiter/offers");
   revalidatePath(`/recruiter/jobs/${input.jobId}`);
@@ -116,6 +131,16 @@ export async function respondToOfferAction(
   if (!user) throw new Error("Unauthenticated");
 
   const supabase = await createClient();
+
+  // Fetch offer to get recruiter context for notification
+  const { data: offer } = await supabase
+    .from("offers")
+    .select("recruiter_id, offer_title, jobs(title)")
+    .eq("id", offerId)
+    .eq("candidate_id", user.id)
+    .eq("status", "pending")
+    .single();
+
   const { error } = await supabase
     .from("offers")
     .update({
@@ -128,6 +153,26 @@ export async function respondToOfferAction(
     .eq("status", "pending");
 
   if (error) throw new Error(error.message);
+
+  // Fire-and-forget: notify recruiter of offer response
+  if (offer?.recruiter_id) {
+    const jobTitle =
+      (Array.isArray(offer.jobs) ? offer.jobs[0] : offer.jobs) as { title: string } | null;
+    const verb = status === "accepted" ? "accepted" : "declined";
+    dispatchNotification({
+      userId: offer.recruiter_id,
+      type: "system",
+      title: `Offer ${verb}`,
+      message: `${user.full_name} has ${verb} the offer for ${jobTitle?.title ?? offer.offer_title}.`,
+      link: "/recruiter/offers",
+      email: {
+        subject: `Offer ${verb}: ${jobTitle?.title ?? offer.offer_title}`,
+        htmlBody: `<p><strong>${user.full_name}</strong> has ${verb} your offer for <strong>${jobTitle?.title ?? offer.offer_title}</strong> on PRA Talent Intelligence.</p><p><a href="https://pra-eta-umber.vercel.app/en/recruiter/offers">View offers</a></p>`,
+        textBody: `${user.full_name} has ${verb} your offer for ${jobTitle?.title ?? offer.offer_title}. Visit https://pra-eta-umber.vercel.app/en/recruiter/offers to see details.`,
+      },
+    });
+  }
+
   revalidatePath("/candidate/offers");
 }
 
