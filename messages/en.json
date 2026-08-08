@@ -12,12 +12,30 @@
       "title": "Free AI Resume Checker — Instant ATS Score",
       "description": "Get an instant, AI-powered ATS compatibility score for your resume. Free, no account required."
     },
-    "login": { "title": "Sign In", "description": "Sign in to your PRA Talent Intelligence account." },
-    "register": { "title": "Create Account", "description": "Create your free PRA Talent Intelligence account." },
-    "forgotPassword": { "title": "Forgot Password", "description": "Reset your PRA Talent Intelligence account password." },
-    "resetPassword": { "title": "Reset Password", "description": "Set a new password for your PRA Talent Intelligence account." },
-    "phoneLogin": { "title": "Sign In with Mobile", "description": "Sign in to your PRA Talent Intelligence account using your mobile number." },
-    "completeProfile": { "title": "Complete Your Profile", "description": "Finish setting up your PRA Talent Intelligence account." }
+    "login": {
+      "title": "Sign In",
+      "description": "Sign in to your PRA Talent Intelligence account."
+    },
+    "register": {
+      "title": "Create Account",
+      "description": "Create your free PRA Talent Intelligence account."
+    },
+    "forgotPassword": {
+      "title": "Forgot Password",
+      "description": "Reset your PRA Talent Intelligence account password."
+    },
+    "resetPassword": {
+      "title": "Reset Password",
+      "description": "Set a new password for your PRA Talent Intelligence account."
+    },
+    "phoneLogin": {
+      "title": "Sign In with Mobile",
+      "description": "Sign in to your PRA Talent Intelligence account using your mobile number."
+    },
+    "completeProfile": {
+      "title": "Complete Your Profile",
+      "description": "Finish setting up your PRA Talent Intelligence account."
+    }
   },
   "Common": {
     "brand": "PRA Talent Intelligence",
@@ -91,10 +109,22 @@
       "startHiring": "Get started free",
       "tryAtsChecker": "Try the free ATS Checker",
       "stats": [
-        { "value": "95%", "label": "ATS pass rate" },
-        { "value": "3x", "label": "more interview callbacks" },
-        { "value": "10s", "label": "to check your resume" },
-        { "value": "100%", "label": "free to try" }
+        {
+          "value": "95%",
+          "label": "ATS pass rate"
+        },
+        {
+          "value": "3x",
+          "label": "more interview callbacks"
+        },
+        {
+          "value": "10s",
+          "label": "to check your resume"
+        },
+        {
+          "value": "100%",
+          "label": "free to try"
+        }
       ]
     },
     "Trusted": {
@@ -106,10 +136,22 @@
       "freeNoAccount": "Free — no account required",
       "atsLabel": "ATS",
       "breakdown": [
-        { "key": "experience", "value": 90 },
-        { "key": "skills", "value": 85 },
-        { "key": "formatting", "value": 92 },
-        { "key": "education", "value": 80 }
+        {
+          "key": "experience",
+          "value": 90
+        },
+        {
+          "key": "skills",
+          "value": 85
+        },
+        {
+          "key": "formatting",
+          "value": 92
+        },
+        {
+          "key": "education",
+          "value": 80
+        }
       ],
       "title": "Free AI Resume Checker — see your <highlight>ATS score</highlight> in seconds",
       "subtitle": "Upload your resume and get a complete, AI-powered ATS compatibility analysis instantly — no account, no credit card, no waiting.",
@@ -129,36 +171,95 @@
       "comingSoonDialogTitle": "{tool} — Coming soon",
       "comingSoonDialogBody": "{description} We're building this next as part of PRA's AI career toolkit. In the meantime, try the free ATS Resume Checker — it's live today.",
       "tools": [
-        { "key": "ats_checker", "label": "ATS Resume Checker", "description": "Get an instant, AI-powered ATS compatibility score for your resume — free, no account required." },
-        { "key": "resume_builder", "label": "AI Resume Builder", "description": "Build a professional, ATS-optimized resume from scratch with AI guidance." },
-        { "key": "cover_letter_generator", "label": "Cover Letter Generator", "description": "Generate a tailored cover letter for any job in seconds." },
-        { "key": "interview_prep", "label": "Interview Preparation", "description": "Practice with AI-generated interview questions tailored to your target role." },
-        { "key": "career_advisor", "label": "AI Career Advisor", "description": "Get personalized guidance on your next career move, skill gaps, and growth path." }
+        {
+          "key": "ats_checker",
+          "label": "ATS Resume Checker",
+          "description": "Get an instant, AI-powered ATS compatibility score for your resume — free, no account required."
+        },
+        {
+          "key": "resume_builder",
+          "label": "AI Resume Builder",
+          "description": "Build a professional, ATS-optimized resume from scratch with AI guidance."
+        },
+        {
+          "key": "cover_letter_generator",
+          "label": "Cover Letter Generator",
+          "description": "Generate a tailored cover letter for any job in seconds."
+        },
+        {
+          "key": "interview_prep",
+          "label": "Interview Preparation",
+          "description": "Practice with AI-generated interview questions tailored to your target role."
+        },
+        {
+          "key": "career_advisor",
+          "label": "AI Career Advisor",
+          "description": "Get personalized guidance on your next career move, skill gaps, and growth path."
+        }
       ]
     },
     "Features": {
       "title": "Everything your talent team needs, in one platform",
       "subtitle": "Replace your ATS, resume screener, and analytics stack with a single AI-native recruitment intelligence system.",
       "items": [
-        { "title": "AI Resume Parser", "description": "Extracts experience, education, skills, and achievements from any resume in seconds." },
-        { "title": "AI Job Matching", "description": "Every candidate is automatically matched against every open role with a live match score." },
-        { "title": "ATS Scoring", "description": "Instant, transparent ATS scores with formatting, keyword, and readability breakdowns." },
-        { "title": "AI Screening Engine", "description": "Automated candidate evaluation across experience, skills, culture fit, and communication." },
-        { "title": "Candidate Ranking", "description": "Rank entire applicant pools instantly using a weighted, explainable AI scoring model." },
-        { "title": "AI Interview Assistant", "description": "Generate technical, behavioral, and situational interview questions from any job description." },
-        { "title": "Talent Pool & CRM", "description": "Save, tag, and nurture candidates in a searchable talent community for future roles." },
-        { "title": "Fraud & Duplicate Detection", "description": "Flag inconsistent resumes and duplicate candidate profiles before they reach your pipeline." },
-        { "title": "Recruitment Copilot", "description": "An AI assistant across the platform — from job descriptions to offer letters." }
+        {
+          "title": "AI Resume Parser",
+          "description": "Extracts experience, education, skills, and achievements from any resume in seconds."
+        },
+        {
+          "title": "AI Job Matching",
+          "description": "Every candidate is automatically matched against every open role with a live match score."
+        },
+        {
+          "title": "ATS Scoring",
+          "description": "Instant, transparent ATS scores with formatting, keyword, and readability breakdowns."
+        },
+        {
+          "title": "AI Screening Engine",
+          "description": "Automated candidate evaluation across experience, skills, culture fit, and communication."
+        },
+        {
+          "title": "Candidate Ranking",
+          "description": "Rank entire applicant pools instantly using a weighted, explainable AI scoring model."
+        },
+        {
+          "title": "AI Interview Assistant",
+          "description": "Generate technical, behavioral, and situational interview questions from any job description."
+        },
+        {
+          "title": "Talent Pool & CRM",
+          "description": "Save, tag, and nurture candidates in a searchable talent community for future roles."
+        },
+        {
+          "title": "Fraud & Duplicate Detection",
+          "description": "Flag inconsistent resumes and duplicate candidate profiles before they reach your pipeline."
+        },
+        {
+          "title": "Recruitment Copilot",
+          "description": "An AI assistant across the platform — from job descriptions to offer letters."
+        }
       ]
     },
     "HowItWorks": {
       "title": "How it works",
       "subtitle": "From upload to hire, powered by AI at every step.",
       "steps": [
-        { "title": "Upload your resume", "description": "Candidates upload a CV once. Our AI parser extracts every detail automatically." },
-        { "title": "AI builds your profile", "description": "Experience, education, skills, and achievements populate the profile instantly." },
-        { "title": "Get matched to jobs", "description": "Every active role is scored against the candidate with strengths and gaps explained." },
-        { "title": "Recruiters screen with AI", "description": "Recruiters see ranked, AI-scored candidates the moment they apply — no manual review needed." }
+        {
+          "title": "Upload your resume",
+          "description": "Candidates upload a CV once. Our AI parser extracts every detail automatically."
+        },
+        {
+          "title": "AI builds your profile",
+          "description": "Experience, education, skills, and achievements populate the profile instantly."
+        },
+        {
+          "title": "Get matched to jobs",
+          "description": "Every active role is scored against the candidate with strengths and gaps explained."
+        },
+        {
+          "title": "Recruiters screen with AI",
+          "description": "Recruiters see ranked, AI-scored candidates the moment they apply — no manual review needed."
+        }
       ]
     },
     "JobsPreview": {
@@ -187,19 +288,46 @@
     "Testimonials": {
       "title": "Loved by talent teams",
       "items": [
-        { "name": "Amelia Ross", "role": "VP of People, Northwind", "quote": "We went from a two-week screening backlog to same-day shortlists. The AI match scores are shockingly accurate." },
-        { "name": "David Okafor", "role": "Head of Talent, Cascade Digital", "quote": "The ATS scoring alone paid for the platform — candidates fix their resumes and apply-quality went way up." },
-        { "name": "Priya Nair", "role": "Recruiting Lead, Vertex Labs", "quote": "PRA's screening engine gives our recruiters a ranked, explained shortlist in minutes instead of days." }
+        {
+          "name": "Amelia Ross",
+          "role": "VP of People, Northwind",
+          "quote": "We went from a two-week screening backlog to same-day shortlists. The AI match scores are shockingly accurate."
+        },
+        {
+          "name": "David Okafor",
+          "role": "Head of Talent, Cascade Digital",
+          "quote": "The ATS scoring alone paid for the platform — candidates fix their resumes and apply-quality went way up."
+        },
+        {
+          "name": "Priya Nair",
+          "role": "Recruiting Lead, Vertex Labs",
+          "quote": "PRA's screening engine gives our recruiters a ranked, explained shortlist in minutes instead of days."
+        }
       ]
     },
     "Faq": {
       "title": "Frequently asked questions",
       "items": [
-        { "q": "How does the AI resume parser work?", "a": "When a candidate uploads a CV, we extract raw text and send it to an AI model that identifies structured fields — contact info, experience, education, skills, certifications, and more — then populates the candidate profile automatically." },
-        { "q": "How is the ATS score calculated?", "a": "Each resume is scored across experience, skills, formatting, education, and achievements, plus keyword density and recruiter readability. Scores are generated by an AI model and are fully explainable with specific suggestions." },
-        { "q": "How does AI job matching work?", "a": "We generate vector embeddings for every resume and job description, then combine semantic similarity search (pgvector) with an AI reasoning pass to produce a match score, strengths, missing skills, and interview probability." },
-        { "q": "Is my data secure?", "a": "Yes. PRA uses role-based access control, row-level security on every table, encrypted storage, and full audit logging. Only authorized recruiters at your company can see your candidates' data." },
-        { "q": "Can I use PRA without AI features?", "a": "Yes — every AI feature is additive. You can run the platform as a traditional ATS and enable AI screening, matching, and scoring whenever you're ready." }
+        {
+          "q": "How does the AI resume parser work?",
+          "a": "When a candidate uploads a CV, we extract raw text and send it to an AI model that identifies structured fields — contact info, experience, education, skills, certifications, and more — then populates the candidate profile automatically."
+        },
+        {
+          "q": "How is the ATS score calculated?",
+          "a": "Each resume is scored across experience, skills, formatting, education, and achievements, plus keyword density and recruiter readability. Scores are generated by an AI model and are fully explainable with specific suggestions."
+        },
+        {
+          "q": "How does AI job matching work?",
+          "a": "We generate vector embeddings for every resume and job description, then combine semantic similarity search (pgvector) with an AI reasoning pass to produce a match score, strengths, missing skills, and interview probability."
+        },
+        {
+          "q": "Is my data secure?",
+          "a": "Yes. PRA uses role-based access control, row-level security on every table, encrypted storage, and full audit logging. Only authorized recruiters at your company can see your candidates' data."
+        },
+        {
+          "q": "Can I use PRA without AI features?",
+          "a": "Yes — every AI feature is additive. You can run the platform as a traditional ATS and enable AI screening, matching, and scoring whenever you're ready."
+        }
       ]
     },
     "Cta": {
@@ -372,7 +500,9 @@
       "documents": "Documents",
       "favorites": "Favorites",
       "careerAnalytics": "Career Analytics",
-      "notifications": "Notifications"
+      "notifications": "Notifications",
+      "offers": "Offers",
+      "messages": "Messages"
     },
     "Shared": {
       "resume": "Resume",
@@ -899,6 +1029,40 @@
     },
     "RadioGroupResumes": {
       "primary": "Primary"
+    },
+    "Messages": {
+      "title": "Messages",
+      "subtitle": "Your conversations with recruiters",
+      "inbox": "Inbox",
+      "noThreads": "No messages yet. Recruiters will reach out here.",
+      "selectThread": "Select a conversation to view messages",
+      "placeholder": "Type a message… (Enter to send)",
+      "send": "Send",
+      "you": "You",
+      "sendFailed": "Failed to send message. Please try again."
+    },
+    "Offers": {
+      "title": "Job Offers",
+      "subtitle": "{count, plural, =0 {No pending offers} one {# pending offer} other {# pending offers}}",
+      "noOffers": "No offers yet. Accepted offers will appear here.",
+      "salary": "Salary",
+      "startDate": "Start date",
+      "expiryDate": "Offer expires",
+      "accept": "Accept",
+      "decline": "Decline",
+      "pending": "Pending",
+      "accepted": "Accepted",
+      "declined": "Declined",
+      "expired": "Expired",
+      "withdrawn": "Withdrawn",
+      "acceptConfirmTitle": "Accept this offer?",
+      "declineConfirmTitle": "Decline this offer?",
+      "declineNote": "Optionally let the recruiter know why you are declining.",
+      "confirmAccept": "Yes, accept",
+      "confirmDecline": "Decline offer",
+      "cancel": "Cancel",
+      "note": "Reason (optional)",
+      "sentAgo": "Sent"
     }
   },
   "Recruiter": {
@@ -925,7 +1089,9 @@
       "resumeIntelligence": "Resume Intelligence",
       "aiJobDescription": "AI Job Description",
       "companyProfile": "Company Profile",
-      "hiringTeam": "Hiring Team"
+      "hiringTeam": "Hiring Team",
+      "messages": "Messages",
+      "offers": "Offers"
     },
     "Dashboard": {
       "title": "Hiring Command Center",
@@ -1115,7 +1281,11 @@
     "TalentPool": {
       "title": "Talent Pool",
       "subtitle": "Candidates you've saved for future roles at {company}.",
-      "emptyState": "Your talent pool is empty. Save strong candidates from job applications to build your pipeline for future roles."
+      "emptyState": "Your talent pool is empty. Save strong candidates from job applications to build your pipeline for future roles.",
+      "searchPlaceholder": "Search by name or title…",
+      "favoritesOnly": "Favorites only",
+      "removeToast": "Removed from talent pool",
+      "removeFailed": "Failed to remove candidate"
     },
     "Settings": {
       "title": "Settings",
@@ -1514,14 +1684,53 @@
       "openCopilot": "Open Copilot",
       "openCopilotHint": "Click the button above or use the Copilot button in the header."
     },
-    "TalentPool": {
-      "title": "Talent Pool",
-      "subtitle": "Candidates you've saved for future roles at {company}.",
-      "emptyState": "Your talent pool is empty. Save strong candidates from job applications to build your pipeline for future roles.",
-      "searchPlaceholder": "Search by name or title…",
-      "favoritesOnly": "Favorites only",
-      "removeToast": "Removed from talent pool",
-      "removeFailed": "Failed to remove candidate"
+    "Messages": {
+      "title": "Messages",
+      "subtitle": "Direct conversations with candidates",
+      "inbox": "Inbox",
+      "noThreads": "No conversations yet.",
+      "selectThread": "Select a conversation",
+      "placeholder": "Type a message… (Enter to send)",
+      "send": "Send",
+      "sending": "Sending…",
+      "you": "You",
+      "sendFailed": "Failed to send. Please try again."
+    },
+    "Offers": {
+      "title": "Offer Management",
+      "subtitle": "Track all offers sent to candidates",
+      "createOffer": "Create Offer",
+      "noOffers": "No offers sent yet.",
+      "salaryRange": "Salary range",
+      "startDate": "Start date",
+      "expiryDate": "Expiry date",
+      "offerLetter": "Offer letter",
+      "generateLetter": "AI Generate",
+      "generating": "Generating…",
+      "additionalNotes": "Additional notes",
+      "withdraw": "Withdraw",
+      "withdrawConfirm": "Withdraw this offer?",
+      "send": "Send Offer",
+      "sending": "Sending…",
+      "cancel": "Cancel",
+      "offerTitle": "Job title",
+      "currency": "Currency",
+      "statusPending": "Pending",
+      "statusAccepted": "Accepted",
+      "statusDeclined": "Declined",
+      "statusExpired": "Expired",
+      "statusWithdrawn": "Withdrawn",
+      "sentOn": "Sent",
+      "respondedOn": "Responded",
+      "colCandidate": "Candidate",
+      "colJob": "Job",
+      "colSalary": "Salary",
+      "colExpiry": "Expiry",
+      "colStatus": "Status",
+      "statTotal": "Total Offers",
+      "statPending": "Pending",
+      "statAccepted": "Accepted",
+      "statAcceptanceRate": "Acceptance Rate"
     }
   }
 }

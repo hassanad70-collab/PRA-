@@ -35,6 +35,7 @@ export default async function RecruiterLayout({
       items: [
         { href: p("dashboard"), label: tNav("dashboard"), icon: "LayoutDashboard" },
         { href: p("analytics"), label: tNav("analytics"), icon: "BarChart3" },
+        { href: p("messages"), label: tNav("messages"), icon: "MessageCircle" },
         { href: p("ai-assistant"), label: tNav("aiAssistant"), icon: "Bot" },
       ],
     },
@@ -44,6 +45,7 @@ export default async function RecruiterLayout({
         { href: p("jobs"), label: tNav("jobs"), icon: "Briefcase" },
         { href: p("pipeline"), label: tNav("pipeline"), icon: "Activity" },
         { href: p("interviews"), label: tNav("interviews"), icon: "Calendar" },
+        { href: p("offers"), label: tNav("offers"), icon: "FileText" },
       ],
     },
     {

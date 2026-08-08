@@ -57,6 +57,8 @@ export default async function CandidateLayout({
         { href: p("/applications"),      label: tNav("applications"),         icon: "Briefcase" },
         { href: w("/app-intelligence"),  label: tNav("appIntelligence"),      icon: "BarChart2" },
         { href: p("/interviews"),        label: tNav("interviews"),           icon: "Calendar" },
+        { href: p("/offers"),            label: tNav("offers"),               icon: "FileText" },
+        { href: p("/messages"),          label: tNav("messages"),             icon: "MessageCircle" },
       ],
     },
     {

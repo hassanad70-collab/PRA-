@@ -969,3 +969,73 @@ export interface JobMatchWithCandidate {
   created_at: string;
   candidate: Candidate & { profile: Profile };
 }
+
+// ============================================================
+// Hiring Completion Platform (v1.6, migration 0049)
+// ============================================================
+
+export type OfferStatus = "pending" | "accepted" | "declined" | "expired" | "withdrawn";
+
+export interface MessageThread {
+  id: string;
+  company_id: string;
+  recruiter_id: string;
+  candidate_id: string;
+  job_id: string | null;
+  subject: string | null;
+  last_message_at: string;
+  recruiter_unread_count: number;
+  candidate_unread_count: number;
+  created_at: string;
+}
+
+export interface MessageThreadWithPreview extends MessageThread {
+  last_body: string | null;
+  other_name: string;
+  other_email: string;
+  job_title: string | null;
+}
+
+export interface Message {
+  id: string;
+  thread_id: string;
+  sender_role: "recruiter" | "candidate";
+  sender_id: string;
+  body: string;
+  is_read: boolean;
+  created_at: string;
+}
+
+export interface OfferTemplate {
+  id: string;
+  company_id: string;
+  name: string;
+  body: string;
+  created_at: string;
+}
+
+export interface Offer {
+  id: string;
+  company_id: string;
+  job_id: string;
+  candidate_id: string;
+  recruiter_id: string;
+  offer_title: string;
+  salary_min: number | null;
+  salary_max: number | null;
+  currency: string;
+  start_date: string | null;
+  expiry_date: string | null;
+  offer_letter: string | null;
+  status: OfferStatus;
+  candidate_note: string | null;
+  sent_at: string;
+  responded_at: string | null;
+  created_at: string;
+}
+
+export interface OfferWithContext extends Offer {
+  job: Pick<Job, "id" | "title" | "location">;
+  candidate: Pick<Candidate, "id"> & { profile: Pick<Profile, "full_name" | "email"> };
+  recruiter: Pick<Profile, "full_name" | "email">;
+}
