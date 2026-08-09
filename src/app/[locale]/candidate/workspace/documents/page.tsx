@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getCandidateFullProfile, getCurrentUser } from "@/lib/queries/candidate";
 import { getResumeDrafts } from "@/lib/queries/resume-builder";
+import { createClient } from "@/lib/supabase/server";
 import { formatDate } from "@/lib/utils";
 
 export default async function DocumentsPage({ params }: { params: Promise<{ locale: string }> }) {
@@ -14,12 +15,27 @@ export default async function DocumentsPage({ params }: { params: Promise<{ loca
   const user = await getCurrentUser();
   if (!user) redirect({ href: "/login", locale });
 
+  const supabase = await createClient();
   const [{ resumes }, drafts] = await Promise.all([
     getCandidateFullProfile(user.id),
     getResumeDrafts(user.id),
   ]);
 
   const finalizedDrafts = drafts.filter((d) => d.status === "finalized");
+
+  // Re-sign every resume URL at request time — the stored file_url is either
+  // null (new uploads) or a 7-day signed URL that may be expired. The "resumes"
+  // bucket is private, so getPublicUrl() always 403s. Generate a fresh 1-hour
+  // signed URL from file_path each time this page renders.
+  const resumesWithUrls = await Promise.all(
+    resumes.map(async (r) => {
+      if (!r.file_path) return { ...r, viewUrl: null };
+      const { data: signed } = await supabase.storage
+        .from("resumes")
+        .createSignedUrl(r.file_path, 60 * 60);
+      return { ...r, viewUrl: signed?.signedUrl ?? null };
+    })
+  );
 
   return (
     <div className="space-y-8">
@@ -38,7 +54,7 @@ export default async function DocumentsPage({ params }: { params: Promise<{ loca
           </Button>
         </div>
 
-        {resumes.length === 0 ? (
+        {resumesWithUrls.length === 0 ? (
           <Card>
             <CardContent className="py-8 text-center text-sm text-muted-foreground">
               No resumes uploaded yet.{" "}
@@ -49,7 +65,7 @@ export default async function DocumentsPage({ params }: { params: Promise<{ loca
           </Card>
         ) : (
           <div className="space-y-2">
-            {resumes.map((r) => (
+            {resumesWithUrls.map((r) => (
               <Card key={r.id}>
                 <CardContent className="flex items-center justify-between gap-4 pt-4 pb-4">
                   <div className="flex items-center gap-3 min-w-0">
@@ -61,9 +77,11 @@ export default async function DocumentsPage({ params }: { params: Promise<{ loca
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     {r.is_primary && <Badge variant="success">Primary</Badge>}
-                    <Button variant="ghost" size="sm" asChild>
-                      <a href={r.file_url} target="_blank" rel="noopener noreferrer">View</a>
-                    </Button>
+                    {r.viewUrl && (
+                      <Button variant="ghost" size="sm" asChild>
+                        <a href={r.viewUrl} target="_blank" rel="noopener noreferrer">View</a>
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>

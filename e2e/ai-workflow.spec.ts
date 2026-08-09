@@ -37,7 +37,9 @@ async function uploadAndGetResumeId(page: import("@playwright/test").Page) {
 
   const pdfPath = makeTestResumePdfFile(TEST_RESUME_LINES);
   await page.locator('input[type="file"]').setInputFiles(pdfPath);
-  await expect(page.getByText(/resume processed|ai parsing failed/i)).toBeVisible({ timeout: 30_000 });
+  // .first() avoids strict mode violation when the progress label and toast
+  // both match the regex simultaneously.
+  await expect(page.getByText(/resume processed|ai parsing failed/i).first()).toBeVisible({ timeout: 30_000 });
 
   const admin = adminClient();
   const { data: profile } = await admin.from("profiles").select("id").eq("email", TEST_USERS.candidate.email).single();

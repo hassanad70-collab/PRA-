@@ -39,8 +39,10 @@ test.describe("Resume upload", () => {
     await fileInput.setInputFiles(pdfPath);
 
     // Wait for success or graceful failure toast
+    // Use .first() because the progress label and the toast can both match
+    // the regex simultaneously — strict mode requires exactly one element.
     await expect(
-      page.getByText(/resume processed|ai parsing failed/i)
+      page.getByText(/resume processed|ai parsing failed/i).first()
     ).toBeVisible({ timeout: 30_000 });
 
     // Page must refresh and show the uploaded resume in the list
@@ -90,8 +92,10 @@ test.describe("Resume upload", () => {
     // The action can take a while (text extraction + AI pipeline, even in
     // fallback mode); wait for either the success or the graceful-failure
     // toast rather than a fixed timeout.
+    // .first() avoids strict mode violation when both the progress label and
+    // the toast simultaneously match the regex.
     await expect(
-      page.getByText(/resume processed|ai parsing failed/i)
+      page.getByText(/resume processed|ai parsing failed/i).first()
     ).toBeVisible({ timeout: 30_000 });
 
     // Either way, the page must not have thrown — the resume list re-renders.

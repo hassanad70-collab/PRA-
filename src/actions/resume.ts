@@ -20,17 +20,32 @@ const ALLOWED_TYPES = [
   "application/msword",
 ];
 
+// Derive a safe file extension from the MIME type so the original filename
+// is never part of the storage path. This eliminates all issues with spaces,
+// Arabic characters, Unicode, special characters, and duplicate names.
+const MIME_TO_EXT: Record<string, string> = {
+  "application/pdf": "pdf",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
+  "application/msword": "doc",
+};
+
 export interface UploadResumeResult extends ActionResult {
   resumeId?: string;
 }
 
 /**
  * Full resume upload pipeline:
- * 1. Upload the file to Supabase Storage (private, per-candidate folder).
- * 2. Create the `resumes` row.
- * 3. Extract raw text, run the AI parser, and populate the candidate profile.
- * 4. Generate an embedding and AI ATS score.
- * 5. Kick off AI job matching against every published job.
+ * 1. Validate the file (type + size only — filename is NEVER validated).
+ * 2. Generate a UUID-based storage path that is completely independent of the
+ *    original filename. Any filename is accepted: spaces, Arabic, Unicode, etc.
+ * 3. Upload the file to Supabase Storage (private, per-candidate folder).
+ * 4. Guarantee the candidates row exists (upsert) so the resumes FK can never
+ *    fail — handles OAuth users, admin-created accounts, and View As mode.
+ * 5. Create the `resumes` row. file_url is NOT stored (always re-signed at
+ *    render time from file_path — stored signed URLs expire and go stale).
+ * 6. Extract raw text, run the AI parser, and populate the candidate profile.
+ * 7. Generate an embedding and AI ATS score.
+ * 8. Kick off AI job matching against every published job.
  */
 export async function uploadResume(formData: FormData): Promise<UploadResumeResult> {
   const supabase = await createClient();
@@ -42,15 +57,21 @@ export async function uploadResume(formData: FormData): Promise<UploadResumeResu
 
   const file = formData.get("file") as File | null;
   if (!file || file.size === 0) return { success: false, error: "Please select a file to upload." };
+
   if (!ALLOWED_TYPES.includes(file.type)) {
-    return { success: false, error: "Only PDF and Word documents are supported." };
+    return { success: false, error: "Only PDF and Word documents (.pdf, .doc, .docx) are supported." };
   }
   if (file.size > 10 * 1024 * 1024) {
     return { success: false, error: "File must be smaller than 10MB." };
   }
 
+  // UUID-based storage filename — the original filename is NEVER used in storage.
+  // {userId}/{uuid}_{timestamp}.{ext}
+  const ext = MIME_TO_EXT[file.type] ?? "pdf";
+  const storageFilename = `${crypto.randomUUID()}_${Date.now()}.${ext}`;
+  const filePath = `${user.id}/${storageFilename}`;
+
   const buffer = Buffer.from(await file.arrayBuffer());
-  const filePath = `${user.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
 
   const { error: uploadError } = await supabase.storage.from("resumes").upload(filePath, buffer, {
     contentType: file.type,
@@ -59,17 +80,19 @@ export async function uploadResume(formData: FormData): Promise<UploadResumeResu
 
   if (uploadError) return { success: false, error: uploadError.message };
 
-  // The "resumes" bucket is private (supabase/migrations/0010_storage.sql),
-  // so getPublicUrl() would produce a URL that always 403s. Use a signed URL
-  // instead; callers that need a fresh link later should re-sign at request
-  // time since this one expires.
-  const { data: signedUrlData, error: signedUrlError } = await supabase.storage
-    .from("resumes")
-    .createSignedUrl(filePath, 60 * 60 * 24 * 7);
-
-  if (signedUrlError || !signedUrlData) {
-    return { success: false, error: "Failed to generate a resume access link." };
-  }
+  // Guarantee the candidates row exists before inserting into resumes.
+  // The FK constraint is resumes.candidate_id → candidates.id, so if the row
+  // is missing the insert fails with a FK violation. This can happen for:
+  //   • OAuth users (Google/Apple sign-in): Supabase trigger creates profiles
+  //     but no candidates row is created by our code for this auth path.
+  //   • Admin-created accounts that skipped the normal registration flow.
+  //   • super_admin users in View As mode navigating the candidate portal.
+  // Upsert with ignoreDuplicates is idempotent — it's a no-op when the row
+  // already exists (normal case) and creates it only when it's missing.
+  const admin = createAdminClient();
+  await admin
+    .from("candidates")
+    .upsert({ id: user.id }, { onConflict: "id", ignoreDuplicates: true });
 
   const { data: existingPrimary } = await supabase
     .from("resumes")
@@ -82,9 +105,9 @@ export async function uploadResume(formData: FormData): Promise<UploadResumeResu
     .from("resumes")
     .insert({
       candidate_id: user.id,
-      file_name: file.name,
-      file_url: signedUrlData.signedUrl,
-      file_path: filePath,
+      file_name: file.name,   // original filename — display only, never used for storage
+      file_url: null,          // not stored; re-signed from file_path at render time
+      file_path: filePath,     // UUID-based; the only path ever used to access the file
       file_type: file.type,
       file_size_bytes: file.size,
       parse_status: "processing",
@@ -104,7 +127,6 @@ export async function uploadResume(formData: FormData): Promise<UploadResumeResu
   try {
     await processResume(resume.id, user.id, buffer, file.type);
   } catch (err) {
-    const admin = createAdminClient();
     await admin
       .from("resumes")
       .update({ parse_status: "failed", parse_error: err instanceof Error ? err.message : "Unknown error" })

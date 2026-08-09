@@ -235,7 +235,7 @@ export interface Resume {
   id: string;
   candidate_id: string;
   file_name: string;
-  file_url: string;
+  file_url: string | null;
   file_path: string;
   file_type: string | null;
   file_size_bytes: number | null;
