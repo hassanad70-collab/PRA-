@@ -109,13 +109,13 @@ export async function uploadResume(formData: FormData): Promise<UploadResumeResu
       .from("resumes")
       .update({ parse_status: "failed", parse_error: err instanceof Error ? err.message : "Unknown error" })
       .eq("id", resume.id);
-    revalidateCandidatePath("/candidate/resume");
+    revalidateCandidatePath("/candidate/workspace/resumes");
     revalidateCandidatePath("/candidate/profile");
     revalidateCandidatePath("/candidate/dashboard");
     return { success: false, error: "Resume uploaded, but AI parsing failed. You can retry from your profile." };
   }
 
-  revalidateCandidatePath("/candidate/resume");
+  revalidateCandidatePath("/candidate/workspace/resumes");
   revalidateCandidatePath("/candidate/profile");
   revalidateCandidatePath("/candidate/dashboard");
 
@@ -238,7 +238,7 @@ export async function reparseResume(resumeId: string): Promise<ActionResult> {
     return { success: false, error: "Could not reparse this resume right now. Please try again." };
   }
 
-  revalidateCandidatePath("/candidate/resume");
+  revalidateCandidatePath("/candidate/workspace/resumes");
   revalidateCandidatePath("/candidate/profile");
   revalidateCandidatePath("/candidate/dashboard");
   return { success: true };
