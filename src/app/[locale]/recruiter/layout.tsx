@@ -5,6 +5,7 @@ import { redirect } from "@/i18n/navigation";
 import { DashboardShell, type NavGroup } from "@/components/shared/dashboard-shell";
 import { LanguageSwitcher } from "@/components/shared/language-switcher";
 import { CopilotDialog } from "@/components/recruiter/copilot-dialog";
+import { ViewAsSwitcher } from "@/components/super-admin/view-as-switcher";
 import { getCurrentUser } from "@/lib/queries/candidate";
 import { getRecruiterContext } from "@/lib/queries/jobs";
 import { createClient } from "@/lib/supabase/server";
@@ -21,19 +22,26 @@ export default async function RecruiterLayout({
   if (!user) redirect({ href: "/login", locale });
 
   const recruiter = await getRecruiterContext(user.id);
-  if (!recruiter) redirect({ href: "/candidate/dashboard", locale });
+  // Super Admin can browse recruiter routes in "View As" mode even without
+  // a recruiter profile. All RBAC permissions remain intact.
+  if (!recruiter && user.role !== "super_admin") {
+    redirect({ href: "/candidate/dashboard", locale });
+  }
 
   const supabase = await createClient();
-  const [{ data: unreadThreads }, tNav, tCopilot] = await Promise.all([
-    supabase
-      .from("message_threads")
-      .select("recruiter_unread_count")
-      .eq("recruiter_id", recruiter.id)
-      .gt("recruiter_unread_count", 0),
+  const [unreadThreadsResult, tNav, tCopilot] = await Promise.all([
+    recruiter
+      ? supabase
+          .from("message_threads")
+          .select("recruiter_unread_count")
+          .eq("recruiter_id", recruiter.id)
+          .gt("recruiter_unread_count", 0)
+      : Promise.resolve({ data: [] }),
     getTranslations("Recruiter.Nav"),
     getTranslations("Recruiter.Copilot"),
   ]);
-  const unreadMessages = unreadThreads?.reduce((s, t) => s + (t.recruiter_unread_count ?? 0), 0) ?? 0;
+  const unreadMessages =
+    unreadThreadsResult.data?.reduce((s, t) => s + (t.recruiter_unread_count ?? 0), 0) ?? 0;
 
   const p = (path: string) => `/${locale}/recruiter/${path}`;
 
@@ -91,6 +99,7 @@ export default async function RecruiterLayout({
       labels={{ settings: tNav("settings"), signOut: tNav("signOut"), openMenu: tNav("openMenu") }}
       headerExtra={
         <>
+          {user.role === "super_admin" && <ViewAsSwitcher locale={locale} />}
           <CopilotDialog
             labels={{
               trigger: tCopilot("trigger"),

@@ -22,7 +22,7 @@ export default async function RecruiterJobDetailPage({ params }: { params: Promi
   if (!user) redirect({ href: "/login", locale });
 
   const recruiter = await getRecruiterContext(user.id);
-  if (!recruiter) redirect({ href: "/candidate/dashboard", locale });
+  if (!recruiter) redirect({ href: "/recruiter/dashboard", locale });
 
   const job = await getJobById(id);
   if (!job || job.company_id !== recruiter.company_id) notFound();

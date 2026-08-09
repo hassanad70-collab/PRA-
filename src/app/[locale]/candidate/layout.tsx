@@ -4,6 +4,7 @@ import { redirect } from "@/i18n/navigation";
 
 import { DashboardShell, type NavGroup } from "@/components/shared/dashboard-shell";
 import { LanguageSwitcher } from "@/components/shared/language-switcher";
+import { ViewAsSwitcher } from "@/components/super-admin/view-as-switcher";
 import { getCurrentUser } from "@/lib/queries/candidate";
 import { createClient } from "@/lib/supabase/server";
 
@@ -114,7 +115,16 @@ export default async function CandidateLayout({
       user={{ full_name: user.full_name, email: user.email, role: "candidate" }}
       settingsHref={p("/settings")}
       labels={{ settings: tNav("settings"), signOut: tNav("signOut"), openMenu: tNav("openMenu") }}
-      headerExtra={<LanguageSwitcher />}
+      headerExtra={
+        user.role === "super_admin" ? (
+          <>
+            <ViewAsSwitcher locale={locale} />
+            <LanguageSwitcher />
+          </>
+        ) : (
+          <LanguageSwitcher />
+        )
+      }
     >
       {children}
     </DashboardShell>

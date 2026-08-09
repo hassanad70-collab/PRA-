@@ -122,7 +122,9 @@ export async function updateSession(request: NextRequest) {
     if (isAdminRoute && role !== "super_admin") {
       return NextResponse.redirect(new URL(roleHome(role, request), request.url));
     }
-    if (isCandidateRoute && role !== "candidate") {
+    // Super Admin can browse candidate routes while using the "View As" switcher.
+    // All RBAC permissions remain intact — only the UI and routing change.
+    if (isCandidateRoute && role !== "candidate" && role !== "super_admin") {
       return NextResponse.redirect(new URL(roleHome(role, request), request.url));
     }
   }

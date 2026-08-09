@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { DashboardShell, type NavItem } from "@/components/shared/dashboard-shell";
+import { ViewAsSwitcher } from "@/components/super-admin/view-as-switcher";
 import { getRedirectLocale } from "@/i18n/get-redirect-locale";
 import { getCurrentUser } from "@/lib/queries/candidate";
 
@@ -33,11 +34,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     redirect(user.role === "candidate" ? `/${locale}/candidate/dashboard` : `/${locale}/recruiter/dashboard`);
   }
 
+  const locale = await getRedirectLocale();
+
   return (
     <DashboardShell
       navItems={NAV_ITEMS}
       user={{ full_name: user.full_name, email: user.email, role: "super_admin" }}
       settingsHref="/admin/settings"
+      headerExtra={<ViewAsSwitcher locale={locale} />}
     >
       {children}
     </DashboardShell>

@@ -25,7 +25,7 @@ export default async function RecruiterCandidateDetailPage({ params }: { params:
   if (!user) redirect({ href: "/login", locale });
 
   const recruiter = await getRecruiterContext(user.id);
-  if (!recruiter) redirect({ href: "/candidate/dashboard", locale });
+  if (!recruiter) redirect({ href: "/recruiter/dashboard", locale });
 
   const { candidate, profile, experience, education, skills, resumes } = await getCandidateFullProfile(id);
   if (!candidate || !profile) notFound();

@@ -24,7 +24,7 @@ export default async function RecruiterOffersPage({ params }: { params: Promise<
   if (!user) redirect({ href: "/login", locale });
 
   const recruiter = await getRecruiterContext(user.id);
-  if (!recruiter) redirect({ href: "/candidate/dashboard", locale });
+  if (!recruiter) redirect({ href: "/recruiter/dashboard", locale });
 
   const [t, offers] = await Promise.all([
     getTranslations("Recruiter.Offers"),

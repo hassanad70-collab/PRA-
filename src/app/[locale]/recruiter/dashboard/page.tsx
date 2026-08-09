@@ -36,15 +36,19 @@ export default async function RecruiterDashboardPage({ params }: { params: Promi
   if (!user) redirect({ href: "/login", locale });
 
   const recruiter = await getRecruiterContext(user.id);
-  if (!recruiter) redirect({ href: "/candidate/dashboard", locale });
+  // Super Admin can browse recruiter routes in "View As" mode without a
+  // recruiter profile — all data queries fall back to empty/zero.
+  if (!recruiter && user.role !== "super_admin") redirect({ href: "/candidate/dashboard", locale });
 
+  const companyId = recruiter?.company_id ?? "";
+  const hasCompany = companyId !== "";
   const [stats, trend, topSkills, upcomingInterviews, recentHires, recentActivity, t, tShared] = await Promise.all([
-    getCompanyDashboardStats(recruiter.company_id),
-    getMonthlyApplicationTrend(recruiter.company_id),
-    getTopSkills(recruiter.company_id),
-    getUpcomingInterviews(recruiter.company_id),
-    getRecentHires(recruiter.company_id),
-    getRecentActivity(recruiter.company_id),
+    hasCompany ? getCompanyDashboardStats(companyId) : Promise.resolve(null),
+    hasCompany ? getMonthlyApplicationTrend(companyId) : Promise.resolve([]),
+    hasCompany ? getTopSkills(companyId) : Promise.resolve([]),
+    hasCompany ? getUpcomingInterviews(companyId) : Promise.resolve([]),
+    hasCompany ? getRecentHires(companyId) : Promise.resolve([]),
+    hasCompany ? getRecentActivity(companyId) : Promise.resolve([]),
     getTranslations("Recruiter.Dashboard"),
     getTranslations("Recruiter.Shared"),
   ]);
@@ -82,7 +86,7 @@ export default async function RecruiterDashboardPage({ params }: { params: Promi
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">{t("subtitle", { company: recruiter.company?.name ?? "" })}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{t("subtitle", { company: recruiter?.company?.name ?? "" })}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button variant="gradient" asChild size="sm">

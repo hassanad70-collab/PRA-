@@ -19,7 +19,7 @@ export default async function JobMatchesPage({
   if (!user) redirect({ href: "/login", locale });
 
   const recruiter = await getRecruiterContext(user.id);
-  if (!recruiter) redirect({ href: "/candidate/dashboard", locale });
+  if (!recruiter) redirect({ href: "/recruiter/dashboard", locale });
 
   const [job, t] = await Promise.all([
     getJobById(id),
