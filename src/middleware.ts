@@ -53,9 +53,14 @@ export async function middleware(request: NextRequest) {
   // next-intl produces (a locale redirect/rewrite or a plain pass-through),
   // so a session refresh is never silently dropped by the locale
   // middleware's own response replacing it.
-  sessionResponse.headers.forEach((value, key) => {
-    if (key.toLowerCase() === "set-cookie") intlResponse.headers.append(key, value);
-  });
+  //
+  // getSetCookie() returns each Set-Cookie header as a separate array entry,
+  // which is the correct way to iterate multiple Set-Cookie values. Using
+  // headers.forEach() instead would combine them into one comma-separated
+  // string, making chunked Supabase session tokens unreadable by the browser.
+  for (const cookie of sessionResponse.headers.getSetCookie()) {
+    intlResponse.headers.append("set-cookie", cookie);
+  }
   return intlResponse;
 }
 

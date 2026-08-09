@@ -346,6 +346,7 @@
   },
   "JobDetail": {
     "signInToApply": "Sign in to apply",
+    "applyNow": "Apply now",
     "aboutRole": "About this role",
     "responsibilities": "Responsibilities",
     "requirements": "Requirements",

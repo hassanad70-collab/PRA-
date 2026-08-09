@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
+import { getCurrentUser } from "@/lib/queries/candidate";
 import { getJobById } from "@/lib/queries/jobs";
 import { JsonLd } from "@/lib/seo/json-ld";
 import { buildMetadata } from "@/lib/seo/metadata";
@@ -30,13 +31,9 @@ export async function generateMetadata({
   });
 }
 
-// Same ISR window as the homepage/jobs list -- a job posting's content
-// (title, description, requirements) changes rarely after publish.
-export const revalidate = 300;
-
 export default async function PublicJobDetailPage({ params }: { params: Promise<{ id: string; locale: string }> }) {
   const { id, locale } = await params;
-  const job = await getJobById(id);
+  const [job, user] = await Promise.all([getJobById(id), getCurrentUser()]);
   if (!job || job.status !== "published") notFound();
 
   const t = await getTranslations("JobDetail");
@@ -71,9 +68,15 @@ export default async function PublicJobDetailPage({ params }: { params: Promise<
                 )}
               </div>
             </div>
-            <Button variant="gradient" size="lg" asChild>
-              <Link href={`/login?redirect=/${locale}/candidate/jobs/${job.id}`}>{t("signInToApply")}</Link>
-            </Button>
+            {user?.role === "candidate" ? (
+              <Button variant="gradient" size="lg" asChild>
+                <Link href={`/candidate/jobs/${job.id}`}>{t("applyNow")}</Link>
+              </Button>
+            ) : !user ? (
+              <Button variant="gradient" size="lg" asChild>
+                <Link href={`/login?redirect=/${locale}/candidate/jobs/${job.id}`}>{t("signInToApply")}</Link>
+              </Button>
+            ) : null}
           </div>
         </CardContent>
       </Card>

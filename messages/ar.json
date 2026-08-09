@@ -346,6 +346,7 @@
   },
   "JobDetail": {
     "signInToApply": "سجّل الدخول للتقديم",
+    "applyNow": "قدّم الآن",
     "aboutRole": "عن هذه الوظيفة",
     "responsibilities": "المسؤوليات",
     "requirements": "المتطلبات",
