@@ -71,6 +71,7 @@ Production: https://pra-eta-umber.vercel.app
 | [Repository Cleanup Report](release/REPOSITORY_CLEANUP_REPORT.md) | Identified cleanup candidates — NO actions taken; requires approval |
 | [Git Tag Prepared](release/GIT_TAG_PREPARED.md) | Prepared `v2.0.0` annotated tag commands — NOT executed; awaiting approval |
 | [Bug Fix Report — My Resumes](release/BUGFIX-RESUME-UPLOAD.md) | Root cause analysis, evidence, and lessons learned for the upload/view regression |
+| [Technical Debt Register](TECHNICAL_DEBT.md) | 13 audit items (1 High, 4 Medium, 8 Low) with severity, impact, and recommended fix |
 
 ---
 

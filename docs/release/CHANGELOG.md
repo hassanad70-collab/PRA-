@@ -7,6 +7,40 @@ Full git history: `git log --oneline --no-merges`
 
 ---
 
+## [v1.9] — 2026-08-17 — Resume Upload Architecture
+
+`[1d56b08]` v1.9 Resume Upload Architecture: FK guarantee, UUID filenames, fresh signed URLs, drag-and-drop UX  
+`[0e6ec49]` fix(auth): session consistency — authenticated users no longer see sign-in prompts
+
+### Issues Resolved (6)
+
+1. **FK violation on upload** — `resumes` insert sometimes failed with `insert or update on table "resumes" violates foreign key constraint "resumes_candidate_id_fkey"`. Root cause: `candidates` row was not guaranteed to exist before the insert. Fix: admin upsert of `candidates` row before every resume insert (`onConflict: "id", ignoreDuplicates: true`).
+2. **Filename restrictions** — Filenames with spaces, Arabic, Unicode, duplicates, or uppercase characters were rejected. Fix: UUID-based storage filename (`{uuid}_{timestamp}.{ext}`) completely decoupled from the original filename. Original filename stored in `file_name` (display only); no filename validation ever performed.
+3. **Stale/broken View links** — `file_url` was a 7-day Supabase signed URL that expired silently. The `resumes` bucket is private so `getPublicUrl()` always returns HTTP 403. Fix: `createSignedUrl(file_path, 3600)` called at render time on both the My Resumes page and the Documents page; `file_url` column made nullable (migration 0050).
+4. **Auth inconsistency** — Authenticated users occasionally saw sign-in prompts due to mixed `getSession`/`getUser` patterns. Fix: all server actions use only `supabase.auth.getUser()`.
+5. **Upload UX** — No progress indicator, no drag-and-drop, no error recovery. Fix: staged 6-phase progress bar with animation, drag-and-drop zone, MIME + extension + size validation only.
+6. **Missing test coverage** — 28 new Playwright tests across all 6 issues.
+
+### Database Changes
+
+- Migration `0050_resume_upload_v2.sql` — `ALTER TABLE resumes ALTER COLUMN file_url DROP NOT NULL`
+
+### Test Suite
+
+127 passed, 2 skipped, 0 failed (129 total)
+
+### Files Changed
+
+- `src/actions/resume.ts` — complete rewrite
+- `src/components/candidate/resume-upload.tsx` — complete rewrite  
+- `src/app/[locale]/candidate/workspace/documents/page.tsx` — null file_path guard + hide View when no file_path
+- `src/types/database.ts` — `Resume.file_url: string | null`
+- `e2e/resume-upload-v2.spec.ts` — new (28 tests)
+- `e2e/resume-upload.spec.ts` — `.first()` strict-mode fix
+- `e2e/ai-workflow.spec.ts` — `.first()` strict-mode fix in helper
+
+---
+
 ## [Hotfix] — 2026-08-09 — My Resumes Upload & View
 
 `[1fb5646]` fix: My Resumes page upload and view workflow fully restored

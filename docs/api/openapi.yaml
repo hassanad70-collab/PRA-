@@ -1,0 +1,981 @@
+openapi: 3.1.0
+
+info:
+  title: PRA Talent Intelligence API
+  version: 2.0.0
+  description: |
+    REST API for the PRA Talent Intelligence Platform — a full-stack SaaS hiring
+    platform covering candidate applications, recruiter pipelines, AI screening,
+    offer management, and messaging.
+
+    **Authentication:** Most endpoints require a Supabase session cookie
+    (`sb-*-auth-token`) established via the platform's login or OAuth flow.
+    The cron endpoint uses a Bearer token. The Stripe webhook endpoint uses
+    HMAC-SHA256 signature verification. The search-autocomplete and web-vitals
+    endpoints are public.
+
+    **Base path note:** Server Actions (Next.js "use server" functions) are
+    not part of this specification — they are internal server-side invocations
+    and not callable over HTTP from external clients.
+
+servers:
+  - url: https://pra-eta-umber.vercel.app
+    description: Production
+  - url: http://localhost:3000
+    description: Local development
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: sb-auth-token
+      description: >
+        Supabase session cookie set at login. The exact cookie name contains
+        the Supabase project ref (e.g. `sb-<ref>-auth-token`). Server-side
+        route handlers resolve this via `supabase.auth.getUser()`.
+    cronBearer:
+      type: http
+      scheme: bearer
+      description: >
+        Static secret for the cron queue worker. Set via the `CRON_SECRET`
+        environment variable. Required on all Vercel-hosted environments;
+        omitted in local development.
+    stripeSignature:
+      type: apiKey
+      in: header
+      name: Stripe-Signature
+      description: >
+        Stripe webhook HMAC-SHA256 signature. Verified against
+        `STRIPE_WEBHOOK_SECRET`. Timestamps older than 300 seconds are
+        rejected (replay protection).
+
+  schemas:
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Human-readable error message
+      example:
+        error: "Unauthenticated"
+
+    Message:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        thread_id:
+          type: string
+          format: uuid
+        sender_role:
+          type: string
+          enum: [recruiter, candidate]
+        sender_id:
+          type: string
+          format: uuid
+        body:
+          type: string
+        is_read:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+
+    CandidateSearchResult:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        full_name:
+          type: string
+        current_position:
+          type: string
+          nullable: true
+        city:
+          type: string
+          nullable: true
+        country:
+          type: string
+          nullable: true
+        years_of_experience:
+          type: integer
+          nullable: true
+        skills:
+          type: array
+          items:
+            type: string
+        is_open_to_work:
+          type: boolean
+        profile_completion_score:
+          type: integer
+          minimum: 0
+          maximum: 100
+        avatar_url:
+          type: string
+          nullable: true
+
+    AutocompleteSuggestion:
+      type: object
+      required:
+        - text
+        - source
+        - count
+      properties:
+        text:
+          type: string
+        source:
+          type: string
+          description: The database table or index that produced this suggestion
+        count:
+          type: integer
+          description: Number of jobs matching this suggestion
+
+    CronJobResult:
+      type: object
+      required:
+        - processed
+        - errors
+      properties:
+        processed:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: IDs of jobs successfully completed in this invocation
+        errors:
+          type: array
+          items:
+            type: object
+            required:
+              - id
+              - error
+            properties:
+              id:
+                type: string
+                format: uuid
+              error:
+                type: string
+
+    MockInterviewMessage:
+      type: object
+      required:
+        - role
+        - content
+      properties:
+        role:
+          type: string
+          enum: [assistant, user]
+        content:
+          type: string
+
+    MockInterviewRequest:
+      type: object
+      required:
+        - interviewType
+        - targetRole
+        - messages
+      properties:
+        interviewType:
+          type: string
+          enum:
+            - behavioral
+            - technical
+            - situational
+            - competency
+            - case_study
+            - panel
+        targetRole:
+          type: string
+          example: "Senior Software Engineer"
+        company:
+          type: string
+          nullable: true
+          example: "Acme Corp"
+        jobDescription:
+          type: string
+          nullable: true
+          description: Optional job description text for more targeted questions
+        experienceLevel:
+          type: string
+          nullable: true
+          enum: [entry, mid, senior, executive]
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/MockInterviewMessage'
+          description: Full conversation history including prior turns
+        isFinalize:
+          type: boolean
+          default: false
+          description: >
+            When true, the AI returns a final structured feedback report
+            (scores, strengths, improvement areas) instead of the next question.
+
+    ComparisonPdfRequest:
+      type: object
+      required:
+        - applicationIds
+      properties:
+        applicationIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          minItems: 2
+          maxItems: 4
+          description: 2 to 4 application UUIDs to compare
+
+    WebVitalsRequest:
+      type: object
+      required:
+        - name
+        - value
+      properties:
+        name:
+          type: string
+          description: Web Vital metric name
+          example: "LCP"
+        value:
+          type: number
+          description: Metric value (milliseconds for time-based metrics; unitless for CLS)
+          example: 2400
+        rating:
+          type: string
+          enum: [good, needs-improvement, poor]
+          nullable: true
+        path:
+          type: string
+          nullable: true
+          description: Page pathname where the metric was captured
+          example: "/en/candidate/dashboard"
+
+    StripeEventObject:
+      type: object
+      description: >
+        Raw Stripe event payload. Must be delivered as the unmodified raw
+        request body so that the HMAC-SHA256 signature can be verified.
+        The handler processes the following event types:
+        customer.subscription.created, customer.subscription.updated,
+        customer.subscription.deleted, invoice.paid, invoice.payment_failed.
+      properties:
+        id:
+          type: string
+          description: Stripe event ID (e.g. evt_xxx)
+        type:
+          type: string
+          description: Event type string
+        data:
+          type: object
+          properties:
+            object:
+              type: object
+              description: The Stripe resource object for this event
+
+paths:
+  /api/candidate/messages:
+    get:
+      operationId: getCandidateMessages
+      summary: Get messages in a thread (candidate)
+      description: >
+        Returns all messages in a message thread that belongs to the
+        authenticated candidate. The thread ownership is verified before
+        any messages are returned.
+      tags:
+        - Messaging
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: threadId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: UUID of the message thread to fetch
+      responses:
+        '200':
+          description: Array of messages in the thread
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Message'
+        '400':
+          description: threadId query parameter is missing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Missing threadId"
+        '401':
+          description: No valid session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Unauthenticated"
+        '404':
+          description: Thread does not exist or does not belong to this candidate
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Not found"
+
+  /api/cron/process-queue:
+    get:
+      operationId: processJobQueue
+      summary: Process background job queue
+      description: >
+        Dequeues and processes up to 5 pending background jobs per invocation.
+        Supported job types: email_send, job_alert_send, weekly_digest_send.
+        On Vercel-hosted environments, requires a Bearer token matching
+        CRON_SECRET. On local development (no VERCEL_ENV), the token is
+        optional.
+      tags:
+        - Internal / Cron
+      security:
+        - cronBearer: []
+      responses:
+        '200':
+          description: >
+            Processing report. A 200 is returned even when some jobs failed —
+            check the errors array.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CronJobResult'
+              example:
+                processed: ["a1b2c3d4-0000-0000-0000-000000000001"]
+                errors: []
+        '401':
+          description: Authorization header is missing or token does not match CRON_SECRET
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Unauthorized"
+        '503':
+          description: CRON_SECRET is not configured on a hosted Vercel environment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Cron secret not configured"
+
+  /api/mock-interview:
+    post:
+      operationId: streamMockInterview
+      summary: Stream one AI mock interview turn
+      description: >
+        Conducts a single turn of an AI mock interview. The client sends the
+        full conversation history; the server streams back the AI's next
+        response as raw UTF-8 text chunks (no JSON framing).
+
+        Set isFinalize to true on the final turn to receive a structured
+        plain-text feedback report (scores, strengths, improvement areas)
+        instead of the next question.
+
+        Each invocation is stateless — the client is responsible for
+        maintaining and sending the full messages array.
+      tags:
+        - AI / Mock Interview
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MockInterviewRequest'
+            example:
+              interviewType: behavioral
+              targetRole: "Senior Software Engineer"
+              company: "Acme Corp"
+              experienceLevel: senior
+              messages:
+                - role: assistant
+                  content: "Tell me about yourself."
+                - role: user
+                  content: "I have 8 years of backend experience..."
+              isFinalize: false
+      responses:
+        '200':
+          description: >
+            Streaming plain-text response. Concatenate all chunks to form
+            the full assistant turn.
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: Streamed UTF-8 text deltas from the AI
+          headers:
+            Transfer-Encoding:
+              schema:
+                type: string
+                example: chunked
+            Cache-Control:
+              schema:
+                type: string
+                example: no-cache, no-transform
+            X-Accel-Buffering:
+              schema:
+                type: string
+                example: "no"
+        '400':
+          description: Malformed JSON request body
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Bad request"
+        '401':
+          description: No valid session
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Unauthorized"
+        '502':
+          description: OpenAI API error during streaming
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "AI service error"
+        '503':
+          description: OpenAI API key is not configured
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "AI features are not available. Please configure your API key."
+
+  /api/recruiter/candidate-search:
+    get:
+      operationId: searchCandidates
+      summary: Search the candidate pool (recruiter)
+      description: >
+        Full-text and filter search across candidates visible to the
+        recruiter's company. Returns up to 100 results. The authenticated
+        user must have a row in the recruiters table.
+      tags:
+        - Recruiter
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: q
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Free-text search across name, title, and skills
+        - name: location
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by city or country
+        - name: openToWork
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: ["1"]
+          description: Set to "1" to filter to candidates marked as open to work
+      responses:
+        '200':
+          description: Array of matching candidate profiles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CandidateSearchResult'
+        '401':
+          description: No valid session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Authenticated user is not a recruiter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Forbidden"
+
+  /api/recruiter/comparison-pdf:
+    post:
+      operationId: generateComparisonPdf
+      summary: Generate a candidate comparison PDF
+      description: >
+        Generates a multi-candidate comparison PDF and streams it directly
+        to the caller as an attachment. The PDF is created on-the-fly and
+        is never persisted to storage. Accepts 2 to 4 application IDs.
+      tags:
+        - Recruiter
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComparisonPdfRequest'
+            example:
+              applicationIds:
+                - "a1b2c3d4-0000-0000-0000-000000000001"
+                - "a1b2c3d4-0000-0000-0000-000000000002"
+      responses:
+        '200':
+          description: Binary PDF file
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+                example: 'attachment; filename="comparison-1723123456789.pdf"'
+        '400':
+          description: Fewer than 2 application IDs provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Select at least 2 candidates to compare."
+        '401':
+          description: No valid session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Authenticated user is not a recruiter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Only recruiters can export comparisons."
+        '404':
+          description: Could not load the selected candidates
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Could not load the selected candidates."
+
+  /api/recruiter/messages:
+    get:
+      operationId: getRecruiterMessages
+      summary: Get messages in a thread (recruiter)
+      description: >
+        Returns all messages in a message thread that belongs to the
+        authenticated recruiter. Thread ownership is verified — a recruiter
+        cannot read threads assigned to another recruiter.
+      tags:
+        - Recruiter
+        - Messaging
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: threadId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: UUID of the message thread to fetch
+      responses:
+        '200':
+          description: Array of messages in the thread
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Message'
+        '400':
+          description: threadId query parameter is missing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Missing threadId"
+        '401':
+          description: No valid session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Authenticated user is not a recruiter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Thread does not exist or belongs to a different recruiter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Not found"
+
+  /api/recruiter/resume-intelligence:
+    get:
+      operationId: getResumeIntelligence
+      summary: Get candidate resumes for recruiter review
+      description: >
+        Fetches resume records for a specific candidate for display in the
+        recruiter's Resume Intelligence panel. Returns all resumes belonging
+        to the specified candidate, including parsed data when available.
+      tags:
+        - Recruiter
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: candidateId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: UUID of the candidate whose resumes to retrieve
+      responses:
+        '200':
+          description: Array of resume records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      format: uuid
+                    file_name:
+                      type: string
+                    file_url:
+                      type: string
+                      description: Signed URL (expires)
+                    is_primary:
+                      type: boolean
+                    created_at:
+                      type: string
+                      format: date-time
+                    parsed_data:
+                      type: object
+                      nullable: true
+                      description: Structured JSON from the AI resume parser
+        '400':
+          description: candidateId query parameter is missing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Missing candidateId"
+        '401':
+          description: No valid session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Authenticated user is not a recruiter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/search-autocomplete:
+    get:
+      operationId: getAutocompleteSuggestions
+      summary: Job search autocomplete suggestions
+      description: >
+        Returns up to 8 autocomplete suggestions for the job search bar.
+        Backed by a Postgres RPC function (get_autocomplete_suggestions).
+        Public endpoint — no authentication required.
+        Rate limited to 60 requests per 60 seconds per IP address.
+        Responses are cached for 60 seconds at the CDN edge
+        (stale-while-revalidate: 300 seconds).
+      tags:
+        - Search
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 2
+          description: >
+            Search term. Must be at least 2 characters; shorter values
+            return an empty suggestions array without a database query.
+          example: "soft"
+        - name: field
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [title, keywords, location]
+            default: title
+          description: The field to match suggestions against
+      responses:
+        '200':
+          description: Autocomplete suggestions (may be empty)
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - suggestions
+                properties:
+                  suggestions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AutocompleteSuggestion'
+              example:
+                suggestions:
+                  - text: "Software Engineer"
+                    source: "title"
+                    count: 42
+                  - text: "Software Developer"
+                    source: "title"
+                    count: 17
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                example: "public, s-maxage=60, stale-while-revalidate=300"
+        '400':
+          description: field parameter is not one of the allowed values
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Invalid field"
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Too many requests"
+
+  /api/web-vitals:
+    post:
+      operationId: reportWebVitals
+      summary: Ingest a Core Web Vitals metric
+      description: >
+        Receives a single Web Vitals metric from the client-side web-vitals
+        library and records it via the platform analytics system.
+        Public endpoint — no authentication required.
+        Rate limited to 30 requests per 60 seconds per IP address.
+      tags:
+        - Observability
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebVitalsRequest'
+            example:
+              name: "LCP"
+              value: 2400
+              rating: "good"
+              path: "/en/candidate/dashboard"
+      responses:
+        '200':
+          description: Metric accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '400':
+          description: name is not a string or value is not a number
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Invalid payload"
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Too many requests"
+
+  /api/webhooks/stripe:
+    post:
+      operationId: handleStripeWebhook
+      summary: Stripe webhook receiver
+      description: >
+        Receives webhook events from the Stripe Dashboard. All events are
+        persisted to billing_events before processing (idempotent via
+        stripe_event_id unique constraint).
+
+        Signature verification uses Web Crypto (no Stripe SDK). Timestamps
+        older than 300 seconds are rejected to prevent replay attacks.
+
+        Handled event types:
+        - customer.subscription.created: upserts subscription record and syncs company plan/status
+        - customer.subscription.updated: upserts subscription record and syncs company plan/status
+        - customer.subscription.deleted: marks subscription and company as cancelled
+        - invoice.paid: upserts invoice record
+        - invoice.payment_failed: upserts invoice record and queues payment_failed email
+
+        All other events are logged but not processed.
+      tags:
+        - Webhooks
+      security:
+        - stripeSignature: []
+      requestBody:
+        required: true
+        description: >
+          Raw Stripe event JSON. Must be delivered unmodified so that HMAC
+          verification succeeds. Do not re-serialize the body.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StripeEventObject'
+      responses:
+        '200':
+          description: >
+            Event received and logged. Always returned after successful
+            logging, even if downstream processing encounters a non-fatal
+            error, to prevent Stripe from retrying the event.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  received:
+                    type: boolean
+                    example: true
+        '400':
+          description: >
+            Invalid JSON body, missing Stripe-Signature header, or
+            signature/timestamp validation failure.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                invalidJson:
+                  value:
+                    error: "Invalid JSON body"
+                missingSignature:
+                  value:
+                    error: "Missing stripe-signature header"
+                invalidSignature:
+                  value:
+                    error: "Invalid Stripe signature or stale timestamp"
+
+  /auth/callback:
+    get:
+      operationId: authCallback
+      summary: OAuth / email magic-link callback
+      description: >
+        Handles the redirect back from Supabase Auth after a user completes
+        an OAuth flow or follows an email magic-link. Exchanges the one-time
+        code for a session, resolves the user's role from the profiles table,
+        and redirects to the appropriate dashboard.
+
+        For brand-new OAuth candidates, a candidates row is created and a
+        welcome email is queued before the redirect.
+
+        The next parameter is honoured for password-reset links (which
+        embed next=/reset-password) but is validated to be a same-site
+        relative path to prevent open-redirect attacks.
+      tags:
+        - Auth
+      parameters:
+        - name: code
+          in: query
+          required: true
+          schema:
+            type: string
+          description: One-time authorization code issued by Supabase Auth
+        - name: next
+          in: query
+          required: false
+          schema:
+            type: string
+          description: >
+            Relative path to redirect to after successful exchange (e.g.
+            /reset-password). Only same-site paths accepted (must start
+            with / and not with //).
+      responses:
+        '302':
+          description: >
+            Successful redirect to the appropriate destination.
+            Possible locations:
+            - /{locale}/complete-profile (new OAuth candidate)
+            - /{locale}/candidate/dashboard
+            - /{locale}/recruiter/dashboard
+            - /admin
+            - {origin}{next} (when next param is present)
+          headers:
+            Location:
+              schema:
+                type: string
+                example: "/en/candidate/dashboard"
+        '302-error':
+          description: >
+            Redirect to error page when code is missing or exchange fails.
+            Location: /login?error=auth_callback_failed
+          headers:
+            Location:
+              schema:
+                type: string
+                example: "/login?error=auth_callback_failed"
+
+tags:
+  - name: Auth
+    description: OAuth callback and authentication flow endpoints
+  - name: Messaging
+    description: Message thread retrieval for candidates and recruiters
+  - name: Recruiter
+    description: Recruiter-only endpoints for candidate search, PDF export, and resume review
+  - name: AI / Mock Interview
+    description: Streaming AI mock interview endpoint
+  - name: Search
+    description: Public job search autocomplete
+  - name: Observability
+    description: Client-side metric ingestion
+  - name: Webhooks
+    description: Inbound webhooks from third-party services (Stripe)
+  - name: Internal / Cron
+    description: Internal background job processing endpoints
