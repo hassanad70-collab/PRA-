@@ -11,7 +11,7 @@
 |---|---|
 | **Tag name** | `v2.0.0` |
 | **Tag type** | Annotated tag |
-| **Target commit** | `1d56b08` (current HEAD on `main`) |
+| **Target commit** | `64c78be` (current HEAD on `main` — docs commit) |
 | **Tagger** | Hassan Ahmed |
 | **Date** | 2026-08-17 |
 
@@ -109,7 +109,7 @@ git show v2.0.0
 git log --oneline -1 v2.0.0
 ```
 
-Expected output: `1d56b08 v1.9 Resume Upload Architecture: FK guarantee, UUID filenames, fresh signed URLs, drag-and-drop UX`
+Expected output: `64c78be docs: v2.0 Production Baseline — full technical documentation suite`
 
 ---
 
