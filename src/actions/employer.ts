@@ -1,8 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-
 import { createClient } from "@/lib/supabase/server";
+import { revalidateRecruiterPath } from "@/lib/revalidate-recruiter-path";
 import { getCurrentUser } from "@/lib/queries/candidate";
 import { getRecruiterContext } from "@/lib/queries/jobs";
 import { generateJobDescriptionDraft } from "@/lib/ai/job-description-writer";
@@ -33,8 +32,8 @@ export async function saveCandidateAction(candidateId: string) {
   await supabase
     .from("saved_candidates")
     .upsert({ recruiter_id: recruiter.id, candidate_id: candidateId }, { onConflict: "recruiter_id,candidate_id" });
-  revalidatePath("/recruiter/saved-candidates");
-  revalidatePath("/recruiter/candidate-search");
+  revalidateRecruiterPath("/saved-candidates");
+  revalidateRecruiterPath("/candidate-search");
 }
 
 export async function unsaveCandidateAction(candidateId: string) {
@@ -45,8 +44,8 @@ export async function unsaveCandidateAction(candidateId: string) {
     .delete()
     .eq("recruiter_id", recruiter.id)
     .eq("candidate_id", candidateId);
-  revalidatePath("/recruiter/saved-candidates");
-  revalidatePath("/recruiter/candidate-search");
+  revalidateRecruiterPath("/saved-candidates");
+  revalidateRecruiterPath("/candidate-search");
 }
 
 export async function updateSavedCandidateNotesAction(candidateId: string, notes: string) {
@@ -57,7 +56,7 @@ export async function updateSavedCandidateNotesAction(candidateId: string, notes
     .update({ notes })
     .eq("recruiter_id", recruiter.id)
     .eq("candidate_id", candidateId);
-  revalidatePath("/recruiter/saved-candidates");
+  revalidateRecruiterPath("/saved-candidates");
 }
 
 // ----------------------------------------------------------------
@@ -84,7 +83,7 @@ export async function upsertCompanyProfileAction(data: Partial<CompanyProfile>) 
     },
     { onConflict: "company_id" }
   );
-  revalidatePath("/recruiter/company-profile");
+  revalidateRecruiterPath("/company-profile");
 }
 
 export async function publishCompanyProfileAction(isPublished: boolean) {
@@ -94,7 +93,7 @@ export async function publishCompanyProfileAction(isPublished: boolean) {
     .from("company_profiles")
     .update({ is_published: isPublished, updated_at: new Date().toISOString() })
     .eq("company_id", recruiter.company_id);
-  revalidatePath("/recruiter/company-profile");
+  revalidateRecruiterPath("/company-profile");
 }
 
 // ----------------------------------------------------------------
@@ -153,7 +152,7 @@ export async function runCandidateMatchAction(jobId: string, candidateId: string
     { onConflict: "job_id,candidate_id" }
   );
 
-  revalidatePath(`/recruiter/jobs/${jobId}/matches`);
+  revalidateRecruiterPath(`/jobs/${jobId}/matches`);
   return { result };
 }
 
@@ -175,7 +174,7 @@ export async function addToTalentPoolAction(candidateId: string, notes?: string)
     },
     { onConflict: "company_id,candidate_id" }
   );
-  revalidatePath("/recruiter/talent-pool");
+  revalidateRecruiterPath("/talent-pool");
 }
 
 export async function removeFromTalentPoolAction(entryId: string) {
@@ -186,7 +185,7 @@ export async function removeFromTalentPoolAction(entryId: string) {
     .delete()
     .eq("id", entryId)
     .eq("company_id", recruiter.company_id);
-  revalidatePath("/recruiter/talent-pool");
+  revalidateRecruiterPath("/talent-pool");
 }
 
 export async function toggleTalentPoolFavoriteAction(entryId: string, isFavorite: boolean) {
@@ -197,7 +196,7 @@ export async function toggleTalentPoolFavoriteAction(entryId: string, isFavorite
     .update({ is_favorite: isFavorite })
     .eq("id", entryId)
     .eq("company_id", recruiter.company_id);
-  revalidatePath("/recruiter/talent-pool");
+  revalidateRecruiterPath("/talent-pool");
 }
 
 // ----------------------------------------------------------------
