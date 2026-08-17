@@ -1,7 +1,7 @@
 # Release Notes — v2.0 (Stabilization Sprint)
 
 **Release Date:** 2026-08-17  
-**Commit:** `1d56b08` (HEAD — main)  
+**Commit:** `b93c587` (HEAD — main)  
 **Branch:** `main`  
 **Production:** https://pra-eta-umber.vercel.app
 
@@ -29,7 +29,7 @@ All features in this release were shipped across v1.0 through v1.9.
 | Database migrations | 50 |
 | Server Action modules | 36 |
 | AI capabilities | 29 |
-| End-to-end tests | 129 (127 passing, 2 skipped) |
+| End-to-end tests | 134 (132 passing, 2 skipped) |
 | Supported locales | 2 (EN, AR) |
 | User roles | 4 (super_admin, recruiter, hr_manager, candidate) |
 | Portal trees | 3 (admin, recruiter, candidate) |
@@ -113,6 +113,7 @@ Next.js 15.4 · TypeScript 5 · React 19 · Supabase (PostgreSQL 15 + Auth + Sto
 - Production: hardened security headers, RLS policies, email templates
 - Auth: replaced LinkedIn OAuth with phone OTP; added profile completion flow
 - Mobile: fixed horizontal overflow app-wide
+- **DEBT-001 (P1):** `employer.ts` — replaced 11 bare `revalidatePath("/recruiter/...")` calls (silent no-ops for locale-prefixed routes) with `revalidateRecruiterPath()` helper; both `/en/recruiter/...` and `/ar/recruiter/...` now correctly revalidated after every employer mutation
 
 ---
 
@@ -161,7 +162,7 @@ Shipped 2026-08-17 as the final hardening commit before v2.0 tag:
 - **Fresh signed URLs** — `resumes` bucket is private; both resume pages re-sign from `file_path` at render time
 - **Drag-and-drop upload** — staged 6-phase progress, MIME/size validation, success/error toast
 - **Auth hardening** — server actions use only `supabase.auth.getUser()`
-- **28 new e2e tests** — 127/129 passing
+- **28 new e2e tests** — 132/134 passing
 - **Migration 0050** — `resumes.file_url` column made nullable
 
 ---

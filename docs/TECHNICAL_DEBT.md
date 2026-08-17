@@ -1,8 +1,8 @@
 # Technical Debt Register
 
 **Generated:** 2026-08-17  
-**Platform version:** v2.0 (commit `1d56b08`)  
-**Status:** Audit-only — no changes have been made. Review each item before acting.
+**Platform version:** v2.0.0 (commit `b93c587`)  
+**Status:** DEBT-001 resolved in commit `b93c587`. All remaining items are P2 or lower.
 
 ---
 
@@ -17,17 +17,14 @@
 
 ---
 
-## DEBT-001 — Bare `revalidatePath()` in employer actions (stale UI after company/talent actions)
+## DEBT-001 — Bare `revalidatePath()` in employer actions (stale UI after company/talent actions) ✅ RESOLVED
 
 | Field | Value |
 |---|---|
 | **Severity** | High |
-| **File** | `src/actions/employer.ts` (lines 36, 37, 48, 49, 60, 87, 97, 156, 178, 189, 200) |
-| **Impact** | After a recruiter saves/unsaves a candidate, updates company profile, or adds to talent pool, the affected pages are NOT revalidated — Next.js cache serves stale data until the next full page reload. |
-| **Root cause** | `revalidatePath("/recruiter/saved-candidates")` uses a bare, non-locale-prefixed path. Since Recruiter Intelligence v2.0 moved all recruiter routes under `[locale]`, the real routes are `/en/recruiter/saved-candidates` and `/ar/recruiter/saved-candidates`. A bare call matches no real route and silently does nothing. |
-| **Recommended fix** | Replace all bare `revalidatePath("/recruiter/...")` calls with `revalidateRecruiterPath("/saved-candidates")` etc., using the existing `src/lib/revalidate-recruiter-path.ts` helper — exactly the same pattern applied elsewhere. |
-| **Risk** | Low risk to fix; the helper is already written and proven. The fix is a mechanical find-and-replace within one file. |
-| **Priority** | P1 — fix before v2.0.0 tag |
+| **Status** | **Resolved** in commit `b93c587` (2026-08-17) |
+| **File** | `src/actions/employer.ts` |
+| **Resolution** | All 11 bare `revalidatePath("/recruiter/...")` calls replaced with `revalidateRecruiterPath()` helper. Both `/en/recruiter/...` and `/ar/recruiter/...` now correctly revalidated. 5 regression tests added in `e2e/employer-revalidation.spec.ts`. Production verified. |
 
 ---
 
