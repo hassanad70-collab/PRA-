@@ -507,7 +507,8 @@
       "offers": "العروض الوظيفية",
       "messages": "الرسائل",
       "resumeSubGroup": "السيرة الذاتية",
-      "interviewSubGroup": "المقابلات"
+      "interviewSubGroup": "المقابلات",
+      "careerCoach": "المدرب المهني الذكي"
     },
     "Workspace": {
       "Chatbot": {
@@ -1094,6 +1095,95 @@
       "cancel": "إلغاء",
       "note": "السبب (اختياري)",
       "sentAgo": "أُرسل"
+    },
+    "CareerCoach": {
+      "title": "المدرب المهني الذكي",
+      "subtitle": "رفيقك الشخصي والمستمر في التطوير المهني.",
+      "empty": {
+        "heading": "ابدأ رحلتك المهنية",
+        "body": "حدد هدفك المهني ودع مدربك الذكي يرشدك خلال التقييمات وخرائط الطريق والإجراءات الأسبوعية وتتبع التقدم — في مكان واحد.",
+        "cta": "حدد هدفي المهني"
+      },
+      "goal": {
+        "cardTitle": "الهدف المهني",
+        "labelTitle": "الهدف",
+        "labelTarget": "الدور المستهدف",
+        "labelCurrent": "الدور الحالي",
+        "labelDate": "التاريخ المستهدف",
+        "labelStatus": "الحالة",
+        "labelNotes": "ملاحظات",
+        "createHeading": "حدد هدفك المهني",
+        "editHeading": "تعديل الهدف المهني",
+        "fieldTitle": "عنوان الهدف",
+        "fieldTitlePlaceholder": "مثال: الانتقال إلى مدير منتج أول",
+        "fieldTarget": "الدور المستهدف",
+        "fieldTargetPlaceholder": "مثال: مدير منتج أول",
+        "fieldCurrent": "الدور الحالي (اختياري)",
+        "fieldCurrentPlaceholder": "مثال: مدير منتج",
+        "fieldDate": "التاريخ المستهدف (اختياري)",
+        "fieldNotes": "ملاحظات (اختياري)",
+        "fieldNotesPlaceholder": "أي سياق حول هدفك...",
+        "save": "حفظ الهدف",
+        "saving": "جارٍ الحفظ...",
+        "edit": "تعديل",
+        "pause": "إيقاف مؤقت",
+        "resume": "استئناف",
+        "complete": "تعليم كمكتمل",
+        "pauseConfirmTitle": "إيقاف هذا الهدف مؤقتًا؟",
+        "pauseConfirmBody": "يمكنك استئنافه في أي وقت. يتم الحفاظ على التقدم.",
+        "completeConfirmTitle": "تعليم الهدف كمكتمل؟",
+        "completeConfirmBody": "عمل رائع! يمكنك بدء هدف جديد في أي وقت.",
+        "confirm": "تأكيد",
+        "cancel": "إلغاء",
+        "statusActive": "نشط",
+        "statusPaused": "متوقف مؤقتًا",
+        "statusCompleted": "مكتمل",
+        "statusAbandoned": "متروك",
+        "noDate": "لا يوجد تاريخ مستهدف"
+      },
+      "progress": {
+        "cardTitle": "التقدم المهني",
+        "score": "{{score}} / 100",
+        "actionCompletion": "إتمام الإجراءات",
+        "consistency": "الاتساق",
+        "milestoneProgress": "تقدم المعالم",
+        "activityBreadth": "تنوع الأنشطة",
+        "of": "من",
+        "pts": "نقطة"
+      },
+      "readiness": {
+        "cardTitle": "جاهزية المدرب",
+        "goal": "الهدف المهني",
+        "assessment": "التقييم المهني",
+        "roadmap": "خارطة الطريق",
+        "complete": "مكتمل",
+        "pending": "معلق"
+      },
+      "assessment": {
+        "cardTitle": "التقييم المهني",
+        "strengthsLabel": "نقاط قوتك",
+        "gapsLabel": "فجوات المهارات الرئيسية",
+        "lockedHint": "أجرِ تقييمك المهني الأول لفتح تحليل نقاط القوة والفجوات.",
+        "lockedButton": "قريبًا في المرحلة التالية"
+      },
+      "actions": {
+        "cardTitle": "إجراءات هذا الأسبوع",
+        "emptyHint": "لا توجد إجراءات معلقة. قم بإنشاء خارطة الطريق لفتح الإجراءات الأسبوعية الموصى بها.",
+        "lockedButton": "قريبًا في المرحلة التالية",
+        "due": "موعد التسليم",
+        "noActions": "لا توجد إجراءات بعد"
+      },
+      "nextSteps": {
+        "cardTitle": "الخطوة التالية الموصى بها",
+        "createAssessment": "إجراء تقييم مهني",
+        "createAssessmentHint": "حدد نقاط قوتك وفجوات مهاراتك والأدوار الأنسب لك بتقييم مهني مدعوم بالذكاء الاصطناعي.",
+        "createRoadmap": "إنشاء خارطة طريق مهنية",
+        "createRoadmapHint": "ابنِ خارطة طريق شخصية ومتدرجة للوصول إلى دورك المستهدف.",
+        "checkIn": "أكمل أول تسجيل دخول أسبوعي",
+        "checkInHint": "شارك تقدمك الأسبوعي واحصل على ملاحظات تدريب مدعومة بالذكاء الاصطناعي.",
+        "allDone": "أنت على المسار الصحيح!",
+        "allDoneHint": "واصل إتمام إجراءاتك الأسبوعية وتسجيل الدخول بانتظام للحفاظ على زخمك."
+      }
     }
   },
   "Recruiter": {

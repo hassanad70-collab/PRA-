@@ -70,6 +70,7 @@ export default async function CandidateLayout({
           ],
         },
         { href: w("/assistant"),      label: tNav("aiAssistant"),       icon: "Bot",        tag: "ai" },
+        { href: w("/career-coach"),   label: tNav("careerCoach"),       icon: "Target",     tag: "ai" },
         { href: w("/cover-letters"),  label: tNav("coverLetters"),      icon: "Mail",       tag: "ai" },
         { href: w("/career-advisor"), label: tNav("careerAdvisor"),     icon: "Sparkles",   tag: "ai" },
         { href: w("/salary"),         label: tNav("salaryInsights"),    icon: "DollarSign", tag: "ai" },

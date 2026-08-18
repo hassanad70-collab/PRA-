@@ -507,7 +507,8 @@
       "offers": "Offers",
       "messages": "Messages",
       "resumeSubGroup": "Resume",
-      "interviewSubGroup": "Interview"
+      "interviewSubGroup": "Interview",
+      "careerCoach": "AI Career Coach"
     },
     "Workspace": {
       "Chatbot": {
@@ -1094,6 +1095,95 @@
       "cancel": "Cancel",
       "note": "Reason (optional)",
       "sentAgo": "Sent"
+    },
+    "CareerCoach": {
+      "title": "AI Career Coach",
+      "subtitle": "Your personalized, persistent career development companion.",
+      "empty": {
+        "heading": "Start Your Career Journey",
+        "body": "Define your career goal and let your AI coach guide you through assessments, roadmaps, weekly actions, and progress tracking — all in one place.",
+        "cta": "Define My Career Goal"
+      },
+      "goal": {
+        "cardTitle": "Career Goal",
+        "labelTitle": "Goal",
+        "labelTarget": "Target Role",
+        "labelCurrent": "Current Role",
+        "labelDate": "Target Date",
+        "labelStatus": "Status",
+        "labelNotes": "Notes",
+        "createHeading": "Define Your Career Goal",
+        "editHeading": "Edit Career Goal",
+        "fieldTitle": "Goal title",
+        "fieldTitlePlaceholder": "e.g. Transition to Senior Product Manager",
+        "fieldTarget": "Target role",
+        "fieldTargetPlaceholder": "e.g. Senior Product Manager",
+        "fieldCurrent": "Current role (optional)",
+        "fieldCurrentPlaceholder": "e.g. Product Manager",
+        "fieldDate": "Target date (optional)",
+        "fieldNotes": "Notes (optional)",
+        "fieldNotesPlaceholder": "Any context about your goal...",
+        "save": "Save Goal",
+        "saving": "Saving...",
+        "edit": "Edit",
+        "pause": "Pause",
+        "resume": "Resume",
+        "complete": "Mark Complete",
+        "pauseConfirmTitle": "Pause this goal?",
+        "pauseConfirmBody": "You can resume it at any time. Progress is preserved.",
+        "completeConfirmTitle": "Mark goal as complete?",
+        "completeConfirmBody": "Great work! You can start a new goal any time.",
+        "confirm": "Confirm",
+        "cancel": "Cancel",
+        "statusActive": "Active",
+        "statusPaused": "Paused",
+        "statusCompleted": "Completed",
+        "statusAbandoned": "Abandoned",
+        "noDate": "No target date"
+      },
+      "progress": {
+        "cardTitle": "Career Progress",
+        "score": "{{score}} / 100",
+        "actionCompletion": "Action Completion",
+        "consistency": "Consistency",
+        "milestoneProgress": "Milestone Progress",
+        "activityBreadth": "Activity Breadth",
+        "of": "of",
+        "pts": "pts"
+      },
+      "readiness": {
+        "cardTitle": "Coach Readiness",
+        "goal": "Career Goal",
+        "assessment": "Career Assessment",
+        "roadmap": "Career Roadmap",
+        "complete": "Complete",
+        "pending": "Pending"
+      },
+      "assessment": {
+        "cardTitle": "Career Assessment",
+        "strengthsLabel": "Your Strengths",
+        "gapsLabel": "Key Skill Gaps",
+        "lockedHint": "Run your first career assessment to unlock personalized strengths and gap analysis.",
+        "lockedButton": "Coming in next phase"
+      },
+      "actions": {
+        "cardTitle": "This Week's Actions",
+        "emptyHint": "No pending actions. Generate your career roadmap to unlock weekly AI-recommended actions.",
+        "lockedButton": "Coming in next phase",
+        "due": "Due",
+        "noActions": "No actions yet"
+      },
+      "nextSteps": {
+        "cardTitle": "Recommended Next Step",
+        "createAssessment": "Run Career Assessment",
+        "createAssessmentHint": "Identify your strengths, skill gaps, and best-fit roles with an AI-powered career assessment.",
+        "createRoadmap": "Generate Career Roadmap",
+        "createRoadmapHint": "Build a phased, personalized roadmap to reach your target role.",
+        "checkIn": "Complete Your First Check-in",
+        "checkInHint": "Share your weekly progress and get AI-powered coaching feedback.",
+        "allDone": "You are on track!",
+        "allDoneHint": "Keep completing your weekly actions and check in regularly to maintain your momentum."
+      }
     }
   },
   "Recruiter": {
