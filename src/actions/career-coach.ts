@@ -83,7 +83,7 @@ export async function createCareerGoalAction(input: {
   const goal = await insertGoal(user.id, input);
   if (!goal) return { success: false, error: "Failed to create career goal." };
 
-  revalidateCandidatePath("/candidate/workspace/coach");
+  revalidateCandidatePath("/candidate/workspace/career-coach");
   revalidateCandidatePath("/candidate/dashboard");
   return { success: true, data: goal };
 }
@@ -104,7 +104,7 @@ export async function updateCareerGoalAction(
   const goal = await updateGoal(user.id, goalId, input);
   if (!goal) return { success: false, error: "Failed to update career goal." };
 
-  revalidateCandidatePath("/candidate/workspace/coach");
+  revalidateCandidatePath("/candidate/workspace/career-coach");
   return { success: true, data: goal };
 }
 
@@ -118,7 +118,7 @@ export async function setGoalStatusAction(
   const ok = await setGoalStatus(user.id, goalId, status);
   if (!ok) return { success: false, error: "Failed to update goal status." };
 
-  revalidateCandidatePath("/candidate/workspace/coach");
+  revalidateCandidatePath("/candidate/workspace/career-coach");
   revalidateCandidatePath("/candidate/dashboard");
   return { success: true };
 }
@@ -253,7 +253,7 @@ export async function triggerCareerAssessmentAction(
 
   if (!saved) return { success: false, error: "Failed to save career assessment." };
 
-  revalidateCandidatePath("/candidate/workspace/coach");
+  revalidateCandidatePath("/candidate/workspace/career-coach");
   return { success: true, data: saved };
 }
 
@@ -303,7 +303,7 @@ export async function generateCareerRoadmapAction(
   const saved = await upsertRoadmap(user.id, goalId, aiResult.phases);
   if (!saved) return { success: false, error: "Failed to save career roadmap." };
 
-  revalidateCandidatePath("/candidate/workspace/coach");
+  revalidateCandidatePath("/candidate/workspace/career-coach");
   return { success: true, data: saved };
 }
 
@@ -380,7 +380,7 @@ export async function generateWeeklyActionsAction(
     })
   );
 
-  revalidateCandidatePath("/candidate/workspace/coach");
+  revalidateCandidatePath("/candidate/workspace/career-coach");
   return { success: true, data: inserted };
 }
 
@@ -396,7 +396,7 @@ export async function updateActionStatusAction(
   const updated = await updateActionStatus(user.id, actionId, status);
   if (!updated) return { success: false, error: "Failed to update action status." };
 
-  revalidateCandidatePath("/candidate/workspace/coach");
+  revalidateCandidatePath("/candidate/workspace/career-coach");
   return { success: true, data: updated };
 }
 
@@ -461,11 +461,11 @@ export async function submitCheckinAction(
 
   if (aiResponse) {
     await updateCheckinAiResponse(user.id, checkin.id, aiResponse);
-    revalidateCandidatePath("/candidate/workspace/coach");
+    revalidateCandidatePath("/candidate/workspace/career-coach");
     return { success: true, data: { ...checkin, ai_response: aiResponse } };
   }
 
-  revalidateCandidatePath("/candidate/workspace/coach");
+  revalidateCandidatePath("/candidate/workspace/career-coach");
   return { success: true, data: checkin };
 }
 
