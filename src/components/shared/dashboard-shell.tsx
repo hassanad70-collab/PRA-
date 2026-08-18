@@ -173,6 +173,8 @@ interface DashboardShellProps {
   settingsHref: string;
   labels?: { settings: string; signOut: string; openMenu: string };
   headerExtra?: React.ReactNode;
+  /** Optional fixed-position overlay mounted inside the root flex container (e.g. global AI assistant). */
+  floatingSlot?: React.ReactNode;
 }
 
 const DEFAULT_LABELS = { settings: "Settings", signOut: "Sign out", openMenu: "Open menu" };
@@ -322,7 +324,7 @@ function SubGroupHeader({
 
 export function DashboardShell({
   navItems, navGroups, user, children, settingsHref,
-  labels = DEFAULT_LABELS, headerExtra,
+  labels = DEFAULT_LABELS, headerExtra, floatingSlot,
 }: DashboardShellProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = React.useState(false);
@@ -768,6 +770,7 @@ export function DashboardShell({
 
   return (
     <div className="flex min-h-screen">
+      {floatingSlot}
       <aside className="hidden w-64 shrink-0 border-r border-border bg-card lg:block lg:h-screen lg:sticky lg:top-0 lg:overflow-hidden">
         {SidebarContent}
       </aside>

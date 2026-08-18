@@ -523,6 +523,16 @@
         "delete": "حذف",
         "deleteConfirm": "حذف هذه المحادثة؟",
         "untitledChat": "محادثة جديدة"
+      },
+      "GlobalAssistant": {
+        "openButton": "اسأل AI",
+        "drawerTitle": "المساعد الذكي",
+        "contextLabel": "السياق",
+        "contextGeneral": "المساعد المهني العام",
+        "openFullExperience": "التجربة الكاملة",
+        "historyTitle": "سجل المحادثات",
+        "backToChat": "العودة للمحادثة",
+        "noHistory": "لا توجد محادثات بعد."
       }
     },
     "Shared": {

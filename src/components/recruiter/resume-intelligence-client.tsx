@@ -72,7 +72,6 @@ export function ResumeIntelligenceClient({ candidates, labels }: ResumeIntellige
     }
   }
 
-  const selectedCandidate = candidates.find((c) => c.id === selectedId);
 
   return (
     <div className="grid gap-6 lg:grid-cols-[280px_1fr]">

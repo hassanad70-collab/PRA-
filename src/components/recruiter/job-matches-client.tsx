@@ -31,7 +31,7 @@ interface JobMatchesClientProps {
   };
 }
 
-export function JobMatchesClient({ jobId, jobTitle, initialMatches, labels }: JobMatchesClientProps) {
+export function JobMatchesClient({ jobId, initialMatches, labels }: JobMatchesClientProps) {
   const [matches, setMatches] = React.useState(initialMatches);
   const [expandedId, setExpandedId] = React.useState<string | null>(null);
   const [refreshingId, setRefreshingId] = React.useState<string | null>(null);

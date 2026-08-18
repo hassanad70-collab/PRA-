@@ -523,6 +523,16 @@
         "delete": "Delete",
         "deleteConfirm": "Delete this conversation?",
         "untitledChat": "New Chat"
+      },
+      "GlobalAssistant": {
+        "openButton": "Ask AI",
+        "drawerTitle": "AI Assistant",
+        "contextLabel": "Context",
+        "contextGeneral": "General Career Assistant",
+        "openFullExperience": "Full experience",
+        "historyTitle": "Conversation History",
+        "backToChat": "Back to chat",
+        "noHistory": "No conversations yet."
       }
     },
     "Shared": {
