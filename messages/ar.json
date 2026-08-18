@@ -482,7 +482,7 @@
       "signOut": "تسجيل الخروج",
       "openMenu": "فتح القائمة",
       "aiWorkspaceGroup": "مساحة العمل الذكية",
-      "aiAssistant": "المساعد الذكي",
+      "aiAssistant": "المساعد المهني الذكي",
       "myResumes": "سيرتي الذاتية",
       "resumeStudio": "استوديو السيرة الذاتية",
       "atsChecker": "فحص توافق ATS",
@@ -508,6 +508,22 @@
       "messages": "الرسائل",
       "resumeSubGroup": "السيرة الذاتية",
       "interviewSubGroup": "المقابلات"
+    },
+    "Workspace": {
+      "Chatbot": {
+        "newChat": "محادثة جديدة",
+        "chatHistory": "سجل المحادثات",
+        "noSessions": "لا توجد محادثات سابقة",
+        "today": "اليوم",
+        "yesterday": "أمس",
+        "previous7Days": "آخر 7 أيام",
+        "older": "أقدم من ذلك",
+        "searchPlaceholder": "ابحث في المحادثات…",
+        "rename": "إعادة التسمية",
+        "delete": "حذف",
+        "deleteConfirm": "حذف هذه المحادثة؟",
+        "untitledChat": "محادثة جديدة"
+      }
     },
     "Shared": {
       "resume": "السيرة الذاتية",

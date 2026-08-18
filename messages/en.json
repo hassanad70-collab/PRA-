@@ -482,7 +482,7 @@
       "signOut": "Sign out",
       "openMenu": "Open menu",
       "aiWorkspaceGroup": "AI Career Workspace",
-      "aiAssistant": "AI Assistant",
+      "aiAssistant": "AI Career Chatbot",
       "myResumes": "My Resumes",
       "resumeStudio": "Resume Studio",
       "atsChecker": "ATS Resume Checker",
@@ -508,6 +508,22 @@
       "messages": "Messages",
       "resumeSubGroup": "Resume",
       "interviewSubGroup": "Interview"
+    },
+    "Workspace": {
+      "Chatbot": {
+        "newChat": "New Chat",
+        "chatHistory": "Chat History",
+        "noSessions": "No previous chats",
+        "today": "Today",
+        "yesterday": "Yesterday",
+        "previous7Days": "Previous 7 Days",
+        "older": "Older",
+        "searchPlaceholder": "Search conversations…",
+        "rename": "Rename",
+        "delete": "Delete",
+        "deleteConfirm": "Delete this conversation?",
+        "untitledChat": "New Chat"
+      }
     },
     "Shared": {
       "resume": "Resume",
