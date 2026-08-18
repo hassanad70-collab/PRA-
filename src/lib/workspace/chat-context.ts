@@ -2,6 +2,7 @@ import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
 import { getWorkspaceResume } from "@/lib/workspace/resume-context";
+import { getActiveGoal, getLatestAssessment } from "@/lib/queries/career-coach";
 
 export interface ContextResult {
   systemContext: string;
@@ -135,9 +136,10 @@ async function assembleInterviewContext(userId: string): Promise<ContextResult> 
 }
 
 async function assembleCareerContext(userId: string): Promise<ContextResult> {
-  const [resume, profile] = await Promise.all([
+  const [resume, profile, activeGoal] = await Promise.all([
     getWorkspaceResume(userId),
     getProfileHeadline(userId),
+    getActiveGoal(userId),
   ]);
 
   const parts: string[] = [];
@@ -150,6 +152,30 @@ async function assembleCareerContext(userId: string): Promise<ContextResult> {
   if (resume?.raw_text) {
     parts.push(`Resume overview:\n---\n${resume.raw_text.slice(0, 1500)}\n---`);
     labels.push("Resume");
+  }
+
+  if (activeGoal) {
+    const goalLines = [
+      `Career goal: "${activeGoal.title}"`,
+      `Target role: ${activeGoal.target_role}`,
+      activeGoal.current_role && `Current role: ${activeGoal.current_role}`,
+      activeGoal.target_date && `Target date: ${activeGoal.target_date}`,
+    ].filter(Boolean).join("; ");
+    parts.push(goalLines);
+    labels.push("Career Goal");
+
+    const assessment = await getLatestAssessment(userId, activeGoal.id);
+    if (assessment) {
+      const assessLines = [
+        assessment.strengths.length && `Strengths: ${assessment.strengths.slice(0, 3).join(", ")}`,
+        assessment.skill_gaps.length && `Key skill gaps: ${assessment.skill_gaps.slice(0, 4).map((g) => g.skill).join(", ")}`,
+        assessment.suggested_roles.length && `Suggested roles: ${assessment.suggested_roles.slice(0, 3).join(", ")}`,
+      ].filter(Boolean).join(". ");
+      if (assessLines) {
+        parts.push(`Career assessment summary: ${assessLines}`);
+        labels.push("Assessment");
+      }
+    }
   }
 
   return build(parts, labels);
