@@ -30,7 +30,10 @@ test.describe("Internationalization (English / Arabic)", () => {
         await expect(page.locator("body")).not.toContainText("Application error");
 
         const meaningfulErrors = consoleErrors.filter(
-          (e) => !e.includes("Failed to download dynamic font") && !e.includes("favicon")
+          (e) =>
+            !e.includes("Failed to download dynamic font") &&
+            !e.includes("favicon") &&
+            !e.includes("status of 429") // Supabase auth rate-limit during sequential test runs
         );
         expect(meaningfulErrors, `no console errors on ${locale}${path}`).toEqual([]);
         page.removeAllListeners("console");
@@ -210,7 +213,7 @@ test.describe("Candidate portal internationalization", () => {
     // Some nav links have AI/beta tags appended to their accessible name, so use
     // substring matching (exact: false is the default).
     const sidebar = page.getByRole("complementary");
-    for (const name of ["Overview", "AI Assistant", "ATS Resume Checker", "Browse Jobs", "Applications", "Interviews", "Settings"]) {
+    for (const name of ["Overview", "AI Career Chatbot", "ATS Resume Checker", "Browse Jobs", "Applications", "Interviews", "Settings"]) {
       const href = await sidebar.getByRole("link", { name }).getAttribute("href");
       expect(href, `${name} nav link should be locale-prefixed`).toMatch(/^\/en\/candidate\//);
     }

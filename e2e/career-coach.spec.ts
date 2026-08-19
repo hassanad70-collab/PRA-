@@ -353,7 +353,7 @@ test.describe("Career Coach — Arabic/RTL", () => {
   });
 
   test("Arabic career-coach page loads without errors", async ({ page }) => {
-    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
+    await loginAsCandidate(page);
     await page.goto(AR_COACH_URL);
     await expect(page).toHaveURL(/\/ar\/candidate\/workspace\/career-coach/, { timeout: 8_000 });
     // Should show Arabic heading or empty state

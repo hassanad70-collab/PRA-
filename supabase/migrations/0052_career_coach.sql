@@ -9,7 +9,7 @@ CREATE TABLE career_goals (
   user_id      uuid        NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   title        text        NOT NULL,
   target_role  text        NOT NULL,
-  current_role text,
+  "current_role" text,
   target_date  date,
   status       text        NOT NULL DEFAULT 'active'
                              CHECK (status IN ('active','paused','completed','abandoned')),

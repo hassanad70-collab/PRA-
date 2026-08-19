@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -50,9 +50,15 @@ export function GoalDialog({ open, onOpenChange, existing, onSuccess }: GoalDial
   const isEdit = !!existing;
   const heading = isEdit ? "Edit Career Goal" : "Define Your Career Goal";
 
-  // Reset form whenever the dialog opens with new data
+  // Reset form when the dialog opens. We can't rely on onOpenChange(true) being
+  // called when the parent controls `open` externally (Radix only fires it for
+  // internal dismiss events), so a useEffect is required.
+  useEffect(() => {
+    if (open) setForm(emptyForm(existing));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, existing?.id]);
+
   function handleOpenChange(v: boolean) {
-    if (v) setForm(emptyForm(existing));
     onOpenChange(v);
   }
 

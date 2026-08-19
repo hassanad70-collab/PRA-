@@ -94,6 +94,17 @@ async function globalSetup() {
   await admin.from("resumes").delete().eq("candidate_id", candidateId);
   await admin.from("candidates").update({ primary_resume_id: null }).eq("id", candidateId);
 
+  // Career coach tables accumulate across runs. Goals in active/paused state
+  // from a mid-run failure would cause the creation test to find an existing
+  // goal on the next run; cascading FK deletes clean up the child tables.
+  await admin.from("career_goals").delete().eq("user_id", candidateId);
+
+  // guest_tool_usage accumulates across runs. When the manually-started test
+  // server lacks E2E_TEST_MODE=true, the IP-based daily cap (3 scans) is
+  // enforced, causing the guest-ats-checker tests to see ip_capped after a
+  // few successful runs. Clearing all rows at suite start ensures a clean slate.
+  await admin.from("guest_tool_usage").delete().not("id", "is", null);
+
   const candidateOtherId = await ensureUser(admin, TEST_USERS.candidateOther, "candidate");
   await admin.from("candidates").upsert({ id: candidateOtherId }, { onConflict: "id" });
 

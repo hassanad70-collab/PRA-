@@ -29,7 +29,7 @@ export async function getActiveGoal(userId: string): Promise<CareerGoal | null> 
     .from("career_goals")
     .select("*")
     .eq("user_id", userId)
-    .eq("status", "active")
+    .in("status", ["active", "paused"])
     .order("created_at", { ascending: false })
     .limit(1)
     .returns<CareerGoal[]>()

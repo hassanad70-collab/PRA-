@@ -37,11 +37,17 @@ test.describe.serial("Organizations & Roles", () => {
     const inviteUrl = linkText?.trim();
     expect(inviteUrl).toBeTruthy();
 
+    // NEXT_PUBLIC_SITE_URL is baked at build time and may use a different
+    // port than the Playwright test server. Extract just the path so we
+    // always navigate to the correct server regardless of the base URL.
+    const invitePath = inviteUrl ? new URL(inviteUrl).pathname : null;
+    expect(invitePath).toMatch(/^\/invite\//);
+
     // Close the dialog first -- it's still open and would otherwise cover
     // the header's account menu button that logout() needs to click.
     await page.getByRole("button", { name: "Done" }).click();
     await logout(page);
-    await page.goto(inviteUrl!);
+    await page.goto(invitePath!);
     await expect(page.getByRole("heading", { name: /Join/ })).toBeVisible();
 
     await page.getByLabel("Full name").fill("E2E Invited Member");
