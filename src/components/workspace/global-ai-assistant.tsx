@@ -638,32 +638,26 @@ export function GlobalAiAssistant() {
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <>
-      {/* Desktop floating tab (md+) */}
+      {/* Desktop pill FAB (md+) */}
       <button
         onClick={handleOpen}
         aria-label={t("openButton")}
         data-testid="global-ai-tab"
         className={cn(
-          "hidden md:flex fixed top-1/2 -translate-y-1/2 z-[55]",
-          "flex-col items-center gap-1 py-3 px-2",
-          "bg-primary text-primary-foreground cursor-pointer border-0",
-          "transition-opacity duration-200 hover:opacity-90 focus-visible:outline-none",
-          "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
-          isRTL
-            ? "left-0 rounded-r-xl"
-            : "right-0 rounded-l-xl"
+          "hidden md:flex fixed bottom-6 z-[55]",
+          "items-center gap-2.5 px-5 h-[54px] min-w-[150px]",
+          "rounded-[15px] border-0 cursor-pointer",
+          "text-white font-semibold text-sm",
+          "shadow-[0_4px_14px_0_rgba(37,99,235,0.25)]",
+          "transition-all duration-200",
+          "hover:shadow-[0_6px_20px_0_rgba(37,99,235,0.35)] hover:-translate-y-px",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB] focus-visible:ring-offset-2",
+          isRTL ? "left-6" : "right-6"
         )}
+        style={{ background: "linear-gradient(to right, #2563EB, #06B6D4)" }}
       >
-        <Bot className="h-4 w-4" />
-        <span
-          className="text-[10px] font-semibold tracking-wide leading-none"
-          style={{
-            writingMode: "vertical-rl",
-            transform: isRTL ? "rotate(180deg)" : "none",
-          }}
-        >
-          {t("openButton")}
-        </span>
+        <Sparkles className="h-4 w-4 shrink-0" />
+        <span>{t("openButton")}</span>
       </button>
 
       {/* Mobile FAB (< md) */}
@@ -672,15 +666,18 @@ export function GlobalAiAssistant() {
         aria-label={t("openButton")}
         data-testid="global-ai-fab"
         className={cn(
-          "md:hidden fixed bottom-20 z-[55]",
-          "flex h-12 w-12 items-center justify-center rounded-full",
-          "bg-primary text-primary-foreground shadow-lg border-0",
-          "transition-opacity duration-200 hover:opacity-90 focus-visible:outline-none",
-          "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+          "md:hidden fixed bottom-6 z-[55]",
+          "flex h-14 w-14 items-center justify-center rounded-full border-0 cursor-pointer",
+          "text-white",
+          "shadow-[0_4px_14px_0_rgba(37,99,235,0.25)]",
+          "transition-all duration-200",
+          "hover:shadow-[0_6px_20px_0_rgba(37,99,235,0.35)] hover:-translate-y-px",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB] focus-visible:ring-offset-2",
           isRTL ? "left-4" : "right-4"
         )}
+        style={{ background: "linear-gradient(to right, #2563EB, #06B6D4)" }}
       >
-        <Bot className="h-5 w-5" />
+        <Sparkles className="h-5 w-5" />
       </button>
 
       {/* Chat panel — only mounts after first open (lazy) */}
