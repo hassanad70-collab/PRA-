@@ -120,16 +120,16 @@ export function CoverLetterTool() {
 
         {/* Personalization tips */}
         {result.tips.length > 0 && (
-          <Card className="border-amber-200 bg-amber-50 dark:border-amber-800/40 dark:bg-amber-950/20">
+          <Card className="border-pra-warning/30 bg-pra-warning/5">
             <CardHeader className="pb-2 pt-4">
-              <CardTitle className="text-sm text-amber-800 dark:text-amber-400">
+              <CardTitle className="text-sm text-pra-warning">
                 ✏️ Personalize before sending
               </CardTitle>
             </CardHeader>
             <CardContent className="pb-4">
               <ul className="space-y-1.5">
                 {result.tips.map((tip, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-amber-800 dark:text-amber-400">
+                  <li key={i} className="flex items-start gap-2 text-sm text-pra-warning">
                     <span className="mt-0.5 shrink-0 text-xs font-bold">{i + 1}.</span>
                     {tip}
                   </li>

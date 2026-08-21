@@ -8,14 +8,14 @@ import { getCurrentUser } from "@/lib/queries/candidate";
 import { getCareerAnalytics } from "@/lib/workspace/analytics";
 
 const STATUS_COLORS: Record<string, string> = {
-  pending: "bg-yellow-500",
-  reviewing: "bg-blue-500",
-  shortlisted: "bg-purple-500",
-  interview_scheduled: "bg-orange-500",
-  offered: "bg-emerald-500",
-  hired: "bg-green-600",
-  rejected: "bg-red-500",
-  withdrawn: "bg-gray-400",
+  pending: "bg-pra-warning",
+  reviewing: "bg-pra-primary",
+  shortlisted: "bg-pra-cyan",
+  interview_scheduled: "bg-pra-primary",
+  offered: "bg-pra-success",
+  hired: "bg-pra-success",
+  rejected: "bg-pra-danger",
+  withdrawn: "bg-pra-text-muted",
 };
 
 export default async function CareerAnalyticsPage({ params }: { params: Promise<{ locale: string }> }) {
@@ -108,10 +108,10 @@ export default async function CareerAnalyticsPage({ params }: { params: Promise<
                     <div
                       className={`h-2 rounded-full transition-all ${
                         s.overall_score >= 80
-                          ? "bg-emerald-500"
+                          ? "bg-pra-success"
                           : s.overall_score >= 60
-                            ? "bg-yellow-500"
-                            : "bg-red-500"
+                            ? "bg-pra-warning"
+                            : "bg-pra-danger"
                       }`}
                       style={{ width: `${s.overall_score}%` }}
                     />
@@ -140,7 +140,7 @@ export default async function CareerAnalyticsPage({ params }: { params: Promise<
                 .map(([status, count]) => (
                   <div key={status} className="flex items-center gap-3">
                     <div
-                      className={`h-2.5 w-2.5 shrink-0 rounded-full ${STATUS_COLORS[status] ?? "bg-gray-400"}`}
+                      className={`h-2.5 w-2.5 shrink-0 rounded-full ${STATUS_COLORS[status] ?? "bg-pra-text-muted"}`}
                     />
                     <span className="flex-1 text-sm capitalize text-muted-foreground">
                       {status.replace("_", " ")}

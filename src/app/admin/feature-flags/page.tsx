@@ -125,7 +125,7 @@ export default async function AdminFeatureFlagsPage({
                           return (
                             <TableCell key={plan} className="text-center">
                               {enabled ? (
-                                <span className="text-green-600 dark:text-green-400">
+                                <span className="text-pra-success">
                                   ✓{limit != null ? ` (${limit})` : ""}
                                 </span>
                               ) : (

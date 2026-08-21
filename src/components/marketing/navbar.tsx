@@ -120,7 +120,7 @@ export function Navbar() {
       <div className="container flex h-14 items-center justify-between">
         {/* Brand */}
         <Link href="/" className="flex items-center gap-2 font-semibold shrink-0">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-700 to-blue-500 text-white">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-pra-primary-hover to-pra-primary text-white">
             <Sparkles className="h-4 w-4" />
           </div>
           <span className="hidden sm:inline">{t("brand")}</span>

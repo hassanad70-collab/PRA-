@@ -95,7 +95,7 @@ export default async function AdminEmailPage({
                   </TableCell>
                   <TableCell>
                     {tpl.is_active ? (
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      <CheckCircle2 className="h-4 w-4 text-pra-success" />
                     ) : (
                       <XCircle className="h-4 w-4 text-muted-foreground" />
                     )}

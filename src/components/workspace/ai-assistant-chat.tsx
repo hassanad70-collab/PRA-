@@ -337,14 +337,14 @@ export function AiAssistantChat({
       {/* Context indicator */}
       {sourceLabels.length > 0 && (
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <Wifi className="h-3 w-3 text-green-500" />
+          <Wifi className="h-3 w-3 text-pra-success" />
           <span>Context: {sourceLabels.join(" · ")}</span>
         </div>
       )}
 
       {/* No-resume warning */}
       {!hasResume && (
-        <Card className="border-amber-500/30 bg-amber-500/5">
+        <Card className="border-pra-warning/30 bg-pra-warning/5">
           <CardContent className="py-3 text-sm text-muted-foreground">
             <span className="font-medium text-foreground">Tip:</span> Upload your resume in{" "}
             <Link href="/candidate/workspace/resumes" className="underline">

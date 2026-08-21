@@ -12,8 +12,8 @@ export function TrendChart({ data, noDataLabel }: { data: { month: string; appli
       <AreaChart data={data}>
         <defs>
           <linearGradient id="colorApplications" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#6366f1" stopOpacity={0.4} />
-            <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+            <stop offset="5%" stopColor="#2563EB" stopOpacity={0.4} />
+            <stop offset="95%" stopColor="#2563EB" stopOpacity={0} />
           </linearGradient>
         </defs>
         <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
@@ -22,7 +22,7 @@ export function TrendChart({ data, noDataLabel }: { data: { month: string; appli
         <Tooltip
           contentStyle={{ borderRadius: 12, border: "1px solid hsl(var(--border))", fontSize: 12 }}
         />
-        <Area type="monotone" dataKey="applications" stroke="#6366f1" fill="url(#colorApplications)" strokeWidth={2} />
+        <Area type="monotone" dataKey="applications" stroke="#2563EB" fill="url(#colorApplications)" strokeWidth={2} />
       </AreaChart>
     </ResponsiveContainer>
   );

@@ -118,10 +118,10 @@ export function StudioLeftPanel({
                     <div className="text-[10px] text-muted-foreground">Empty</div>
                   )}
                   {completion.status === "partial" && (
-                    <div className="text-[10px] text-yellow-600">{completion.pct}%</div>
+                    <div className="text-[10px] text-pra-warning">{completion.pct}%</div>
                   )}
                   {completion.status === "complete" && (
-                    <div className="text-[10px] text-green-600">Complete</div>
+                    <div className="text-[10px] text-pra-success">Complete</div>
                   )}
                 </div>
               </button>

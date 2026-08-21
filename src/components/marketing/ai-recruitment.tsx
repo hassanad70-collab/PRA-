@@ -65,7 +65,7 @@ export function AIRecruitment() {
                     </div>
                     <div className="mt-2 h-1.5 rounded-full bg-muted">
                       <div
-                        className="h-1.5 rounded-full bg-gradient-to-r from-blue-600 to-blue-400 rtl:bg-gradient-to-l"
+                        className="h-1.5 rounded-full bg-gradient-to-r from-pra-primary to-pra-cyan rtl:bg-gradient-to-l"
                         style={{ width: `${value}%` }}
                       />
                     </div>

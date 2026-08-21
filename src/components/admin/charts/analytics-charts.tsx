@@ -15,7 +15,7 @@ import {
 
 import type { MonthlyGrowth, AtsDistribution, DailyActivity } from "@/actions/admin-analytics";
 
-const COLORS = ["#6366f1", "#06b6d4", "#22c55e", "#f59e0b", "#ef4444"];
+const COLORS = ["#2563EB", "#06B6D4", "#10B981", "#F59E0B", "#EF4444"];
 
 export function MonthlyGrowthChart({ data }: { data: MonthlyGrowth[] }) {
   if (!data.length) {
@@ -30,12 +30,12 @@ export function MonthlyGrowthChart({ data }: { data: MonthlyGrowth[] }) {
       <AreaChart data={data}>
         <defs>
           <linearGradient id="grad-apps" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#6366f1" stopOpacity={0.4} />
-            <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+            <stop offset="5%" stopColor="#2563EB" stopOpacity={0.4} />
+            <stop offset="95%" stopColor="#2563EB" stopOpacity={0} />
           </linearGradient>
           <linearGradient id="grad-candidates" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.3} />
-            <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
+            <stop offset="5%" stopColor="#06B6D4" stopOpacity={0.3} />
+            <stop offset="95%" stopColor="#06B6D4" stopOpacity={0} />
           </linearGradient>
         </defs>
         <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
@@ -47,7 +47,7 @@ export function MonthlyGrowthChart({ data }: { data: MonthlyGrowth[] }) {
         <Area
           type="monotone"
           dataKey="applications"
-          stroke="#6366f1"
+          stroke="#2563EB"
           fill="url(#grad-apps)"
           strokeWidth={2}
           name="Applications"
@@ -55,7 +55,7 @@ export function MonthlyGrowthChart({ data }: { data: MonthlyGrowth[] }) {
         <Area
           type="monotone"
           dataKey="new_candidates"
-          stroke="#06b6d4"
+          stroke="#06B6D4"
           fill="url(#grad-candidates)"
           strokeWidth={2}
           name="New Candidates"
@@ -104,8 +104,8 @@ export function DailyActivityChart({ data }: { data: DailyActivity[] }) {
       <AreaChart data={data}>
         <defs>
           <linearGradient id="grad-daily" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#22c55e" stopOpacity={0.4} />
-            <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
+            <stop offset="5%" stopColor="#10B981" stopOpacity={0.4} />
+            <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
           </linearGradient>
         </defs>
         <XAxis dataKey="day" hide />
@@ -116,7 +116,7 @@ export function DailyActivityChart({ data }: { data: DailyActivity[] }) {
         <Area
           type="monotone"
           dataKey="count"
-          stroke="#22c55e"
+          stroke="#10B981"
           fill="url(#grad-daily)"
           strokeWidth={2}
           name="Applications"

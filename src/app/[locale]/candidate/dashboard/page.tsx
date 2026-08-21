@@ -52,10 +52,10 @@ const ACTIVITY_ICONS: Record<string, typeof Bot> = {
 };
 
 const ACTIVITY_COLORS: Record<string, string> = {
-  cover_letter: "text-blue-500 bg-blue-500/10",
-  interview: "text-violet-500 bg-violet-500/10",
-  career_report: "text-emerald-500 bg-emerald-500/10",
-  ats_score: "text-orange-500 bg-orange-500/10",
+  cover_letter: "text-pra-primary bg-pra-primary/10",
+  interview: "text-pra-cyan bg-pra-cyan/10",
+  career_report: "text-pra-success bg-pra-success/10",
+  ats_score: "text-pra-warning bg-pra-warning/10",
   application: "text-primary bg-primary/10",
 };
 
@@ -442,13 +442,13 @@ export default async function CandidateDashboardPage({ params }: { params: Promi
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {[
               { href: "/candidate/workspace/assistant",       icon: Bot,        label: "AI Assistant",            color: "text-primary bg-primary/10" },
-              { href: "/candidate/workspace/studio",          icon: PenLine,    label: "Resume Studio",           color: "text-violet-500 bg-violet-500/10" },
-              { href: "/candidate/workspace/ats-checker",     icon: Target,     label: "ATS Resume Check",        color: "text-orange-500 bg-orange-500/10" },
-              { href: "/candidate/workspace/cover-letters",   icon: FileText,   label: "Cover Letters",           color: "text-blue-500 bg-blue-500/10" },
-              { href: "/candidate/workspace/interview-prep",  icon: Mic,        label: "Interview Prep",          color: "text-emerald-500 bg-emerald-500/10" },
-              { href: "/candidate/workspace/interview-center",icon: Brain,      label: "Interview Intelligence",  color: "text-indigo-500 bg-indigo-500/10" },
-              { href: "/candidate/workspace/app-intelligence",icon: BarChart2,  label: "Application Intelligence",color: "text-teal-500 bg-teal-500/10" },
-              { href: "/candidate/jobs",                      icon: Search,     label: "Browse Jobs",             color: "text-green-500 bg-green-500/10" },
+              { href: "/candidate/workspace/studio",          icon: PenLine,    label: "Resume Studio",           color: "text-pra-primary bg-pra-primary/10" },
+              { href: "/candidate/workspace/ats-checker",     icon: Target,     label: "ATS Resume Check",        color: "text-pra-warning bg-pra-warning/10" },
+              { href: "/candidate/workspace/cover-letters",   icon: FileText,   label: "Cover Letters",           color: "text-pra-cyan bg-pra-cyan/10" },
+              { href: "/candidate/workspace/interview-prep",  icon: Mic,        label: "Interview Prep",          color: "text-pra-success bg-pra-success/10" },
+              { href: "/candidate/workspace/interview-center",icon: Brain,      label: "Interview Intelligence",  color: "text-pra-primary bg-pra-primary/10" },
+              { href: "/candidate/workspace/app-intelligence",icon: BarChart2,  label: "Application Intelligence",color: "text-pra-cyan bg-pra-cyan/10" },
+              { href: "/candidate/jobs",                      icon: Search,     label: "Browse Jobs",             color: "text-pra-success bg-pra-success/10" },
             ].map(({ href, icon: Icon, label, color }) => (
               <Link
                 key={href}

@@ -66,8 +66,8 @@ function QuestionCard({ question, suggestedAnswer, tip, index }: { question: str
             <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Strong Answer Framework</p>
             <p className="text-sm text-foreground leading-relaxed">{suggestedAnswer}</p>
           </div>
-          <div className="rounded-md bg-amber-50 dark:bg-amber-950/20 px-3 py-2">
-            <p className="text-xs font-medium text-amber-800 dark:text-amber-400">💡 Coaching tip: {tip}</p>
+          <div className="rounded-md bg-pra-warning/5 border border-pra-warning/20 px-3 py-2">
+            <p className="text-xs font-medium text-pra-warning">💡 Coaching tip: {tip}</p>
           </div>
         </div>
       )}
@@ -167,7 +167,7 @@ function SavedSessionCard({
         <button
           type="button"
           onClick={() => onToggleFavorite(item.id, !item.is_favorite)}
-          className={`p-1.5 rounded hover:bg-muted transition-colors ${item.is_favorite ? "text-amber-500" : "text-muted-foreground"}`}
+          className={`p-1.5 rounded hover:bg-muted transition-colors ${item.is_favorite ? "text-pra-warning" : "text-muted-foreground"}`}
         >
           <Star className="h-3.5 w-3.5" fill={item.is_favorite ? "currentColor" : "none"} />
         </button>

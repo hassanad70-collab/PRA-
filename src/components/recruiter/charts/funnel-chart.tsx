@@ -3,7 +3,7 @@
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 const STAGE_ORDER = ["submitted", "screening", "shortlisted", "interview", "offer", "hired"];
-const COLORS = ["#6366f1", "#8b5cf6", "#a855f7", "#d946ef", "#ec4899", "#22c55e"];
+const COLORS = ["#94A3B8", "#2563EB", "#06B6D4", "#F59E0B", "#10B981", "#10B981"];
 
 export function FunnelChart({
   funnel,

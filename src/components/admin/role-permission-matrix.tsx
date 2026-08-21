@@ -64,7 +64,7 @@ export function RolePermissionMatrix({ roleId, grouped, grantedIds, isSystem }: 
   return (
     <div className="space-y-4">
       {isSystem && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-800/50 dark:bg-amber-950/30 dark:text-amber-400">
+        <div className="rounded-lg border border-pra-warning/30 bg-pra-warning/5 px-4 py-3 text-sm text-pra-warning">
           System role — permissions are fixed and cannot be modified.
         </div>
       )}

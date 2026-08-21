@@ -185,9 +185,9 @@ function TagBadge({ tag }: { tag: "ai" | "beta" | "new" }) {
   return (
     <span className={cn(
       "rounded px-1 py-0.5 text-[9px] font-bold uppercase tracking-wider leading-none",
-      tag === "ai"   && "bg-blue-500/10 text-blue-500",
-      tag === "beta" && "bg-amber-500/10 text-amber-500",
-      tag === "new"  && "bg-emerald-500/10 text-emerald-500",
+      tag === "ai"   && "bg-pra-primary/10 text-pra-primary",
+      tag === "beta" && "bg-pra-warning/10 text-pra-warning",
+      tag === "new"  && "bg-pra-success/10 text-pra-success",
     )}>
       {tag === "ai" ? "AI" : tag}
     </span>
@@ -730,7 +730,7 @@ export function DashboardShell({
   const SidebarContent = (
     <div className="flex h-full flex-col">
       <Link href="/" className="flex items-center gap-2 px-6 py-5 font-semibold">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-700 to-blue-500 text-white">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-pra-primary-hover to-pra-primary text-white">
           <Sparkles className="h-4 w-4" />
         </div>
         <span className="text-sm">PRA Talent Intelligence</span>

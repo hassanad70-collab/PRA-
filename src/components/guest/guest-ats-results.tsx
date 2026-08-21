@@ -43,7 +43,7 @@ export function GuestAtsResults({ result }: { result: AtsScoreResult }) {
                 </div>
                 <div className="mt-1 h-1.5 rounded-full bg-muted">
                   <div
-                    className="h-1.5 rounded-full bg-gradient-to-r from-blue-600 to-blue-400 rtl:bg-gradient-to-l"
+                    className="h-1.5 rounded-full bg-gradient-to-r from-pra-primary to-pra-cyan rtl:bg-gradient-to-l"
                     style={{ width: `${value ?? 0}%` }}
                   />
                 </div>

@@ -8,7 +8,7 @@ import { getSystemHealth } from "@/actions/admin-diagnostics";
 
 function StatusDot({ ok }: { ok: boolean }) {
   return ok ? (
-    <CheckCircle2 className="h-4 w-4 text-green-500" />
+    <CheckCircle2 className="h-4 w-4 text-pra-success" />
   ) : (
     <XCircle className="h-4 w-4 text-destructive" />
   );

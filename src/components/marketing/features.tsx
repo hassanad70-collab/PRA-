@@ -43,7 +43,7 @@ export function Features() {
               >
                 <Card className="group h-full transition-all hover:-translate-y-1 hover:shadow-lg">
                   <CardContent className="pt-6">
-                    <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/10 to-blue-400/10 text-primary transition-colors group-hover:from-blue-700 group-hover:to-blue-500 group-hover:text-white">
+                    <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-pra-surface-subtle text-primary transition-colors group-hover:bg-gradient-to-br group-hover:from-pra-primary-hover group-hover:to-pra-primary group-hover:text-white">
                       <Icon className="h-5 w-5" />
                     </div>
                     <CardTitle className="mb-2 text-base">{feature.title}</CardTitle>

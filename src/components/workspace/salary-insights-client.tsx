@@ -50,7 +50,7 @@ function EstimateResult({ estimate }: { estimate: AiSalaryEstimate }) {
           </div>
           {/* Salary bar */}
           <div className="relative h-3 rounded-full bg-muted overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-200 via-primary to-blue-200 opacity-30 rounded-full" />
+            <div className="absolute inset-0 bg-gradient-to-r from-pra-cyan/20 via-pra-primary/50 to-pra-cyan/20 opacity-30 rounded-full" />
             <div
               className="absolute top-1/2 h-4 w-1 -translate-y-1/2 rounded-full bg-primary shadow"
               style={{ left: `calc(${medPct}% - 2px)` }}

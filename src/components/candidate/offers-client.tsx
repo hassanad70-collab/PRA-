@@ -54,7 +54,7 @@ const STATUS_CONFIG: Record<
   { label: string; variant: "default" | "secondary" | "destructive" | "outline"; icon: React.ReactNode }
 > = {
   pending: { label: "", variant: "default", icon: <Clock className="h-3 w-3" /> },
-  accepted: { label: "", variant: "secondary", icon: <CheckCircle className="h-3 w-3 text-green-600" /> },
+  accepted: { label: "", variant: "secondary", icon: <CheckCircle className="h-3 w-3 text-pra-success" /> },
   declined: { label: "", variant: "destructive", icon: <XCircle className="h-3 w-3" /> },
   expired: { label: "", variant: "outline", icon: <Clock className="h-3 w-3" /> },
   withdrawn: { label: "", variant: "outline", icon: <XCircle className="h-3 w-3" /> },
@@ -125,7 +125,7 @@ export function CandidateOffersClient({ offers: initial, labels }: Props) {
                     </div>
                   )}
                   {offer.expiry_date && status === "pending" && (
-                    <div className="flex items-center gap-2 text-sm text-amber-600">
+                    <div className="flex items-center gap-2 text-sm text-pra-warning">
                       <Clock className="h-4 w-4 shrink-0" />
                       <span>{labels.expiryDate}: {offer.expiry_date}</span>
                     </div>

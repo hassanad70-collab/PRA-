@@ -271,7 +271,7 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
                   </div>
                   <div className="mt-1 h-1.5 rounded-full bg-muted">
                     <div
-                      className="h-1.5 rounded-full bg-gradient-to-r from-blue-600 to-blue-400"
+                      className="h-1.5 rounded-full bg-gradient-to-r from-pra-primary to-pra-cyan"
                       style={{ width: `${value ?? 0}%` }}
                     />
                   </div>

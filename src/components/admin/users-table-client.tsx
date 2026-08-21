@@ -234,7 +234,7 @@ export function UsersTableClient({ rows, sortBy, sortDir, currentUserId }: Users
                           {isSelf && <span className="ml-1 text-[10px] text-muted-foreground">(you)</span>}
                         </Link>
                         {user.force_password_reset && (
-                          <Badge variant="outline" className="text-[9px] h-3.5 px-1 mt-0.5 border-amber-300 text-amber-600">
+                          <Badge variant="outline" className="text-[9px] h-3.5 px-1 mt-0.5 border-pra-warning/40 text-pra-warning">
                             Reset pending
                           </Badge>
                         )}

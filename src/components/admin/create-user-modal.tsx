@@ -223,10 +223,10 @@ export function CreateUserModal({ companies }: CreateUserModalProps) {
 // Compact role badge used in the users table
 export function RoleBadge({ role }: { role: string }) {
   const variants: Record<string, string> = {
-    super_admin: "bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-400",
-    hr_manager: "bg-cyan-100 text-cyan-700 dark:bg-cyan-950/30 dark:text-cyan-400",
-    recruiter: "bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400",
-    candidate: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
+    super_admin: "bg-pra-danger/10 text-pra-danger",
+    hr_manager: "bg-pra-cyan/10 text-pra-cyan",
+    recruiter: "bg-pra-primary/10 text-pra-primary",
+    candidate: "bg-pra-border text-pra-text-secondary",
   };
   const cls = variants[role] ?? variants.candidate;
   return (

@@ -270,7 +270,7 @@ export default function CompaniesPage() {
         {/* ── Hero ───────────────────────────────────────────── */}
         <section className="relative overflow-hidden pb-20 pt-16 sm:pt-24">
           <div className="absolute inset-0 -z-10 bg-grid-pattern bg-[size:40px_40px] opacity-[0.04]" />
-          <div className="absolute start-1/2 top-0 -z-10 h-[500px] w-[800px] -translate-x-1/2 rounded-full bg-gradient-to-tr from-blue-600/15 via-indigo-500/10 to-sky-400/10 blur-3xl" />
+          <div className="absolute start-1/2 top-0 -z-10 h-[500px] w-[800px] -translate-x-1/2 rounded-full bg-gradient-to-tr from-pra-primary/15 via-pra-primary/10 to-pra-cyan/10 blur-3xl" />
           <div className="container text-center">
             <Badge variant="secondary" className="mb-5">
               <Zap className="mr-1.5 h-3 w-3 text-primary" />

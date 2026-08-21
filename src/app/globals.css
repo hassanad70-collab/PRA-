@@ -4,7 +4,8 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    /* ── shadcn/ui base tokens ──────────────────────────────────── */
+    --background: 210 40% 98%;
     --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
@@ -28,7 +29,7 @@
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --success: 142 71% 45%;
+    --success: 160 84% 39%;
     --success-foreground: 210 40% 98%;
 
     --warning: 38 92% 50%;
@@ -39,6 +40,32 @@
     --ring: 221 83% 53%;
 
     --radius: 0.75rem;
+
+    /* ── PRA Brand tokens ──────────────────────────────────────── */
+    --pra-navy: #0B1F3A;
+    --pra-primary: #2563EB;
+    --pra-primary-hover: #1D4ED8;
+    --pra-cyan: #06B6D4;
+    --pra-success: #10B981;
+    --pra-warning: #F59E0B;
+    --pra-danger: #EF4444;
+    --pra-background: #F8FAFC;
+    --pra-surface: #FFFFFF;
+    --pra-surface-subtle: #EFF6FF;
+    --pra-ai-surface: #ECFEFF;
+    --pra-border: #E2E8F0;
+    --pra-text: #0F172A;
+    --pra-text-secondary: #64748B;
+    --pra-text-muted: #94A3B8;
+    --pra-ai-gradient: linear-gradient(135deg, #2563EB 0%, #06B6D4 100%);
+
+    /* ── PRA Chart palette ─────────────────────────────────────── */
+    --pra-chart-1: #2563EB;
+    --pra-chart-2: #06B6D4;
+    --pra-chart-3: #10B981;
+    --pra-chart-4: #F59E0B;
+    --pra-chart-5: #8B5CF6;
+    --pra-chart-6: #EF4444;
   }
 
   .dark {
@@ -93,7 +120,7 @@
     @apply bg-white/60 dark:bg-white/5 backdrop-blur-xl border border-white/20 dark:border-white/10;
   }
   .gradient-text {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-blue-500 to-sky-500;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-pra-primary via-pra-primary to-pra-cyan;
   }
   .scrollbar-hide::-webkit-scrollbar {
     display: none;

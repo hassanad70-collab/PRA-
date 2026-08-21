@@ -66,9 +66,9 @@ interface Props {
 // ─── Status helpers ───────────────────────────────────────────────────────────
 
 const STATUS_STYLE: Record<GoalStatus, string> = {
-  active:    "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-  paused:    "bg-amber-500/10 text-amber-600 dark:text-amber-400",
-  completed: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
+  active:    "bg-pra-success/10 text-pra-success",
+  paused:    "bg-pra-warning/10 text-pra-warning",
+  completed: "bg-pra-primary/10 text-pra-primary",
   abandoned: "bg-muted text-muted-foreground",
 };
 
@@ -211,7 +211,7 @@ function GoalCard({ goal, onEdit, onStatusChange, isPending }: GoalCardProps) {
             <Button
               size="sm"
               variant="outline"
-              className="h-7 gap-1 text-xs text-emerald-600 border-emerald-500/30 hover:bg-emerald-500/10"
+              className="h-7 gap-1 text-xs text-pra-success border-pra-success/30 hover:bg-pra-success/10"
               onClick={() => onStatusChange("completed")}
               disabled={isPending}
               data-testid="complete-goal-button"
@@ -325,13 +325,13 @@ function CoachReadinessCard({ hasGoal, hasAssessment, hasRoadmap }: ReadinessPro
           <div key={label} className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm">
               {done ? (
-                <CheckCircle2 className="h-4 w-4 text-emerald-500 flex-shrink-0" />
+                <CheckCircle2 className="h-4 w-4 text-pra-success flex-shrink-0" />
               ) : (
                 <Circle className="h-4 w-4 text-muted-foreground flex-shrink-0" />
               )}
               <span className={done ? "font-medium" : "text-muted-foreground"}>{label}</span>
             </div>
-            <span className={cn("text-xs font-medium", done ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground")}>
+            <span className={cn("text-xs font-medium", done ? "text-pra-success" : "text-muted-foreground")}>
               {done ? "Complete" : "Pending"}
             </span>
           </div>
@@ -384,7 +384,7 @@ function AssessmentSummaryCard({ assessment }: { assessment: CareerAssessment | 
             <ul className="space-y-1">
               {assessment.strengths.slice(0, 4).map((s, i) => (
                 <li key={i} className="flex items-start gap-2 text-sm">
-                  <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-emerald-500" />
+                  <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-pra-success" />
                   {s}
                 </li>
               ))}
@@ -404,8 +404,8 @@ function AssessmentSummaryCard({ assessment }: { assessment: CareerAssessment | 
                     variant="outline"
                     className={cn(
                       "text-xs",
-                      gap.priority === "high" && "border-red-500/40 text-red-600 dark:text-red-400",
-                      gap.priority === "medium" && "border-amber-500/40 text-amber-600 dark:text-amber-400",
+                      gap.priority === "high" && "border-pra-danger/40 text-pra-danger",
+                      gap.priority === "medium" && "border-pra-warning/40 text-pra-warning",
                       gap.priority === "low" && "border-muted text-muted-foreground"
                     )}
                   >

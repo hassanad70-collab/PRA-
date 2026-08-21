@@ -98,8 +98,8 @@ export function StudioSectionCard({ section, draftId, isActive, onUpdate, onSele
           variant="outline"
           className={cn(
             "h-5 text-[10px] px-1.5",
-            completion.status === "complete" && "border-green-500 text-green-600",
-            completion.status === "partial" && "border-yellow-500 text-yellow-600",
+            completion.status === "complete" && "border-pra-success text-pra-success",
+            completion.status === "partial" && "border-pra-warning text-pra-warning",
             completion.status === "empty" && "border-muted text-muted-foreground"
           )}
         >
@@ -112,7 +112,7 @@ export function StudioSectionCard({ section, draftId, isActive, onUpdate, onSele
           onClick={(e) => { e.stopPropagation(); setShowAi((v) => !v); }}
           title="AI operations"
         >
-          <Sparkles className="h-3.5 w-3.5 text-violet-500" />
+          <Sparkles className="h-3.5 w-3.5 text-pra-primary" />
         </Button>
         {collapsed ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronUp className="h-4 w-4 text-muted-foreground" />}
       </div>

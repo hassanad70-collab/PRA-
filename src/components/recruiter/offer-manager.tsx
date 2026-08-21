@@ -59,7 +59,7 @@ interface Props {
 
 const STATUS_ICON: Record<OfferStatus, React.ReactNode> = {
   pending: <Clock className="h-3.5 w-3.5" />,
-  accepted: <CheckCircle className="h-3.5 w-3.5 text-green-600" />,
+  accepted: <CheckCircle className="h-3.5 w-3.5 text-pra-success" />,
   declined: <XCircle className="h-3.5 w-3.5 text-destructive" />,
   expired: <Clock className="h-3.5 w-3.5 text-muted-foreground" />,
   withdrawn: <XCircle className="h-3.5 w-3.5 text-muted-foreground" />,

@@ -11,7 +11,7 @@ export function CTA() {
   return (
     <section className="py-24">
       <div className="container">
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-700 via-blue-600 to-blue-500 px-8 py-16 text-center text-white sm:px-16">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-pra-navy via-pra-primary to-pra-primary-hover px-8 py-16 text-center text-white sm:px-16">
           <div className="absolute inset-0 bg-grid-pattern bg-[size:32px_32px] opacity-10" />
           <h2 className="relative text-3xl font-bold tracking-tight sm:text-4xl">{t("title")}</h2>
           <p className="relative mx-auto mt-4 max-w-xl text-white/80">{t("subtitle")}</p>

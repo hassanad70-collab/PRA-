@@ -22,15 +22,15 @@ import type { AiCareerReport } from "@/types/database";
 import type { GuestCareerResult } from "@/lib/ai/guest-career-advisor";
 
 const PRIORITY_COLOR: Record<string, string> = {
-  high: "text-red-600 dark:text-red-400",
-  medium: "text-amber-600 dark:text-amber-400",
-  low: "text-green-600 dark:text-green-400",
+  high: "text-pra-danger",
+  medium: "text-pra-warning",
+  low: "text-pra-success",
 };
 
 const PRIORITY_BG: Record<string, string> = {
-  high: "bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800/40",
-  medium: "bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800/40",
-  low: "bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800/40",
+  high: "bg-pra-danger/5 border-pra-danger/20",
+  medium: "bg-pra-warning/5 border-pra-warning/20",
+  low: "bg-pra-success/5 border-pra-success/20",
 };
 
 function CareerResultView({ result, onReset }: { result: GuestCareerResult; onReset: () => void }) {
@@ -105,7 +105,7 @@ function CareerResultView({ result, onReset }: { result: GuestCareerResult; onRe
       {result.skillGaps.length > 0 && (
         <div>
           <div className="mb-3 flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4 text-amber-500" />
+            <AlertTriangle className="h-4 w-4 text-pra-warning" />
             <h3 className="font-semibold">Skill Gaps to Close</h3>
           </div>
           <div className="space-y-2">
@@ -152,7 +152,7 @@ function CareerResultView({ result, onReset }: { result: GuestCareerResult; onRe
       {result.salaryRange && (
         <div>
           <div className="mb-3 flex items-center gap-2">
-            <DollarSign className="h-4 w-4 text-green-600" />
+            <DollarSign className="h-4 w-4 text-pra-success" />
             <h3 className="font-semibold">Salary Insights</h3>
           </div>
           <Card>
@@ -191,14 +191,14 @@ function CareerResultView({ result, onReset }: { result: GuestCareerResult; onRe
 
       {/* Market insight */}
       {result.marketInsight && (
-        <Card className="border-blue-200 dark:border-blue-800/40 bg-blue-50 dark:bg-blue-950/20">
+        <Card className="border-pra-primary/30 bg-pra-surface-subtle">
           <CardHeader className="pb-2 pt-4">
-            <CardTitle className="text-sm text-blue-800 dark:text-blue-400">
+            <CardTitle className="text-sm text-pra-primary">
               📊 Market Intelligence
             </CardTitle>
           </CardHeader>
           <CardContent className="pb-4">
-            <p className="text-sm text-blue-800 dark:text-blue-400 leading-relaxed">{result.marketInsight}</p>
+            <p className="text-sm text-pra-text-secondary leading-relaxed">{result.marketInsight}</p>
           </CardContent>
         </Card>
       )}
@@ -231,7 +231,7 @@ function SavedReportCard({
         <button
           type="button"
           onClick={() => onToggleFavorite(item.id, !item.is_favorite)}
-          className={`p-1.5 rounded hover:bg-muted transition-colors ${item.is_favorite ? "text-amber-500" : "text-muted-foreground"}`}
+          className={`p-1.5 rounded hover:bg-muted transition-colors ${item.is_favorite ? "text-pra-warning" : "text-muted-foreground"}`}
         >
           <Star className="h-3.5 w-3.5" fill={item.is_favorite ? "currentColor" : "none"} />
         </button>

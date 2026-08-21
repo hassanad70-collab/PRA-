@@ -4,7 +4,7 @@ import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YA
 
 export function MonthlyCountChart({
   data,
-  color = "#6366f1",
+  color = "#2563EB",
   emptyLabel = "No data yet.",
 }: {
   data: { month: string; count: number }[];

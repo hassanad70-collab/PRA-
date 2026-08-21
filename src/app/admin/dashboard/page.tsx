@@ -81,7 +81,7 @@ export default async function AdminDashboardPage() {
             <CardTitle className="text-base">Applications per month</CardTitle>
           </CardHeader>
           <CardContent>
-            <MonthlyCountChart data={applicationsTrend} color="#6366f1" emptyLabel="No applications yet." />
+            <MonthlyCountChart data={applicationsTrend} color="#2563EB" emptyLabel="No applications yet." />
           </CardContent>
         </Card>
 
@@ -90,7 +90,7 @@ export default async function AdminDashboardPage() {
             <CardTitle className="text-base">New candidates per month</CardTitle>
           </CardHeader>
           <CardContent>
-            <MonthlyCountChart data={candidatesTrend} color="#22c55e" emptyLabel="No new candidates yet." />
+            <MonthlyCountChart data={candidatesTrend} color="#10B981" emptyLabel="No new candidates yet." />
           </CardContent>
         </Card>
 
@@ -99,7 +99,7 @@ export default async function AdminDashboardPage() {
             <CardTitle className="text-base">Jobs created per month</CardTitle>
           </CardHeader>
           <CardContent>
-            <MonthlyCountChart data={jobsTrend} color="#f59e0b" emptyLabel="No jobs created yet." />
+            <MonthlyCountChart data={jobsTrend} color="#F59E0B" emptyLabel="No jobs created yet." />
           </CardContent>
         </Card>
 

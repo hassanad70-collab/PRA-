@@ -14,7 +14,7 @@ export function TopSkillsChart({ data, noDataLabel }: { data: { name: string; co
         <XAxis type="number" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
         <YAxis type="category" dataKey="name" fontSize={12} tickLine={false} axisLine={false} width={100} />
         <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid hsl(var(--border))", fontSize: 12 }} />
-        <Bar dataKey="count" fill="#8b5cf6" radius={[0, 6, 6, 0]} />
+        <Bar dataKey="count" fill="#2563EB" radius={[0, 6, 6, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );

@@ -2,7 +2,7 @@
 
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
-const COLORS = ["#6366f1", "#8b5cf6", "#a855f7", "#d946ef", "#ec4899", "#22c55e", "#f59e0b", "#0ea5e9"];
+const COLORS = ["#2563EB", "#06B6D4", "#10B981", "#F59E0B", "#8B5CF6", "#EF4444", "#1D4ED8", "#0891B2"];
 
 export function DepartmentChart({
   breakdown,

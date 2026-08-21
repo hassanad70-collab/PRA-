@@ -11,7 +11,7 @@ const buttonVariants = cva(
       variant: {
         default: "bg-primary text-primary-foreground shadow hover:opacity-90 active:scale-[0.98]",
         gradient:
-          "bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:opacity-95 active:scale-[0.98]",
+          "bg-gradient-to-r from-pra-primary to-pra-cyan text-white shadow-lg shadow-pra-primary/25 hover:shadow-pra-primary/40 hover:opacity-95 active:scale-[0.98]",
         destructive: "bg-destructive text-destructive-foreground shadow-sm hover:opacity-90",
         outline: "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
         secondary: "bg-secondary text-secondary-foreground shadow-sm hover:opacity-80",

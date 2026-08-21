@@ -46,14 +46,14 @@ export default async function FavoritesPage({ params }: { params: Promise<{ loca
               <Link key={cl.id} href={`/${locale}/candidate/workspace/cover-letters`}>
                 <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
                   <CardContent className="flex items-center gap-3 pt-5 pb-5">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-500/10">
-                      <FileText className="h-4 w-4 text-blue-500" />
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-pra-primary/10">
+                      <FileText className="h-4 w-4 text-pra-primary" />
                     </div>
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium">{cl.title}</p>
                       <p className="text-xs text-muted-foreground">{formatDate(cl.created_at)}</p>
                     </div>
-                    <Star className="ml-auto h-4 w-4 shrink-0 fill-yellow-400 text-yellow-400" />
+                    <Star className="ml-auto h-4 w-4 shrink-0 fill-pra-warning text-pra-warning" />
                   </CardContent>
                 </Card>
               </Link>
@@ -70,14 +70,14 @@ export default async function FavoritesPage({ params }: { params: Promise<{ loca
               <Link key={s.id} href={`/${locale}/candidate/workspace/interview-prep`}>
                 <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
                   <CardContent className="flex items-center gap-3 pt-5 pb-5">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-purple-500/10">
-                      <Mic className="h-4 w-4 text-purple-500" />
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-pra-cyan/10">
+                      <Mic className="h-4 w-4 text-pra-cyan" />
                     </div>
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium">{s.job_title ?? "Interview session"}</p>
                       <p className="text-xs text-muted-foreground">{s.company_name ?? formatDate(s.created_at)}</p>
                     </div>
-                    <Star className="ml-auto h-4 w-4 shrink-0 fill-yellow-400 text-yellow-400" />
+                    <Star className="ml-auto h-4 w-4 shrink-0 fill-pra-warning text-pra-warning" />
                   </CardContent>
                 </Card>
               </Link>
@@ -94,14 +94,14 @@ export default async function FavoritesPage({ params }: { params: Promise<{ loca
               <Link key={r.id} href={`/${locale}/candidate/workspace/career-advisor`}>
                 <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
                   <CardContent className="flex items-center gap-3 pt-5 pb-5">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10">
-                      <Sparkles className="h-4 w-4 text-emerald-500" />
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-pra-success/10">
+                      <Sparkles className="h-4 w-4 text-pra-success" />
                     </div>
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium">{r.target_role ?? r.current_job_role ?? "Career report"}</p>
                       <p className="text-xs text-muted-foreground">{formatDate(r.created_at)}</p>
                     </div>
-                    <Star className="ml-auto h-4 w-4 shrink-0 fill-yellow-400 text-yellow-400" />
+                    <Star className="ml-auto h-4 w-4 shrink-0 fill-pra-warning text-pra-warning" />
                   </CardContent>
                 </Card>
               </Link>

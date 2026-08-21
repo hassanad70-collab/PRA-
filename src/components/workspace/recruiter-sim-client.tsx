@@ -35,18 +35,18 @@ const DIMENSIONS: { key: keyof SimResult; label: string }[] = [
 ];
 
 const RECOMMENDATION_LABELS: Record<string, { label: string; color: string }> = {
-  strong_yes: { label: "Strong Yes — Likely to advance", color: "text-emerald-600 dark:text-emerald-400" },
-  yes:        { label: "Yes — Worth interviewing",       color: "text-green-600 dark:text-green-400" },
-  neutral:    { label: "Neutral — Borderline",           color: "text-amber-600 dark:text-amber-400" },
-  no:         { label: "No — Below requirements",        color: "text-orange-600 dark:text-orange-400" },
+  strong_yes: { label: "Strong Yes — Likely to advance", color: "text-pra-success" },
+  yes:        { label: "Yes — Worth interviewing",       color: "text-pra-success" },
+  neutral:    { label: "Neutral — Borderline",           color: "text-pra-warning" },
+  no:         { label: "No — Below requirements",        color: "text-pra-danger" },
   strong_no:  { label: "Strong No — Not a fit",          color: "text-destructive" },
 };
 
 function ScoreBar({ score, label }: { score: number; label: string }) {
   const color =
-    score >= 75 ? "bg-emerald-500"
-    : score >= 55 ? "bg-amber-400"
-    : score >= 35 ? "bg-orange-400"
+    score >= 75 ? "bg-pra-success"
+    : score >= 55 ? "bg-pra-warning"
+    : score >= 35 ? "bg-pra-warning"
     : "bg-destructive";
 
   return (

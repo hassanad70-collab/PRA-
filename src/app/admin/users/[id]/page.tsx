@@ -51,7 +51,7 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
                 : <UserStatusBadge isActive={profile.is_active} deletedAt={profile.deleted_at} />
               }
               {profile.force_password_reset && (
-                <Badge variant="outline" className="text-[10px] border-amber-300 text-amber-600">
+                <Badge variant="outline" className="text-[10px] border-pra-warning/40 text-pra-warning">
                   <RotateCcw className="mr-1 h-3 w-3" /> Reset pending
                 </Badge>
               )}
@@ -87,10 +87,10 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
 
       {/* Force password reset banner */}
       {profile.force_password_reset && !profile.is_locked && (
-        <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800/40 dark:bg-amber-950/20 px-4 py-3">
-          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
+        <div className="flex items-start gap-3 rounded-lg border border-pra-warning/30 bg-pra-warning/5 px-4 py-3">
+          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-pra-warning" />
           <div>
-            <p className="text-sm font-medium text-amber-800 dark:text-amber-400">Password reset pending</p>
+            <p className="text-sm font-medium text-pra-warning">Password reset pending</p>
             <p className="text-xs text-muted-foreground mt-0.5">
               A password reset email has been sent. The flag will clear once the user resets their password.
             </p>

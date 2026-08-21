@@ -33,8 +33,8 @@ const TOOLS = [
     title: "ATS Resume Checker",
     description: "Scan your resume against any job description and get an ATS compatibility score with actionable fixes.",
     badge: "Free · No account",
-    color: "text-blue-600 dark:text-blue-400",
-    bg: "bg-blue-50 dark:bg-blue-950/30",
+    color: "text-pra-primary",
+    bg: "bg-pra-surface-subtle",
   },
   {
     href: "/ai-tools/resume-builder",
@@ -42,8 +42,8 @@ const TOOLS = [
     title: "AI Resume Builder",
     description: "9-step guided wizard builds a polished, ATS-optimized resume with AI rewrites, 5 templates, and PDF/DOCX export.",
     badge: "Requires account",
-    color: "text-violet-600 dark:text-violet-400",
-    bg: "bg-violet-50 dark:bg-violet-950/30",
+    color: "text-pra-primary",
+    bg: "bg-pra-ai-surface",
   },
   {
     href: "/ai-tools/cover-letter",
@@ -51,8 +51,8 @@ const TOOLS = [
     title: "Cover Letter Generator",
     description: "Paste the job description and get a tailored, professional cover letter in seconds. Choose tone and length.",
     badge: "Free · Workspace saves",
-    color: "text-emerald-600 dark:text-emerald-400",
-    bg: "bg-emerald-50 dark:bg-emerald-950/30",
+    color: "text-pra-success",
+    bg: "bg-pra-success/5",
   },
   {
     href: "/ai-tools/interview-prep",
@@ -60,8 +60,8 @@ const TOOLS = [
     title: "Interview Preparation",
     description: "Role-specific questions across HR, Technical, Behavioral, and Situational categories — with answer frameworks and coaching tips.",
     badge: "Free · Workspace saves",
-    color: "text-amber-600 dark:text-amber-400",
-    bg: "bg-amber-50 dark:bg-amber-950/30",
+    color: "text-pra-warning",
+    bg: "bg-pra-warning/5",
   },
   {
     href: "/ai-tools/career-advisor",
@@ -69,8 +69,8 @@ const TOOLS = [
     title: "AI Career Advisor",
     description: "Career roadmap, skill gap analysis, salary insights, certification recommendations, and weekly action goals.",
     badge: "Free · Workspace saves",
-    color: "text-rose-600 dark:text-rose-400",
-    bg: "bg-rose-50 dark:bg-rose-950/30",
+    color: "text-pra-cyan",
+    bg: "bg-pra-cyan/5",
   },
 ];
 

@@ -98,8 +98,8 @@ export function StudioTopBar({
 
       <div className="flex items-center gap-0.5 ml-1">
         {saveStatus === "saving" && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
-        {saveStatus === "saved" && <CheckCircle className="h-3.5 w-3.5 text-green-500" />}
-        {saveStatus === "unsaved" && <Clock className="h-3.5 w-3.5 text-yellow-500" />}
+        {saveStatus === "saved" && <CheckCircle className="h-3.5 w-3.5 text-pra-success" />}
+        {saveStatus === "unsaved" && <Clock className="h-3.5 w-3.5 text-pra-warning" />}
         <span className="hidden text-xs text-muted-foreground sm:inline ml-1">
           {saveStatus === "saving" ? "Saving…" : saveStatus === "saved" ? "Saved" : "Unsaved"}
         </span>

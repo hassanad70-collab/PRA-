@@ -61,7 +61,7 @@ const SCORE_DIMENSION_LABELS: Record<string, string> = {
 };
 
 function ScoreBar({ label, value }: { label: string; value: number }) {
-  const color = value >= 75 ? "bg-green-500" : value >= 50 ? "bg-yellow-500" : "bg-red-500";
+  const color = value >= 75 ? "bg-pra-success" : value >= 50 ? "bg-pra-warning" : "bg-pra-danger";
   return (
     <div className="space-y-1">
       <div className="flex justify-between text-xs">
@@ -85,9 +85,9 @@ function EvalCard({ evaluation }: { evaluation: MockInterviewEvaluation }) {
       >
         <div
           className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-            evaluation.score >= 75 ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" :
-            evaluation.score >= 50 ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400" :
-            "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+            evaluation.score >= 75 ? "bg-pra-success/10 text-pra-success" :
+            evaluation.score >= 50 ? "bg-pra-warning/10 text-pra-warning" :
+            "bg-pra-danger/10 text-pra-danger"
           }`}
         >
           {evaluation.score}/100
@@ -141,13 +141,13 @@ function SessionReport({ session, onNewInterview }: { session: MockInterviewSess
   const scores = session.scores;
   if (!scores) return null;
   const readiness = session.readiness_score ?? 0;
-  const readinessColor = readiness >= 75 ? "text-green-600" : readiness >= 50 ? "text-yellow-600" : "text-red-500";
+  const readinessColor = readiness >= 75 ? "text-pra-success" : readiness >= 50 ? "text-pra-warning" : "text-pra-danger";
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Trophy className="h-5 w-5 text-yellow-500" />
+          <Trophy className="h-5 w-5 text-pra-warning" />
           Interview Complete — Final Report
         </CardTitle>
       </CardHeader>
@@ -184,7 +184,7 @@ function SessionReport({ session, onNewInterview }: { session: MockInterviewSess
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Strengths</p>
               <div className="flex flex-wrap gap-1.5">
                 {session.strengths.map((s, i) => (
-                  <Badge key={i} variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-xs">
+                  <Badge key={i} variant="secondary" className="bg-pra-success/10 text-pra-success text-xs">
                     {s}
                   </Badge>
                 ))}
@@ -196,7 +196,7 @@ function SessionReport({ session, onNewInterview }: { session: MockInterviewSess
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Areas to Improve</p>
               <div className="flex flex-wrap gap-1.5">
                 {session.weaknesses.map((w, i) => (
-                  <Badge key={i} variant="secondary" className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 text-xs">
+                  <Badge key={i} variant="secondary" className="bg-pra-danger/10 text-pra-danger text-xs">
                     {w}
                   </Badge>
                 ))}
@@ -259,7 +259,7 @@ function SessionHistory({
                       <p className="text-sm font-medium truncate">{s.target_role}</p>
                       <Badge variant="outline" className="text-xs shrink-0">{label}</Badge>
                       {s.status === "completed" && (
-                        <Badge variant="secondary" className="text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 shrink-0">
+                        <Badge variant="secondary" className="text-xs bg-pra-success/10 text-pra-success shrink-0">
                           Done
                         </Badge>
                       )}
@@ -593,7 +593,7 @@ export function InterviewCenterClient({ initialSessions }: Props) {
           </CardContent>
 
           {error && (
-            <div className="px-4 py-2 flex items-center gap-2 text-sm text-red-600 bg-red-50 dark:bg-red-900/20 border-t">
+            <div className="px-4 py-2 flex items-center gap-2 text-sm text-pra-danger bg-pra-danger/5 border-t">
               <AlertCircle className="h-4 w-4 shrink-0" />
               {error}
             </div>
@@ -662,7 +662,7 @@ export function InterviewCenterClient({ initialSessions }: Props) {
       {/* Setup fields */}
       <div className="grid gap-4">
         <div className="space-y-1.5">
-          <Label htmlFor="target-role">Target Role <span className="text-red-500">*</span></Label>
+          <Label htmlFor="target-role">Target Role <span className="text-pra-danger">*</span></Label>
           <Input
             id="target-role"
             placeholder="e.g. Senior Software Engineer"
@@ -710,7 +710,7 @@ export function InterviewCenterClient({ initialSessions }: Props) {
       </div>
 
       {error && (
-        <div className="flex items-center gap-2 text-sm text-red-600">
+        <div className="flex items-center gap-2 text-sm text-pra-danger">
           <AlertCircle className="h-4 w-4 shrink-0" />
           {error}
         </div>

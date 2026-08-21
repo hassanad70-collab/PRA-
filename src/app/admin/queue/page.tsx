@@ -11,9 +11,9 @@ function StatusIcon({ status }: { status: string }) {
     case "pending":
       return <Clock className="h-4 w-4 text-muted-foreground" />;
     case "running":
-      return <Loader2 className="h-4 w-4 animate-spin text-blue-500" />;
+      return <Loader2 className="h-4 w-4 animate-spin text-pra-primary" />;
     case "completed":
-      return <CheckCircle2 className="h-4 w-4 text-green-500" />;
+      return <CheckCircle2 className="h-4 w-4 text-pra-success" />;
     case "failed":
       return <AlertCircle className="h-4 w-4 text-destructive" />;
     case "cancelled":
@@ -44,8 +44,8 @@ export default async function AdminQueuePage() {
 
   const statCards = [
     { label: "Pending", value: stats.pending, color: "text-muted-foreground" },
-    { label: "Running", value: stats.running, color: "text-blue-500" },
-    { label: "Completed", value: stats.completed, color: "text-green-500" },
+    { label: "Running", value: stats.running, color: "text-pra-primary" },
+    { label: "Completed", value: stats.completed, color: "text-pra-success" },
     { label: "Failed", value: stats.failed, color: "text-destructive" },
     { label: "Cancelled", value: stats.cancelled, color: "text-muted-foreground" },
   ];

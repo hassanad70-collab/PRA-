@@ -51,7 +51,7 @@ function CopyButton({ text }: { text: string }) {
         setTimeout(() => setCopied(false), 2000);
       }}
     >
-      {copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
+      {copied ? <Check className="h-3 w-3 text-pra-success" /> : <Copy className="h-3 w-3" />}
       {copied ? "Copied" : "Copy"}
     </Button>
   );

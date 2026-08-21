@@ -109,10 +109,10 @@ function computeHeatmap(parsed: ParsedResumeData, ats: AtsScore): SectionScore[]
 }
 
 function heatColor(score: number): string {
-  if (score >= 80) return "bg-emerald-500";
-  if (score >= 60) return "bg-amber-400";
-  if (score >= 40) return "bg-orange-400";
-  return "bg-red-500";
+  if (score >= 80) return "bg-pra-success";
+  if (score >= 60) return "bg-pra-warning";
+  if (score >= 40) return "bg-pra-warning";
+  return "bg-pra-danger";
 }
 
 function heatLabel(score: number): string {
@@ -136,7 +136,7 @@ export function ResumeHeatmap({ parsedData, atsScore }: Props) {
       <CardHeader>
         <div className="flex items-start justify-between gap-2">
           <CardTitle className="flex items-center gap-2 text-base">
-            <Flame className="h-4 w-4 text-orange-500" />
+            <Flame className="h-4 w-4 text-pra-warning" />
             Attention Heatmap
           </CardTitle>
           <TooltipProvider>
@@ -171,10 +171,10 @@ export function ResumeHeatmap({ parsedData, atsScore }: Props) {
                   <Badge
                     variant="outline"
                     className={`text-[10px] px-1.5 py-0 ${
-                      sec.score >= 80 ? "border-emerald-300 text-emerald-700 dark:text-emerald-400"
-                      : sec.score >= 60 ? "border-amber-300 text-amber-700 dark:text-amber-400"
-                      : sec.score >= 40 ? "border-orange-300 text-orange-700 dark:text-orange-400"
-                      : "border-red-300 text-red-700 dark:text-red-400"
+                      sec.score >= 80 ? "border-pra-success/40 text-pra-success"
+                      : sec.score >= 60 ? "border-pra-warning/40 text-pra-warning"
+                      : sec.score >= 40 ? "border-pra-warning/40 text-pra-warning"
+                      : "border-pra-danger/40 text-pra-danger"
                     }`}
                   >
                     {heatLabel(sec.score)}

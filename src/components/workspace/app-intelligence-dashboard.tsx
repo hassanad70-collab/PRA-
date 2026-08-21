@@ -47,18 +47,18 @@ interface Props {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ComponentType<{ className?: string }> }> = {
-  submitted:   { label: "Submitted",   color: "text-blue-500",   icon: Clock },
-  screening:   { label: "Screening",   color: "text-yellow-500", icon: Circle },
-  shortlisted: { label: "Shortlisted", color: "text-purple-500", icon: TrendingUp },
-  interview:   { label: "Interview",   color: "text-indigo-500", icon: Target },
-  offer:       { label: "Offer",       color: "text-green-500",  icon: Trophy },
-  hired:       { label: "Hired",       color: "text-emerald-600",icon: CheckCircle2 },
-  rejected:    { label: "Rejected",    color: "text-red-500",    icon: XCircle },
-  withdrawn:   { label: "Withdrawn",   color: "text-gray-400",   icon: Minus },
-  archived:    { label: "Archived",    color: "text-gray-400",   icon: Minus },
+  submitted:   { label: "Submitted",   color: "text-primary",        icon: Clock },
+  screening:   { label: "Screening",   color: "text-pra-warning",    icon: Circle },
+  shortlisted: { label: "Shortlisted", color: "text-pra-cyan",       icon: TrendingUp },
+  interview:   { label: "Interview",   color: "text-pra-primary",    icon: Target },
+  offer:       { label: "Offer",       color: "text-pra-success",    icon: Trophy },
+  hired:       { label: "Hired",       color: "text-pra-success",    icon: CheckCircle2 },
+  rejected:    { label: "Rejected",    color: "text-pra-danger",     icon: XCircle },
+  withdrawn:   { label: "Withdrawn",   color: "text-muted-foreground", icon: Minus },
+  archived:    { label: "Archived",    color: "text-muted-foreground", icon: Minus },
 };
 
-const FUNNEL_COLORS = ["hsl(var(--primary))", "#6366f1", "#8b5cf6", "#a855f7", "#10b981"];
+const FUNNEL_COLORS = ["#94A3B8", "#2563EB", "#06B6D4", "#F59E0B", "#10B981"];
 
 function KpiCard({
   title,
@@ -85,7 +85,7 @@ function KpiCard({
               <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
                 {trend && (
                   <TrendIcon
-                    className={`h-3 w-3 ${trend === "up" ? "text-green-500" : trend === "down" ? "text-red-500" : "text-muted-foreground"}`}
+                    className={`h-3 w-3 ${trend === "up" ? "text-pra-success" : trend === "down" ? "text-pra-danger" : "text-muted-foreground"}`}
                   />
                 )}
                 {sub}
@@ -119,7 +119,7 @@ function WinProbabilityBadge({ appId, atsScore, matchScore, role, status }: {
   }, [appId, atsScore, matchScore, role, status]);
 
   if (probability !== null) {
-    const color = probability >= 60 ? "text-green-600" : probability >= 35 ? "text-yellow-600" : "text-red-500";
+    const color = probability >= 60 ? "text-pra-success" : probability >= 35 ? "text-pra-warning" : "text-pra-danger";
     return <span className={`text-sm font-semibold tabular-nums ${color}`}>{probability}%</span>;
   }
 
@@ -228,7 +228,7 @@ export function AppIntelligenceDashboard({ analytics, recentApplications }: Prop
             <div className="mt-4 pt-4 border-t grid grid-cols-2 gap-3 text-center text-sm">
               <div>
                 <p className="text-muted-foreground text-xs">Rejection Rate</p>
-                <p className="font-semibold text-red-500 tabular-nums">{analytics.rates.rejectionRate}%</p>
+                <p className="font-semibold text-pra-danger tabular-nums">{analytics.rates.rejectionRate}%</p>
               </div>
               <div>
                 <p className="text-muted-foreground text-xs">Cover Letter Usage</p>
@@ -310,7 +310,7 @@ export function AppIntelligenceDashboard({ analytics, recentApplications }: Prop
                   contentStyle={{ fontSize: 12, background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
                 />
                 <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                  {["#3b82f6", "#8b5cf6", "#6366f1", "#10b981", "#059669", "#ef4444"].map((color, i) => (
+                  {["#2563EB", "#06B6D4", "#10B981", "#F59E0B", "#8B5CF6", "#EF4444"].map((color, i) => (
                     <Cell key={i} fill={color} />
                   ))}
                 </Bar>
@@ -415,7 +415,7 @@ export function AppIntelligenceDashboard({ analytics, recentApplications }: Prop
                 <ul className="space-y-2">
                   {insights.recommendations.map((rec, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm">
-                      <Target className="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                      <Target className="h-4 w-4 text-pra-success shrink-0 mt-0.5" />
                       <span>{rec}</span>
                     </li>
                   ))}

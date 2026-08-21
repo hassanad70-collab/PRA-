@@ -34,9 +34,9 @@ const TYPE_LABELS: Record<PortfolioItem["type"], string> = {
 };
 
 const TYPE_COLORS: Record<PortfolioItem["type"], string> = {
-  project: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
-  publication: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300",
-  design: "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300",
+  project: "bg-pra-surface-subtle text-pra-primary",
+  publication: "bg-pra-cyan/10 text-pra-cyan",
+  design: "bg-pra-success/10 text-pra-success",
   other: "bg-muted text-muted-foreground",
 };
 

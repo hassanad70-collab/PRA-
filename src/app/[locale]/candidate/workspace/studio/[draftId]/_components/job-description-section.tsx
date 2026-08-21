@@ -78,7 +78,7 @@ export function JobDescriptionSection({ draftId, value, onChange }: Props) {
         onClick={handleAnalyze}
         disabled={analyzing}
       >
-        {analyzing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3 text-violet-500" />}
+        {analyzing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3 text-pra-primary" />}
         {analyzing ? "Analyzing…" : "AI Analyze"}
       </Button>
 
@@ -107,7 +107,7 @@ export function JobDescriptionSection({ draftId, value, onChange }: Props) {
             <div>
               <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">ATS Keywords</div>
               <div className="flex flex-wrap gap-1">
-                {analysis.keywords.map((k) => <Badge key={k} className="text-[10px] h-4 px-1.5 bg-violet-100 text-violet-700 border-0 dark:bg-violet-900 dark:text-violet-300">{k}</Badge>)}
+                {analysis.keywords.map((k) => <Badge key={k} className="text-[10px] h-4 px-1.5 bg-pra-ai-surface text-pra-primary border-0">{k}</Badge>)}
               </div>
             </div>
           )}

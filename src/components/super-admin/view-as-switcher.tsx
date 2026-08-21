@@ -75,7 +75,7 @@ export function ViewAsSwitcher({ locale }: { locale: string }) {
           className={cn(
             "h-8 gap-1.5 text-xs font-medium",
             isImpersonating
-              ? "border-amber-500/60 bg-amber-500/10 text-amber-700 hover:bg-amber-500/15 dark:text-amber-400"
+              ? "border-pra-warning/60 bg-pra-warning/10 text-pra-warning hover:bg-pra-warning/15"
               : "border-dashed"
           )}
           suppressHydrationWarning

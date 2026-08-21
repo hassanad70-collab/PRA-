@@ -66,7 +66,7 @@ export function AiOperationsPanel({ draftId, sectionId, sectionType, currentCont
   };
 
   return (
-    <div className="rounded-lg border border-violet-200 bg-violet-50 dark:border-violet-900 dark:bg-violet-950/30 p-3 space-y-3">
+    <div className="rounded-lg border border-pra-primary/20 bg-pra-ai-surface p-3 space-y-3">
       <div className="flex flex-wrap gap-1.5">
         {AI_OPS.map((op) => (
           <button
@@ -74,7 +74,7 @@ export function AiOperationsPanel({ draftId, sectionId, sectionType, currentCont
             title={op.description}
             disabled={loading !== null}
             onClick={() => handleOp(op.key)}
-            className="rounded-full border border-violet-300 bg-white px-2.5 py-0.5 text-xs font-medium text-violet-700 transition-colors hover:bg-violet-100 disabled:opacity-50 dark:bg-violet-900 dark:text-violet-300 dark:border-violet-700 dark:hover:bg-violet-800"
+            className="rounded-full border border-pra-primary/30 bg-white px-2.5 py-0.5 text-xs font-medium text-pra-primary transition-colors hover:bg-pra-primary/10 disabled:opacity-50 dark:bg-pra-navy dark:border-pra-primary/40"
           >
             {loading === op.key ? (
               <span className="flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin" />{op.label}</span>

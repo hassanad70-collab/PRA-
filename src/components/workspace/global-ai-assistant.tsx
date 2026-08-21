@@ -462,7 +462,7 @@ export function GlobalAiAssistant() {
               isRTL && "flex-row-reverse"
             )}
           >
-            <Wifi className="h-3 w-3 text-green-500 shrink-0" />
+            <Wifi className="h-3 w-3 text-pra-success shrink-0" />
             {sourceLabels.length > 0 ? (
               <span>
                 {t("contextLabel")}: {sourceLabels.join(" · ")}
@@ -651,10 +651,10 @@ export function GlobalAiAssistant() {
           "shadow-[0_4px_14px_0_rgba(37,99,235,0.25)]",
           "transition-all duration-200",
           "hover:shadow-[0_6px_20px_0_rgba(37,99,235,0.35)] hover:-translate-y-px",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB] focus-visible:ring-offset-2",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pra-primary focus-visible:ring-offset-2",
           isRTL ? "left-6" : "right-6"
         )}
-        style={{ background: "linear-gradient(to right, #2563EB, #06B6D4)" }}
+        style={{ background: "var(--pra-ai-gradient)" }}
       >
         <Sparkles className="h-4 w-4 shrink-0" />
         <span>{t("openButton")}</span>
@@ -672,10 +672,10 @@ export function GlobalAiAssistant() {
           "shadow-[0_4px_14px_0_rgba(37,99,235,0.25)]",
           "transition-all duration-200",
           "hover:shadow-[0_6px_20px_0_rgba(37,99,235,0.35)] hover:-translate-y-px",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB] focus-visible:ring-offset-2",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pra-primary focus-visible:ring-offset-2",
           isRTL ? "left-4" : "right-4"
         )}
-        style={{ background: "linear-gradient(to right, #2563EB, #06B6D4)" }}
+        style={{ background: "var(--pra-ai-gradient)" }}
       >
         <Sparkles className="h-5 w-5" />
       </button>

@@ -56,7 +56,7 @@ export function AICareerToolsSection() {
                   className={cn(
                     "flex h-11 w-11 items-center justify-center rounded-xl transition-colors",
                     isLive
-                      ? "bg-gradient-to-br from-blue-500/10 to-blue-400/10 text-primary group-hover:bg-gradient-to-br group-hover:from-blue-700 group-hover:to-blue-500 group-hover:text-white"
+                      ? "bg-pra-surface-subtle text-primary group-hover:bg-gradient-to-br group-hover:from-pra-primary-hover group-hover:to-pra-primary group-hover:text-white"
                       : "bg-muted text-muted-foreground"
                   )}
                 >
