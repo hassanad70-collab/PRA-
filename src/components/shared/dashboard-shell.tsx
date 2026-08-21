@@ -227,7 +227,7 @@ function NavLink({
         href={href}
         onClick={onClick}
         className={cn(
-          "relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150",
+          "relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150",
           onPin && "pr-8",
           active
             ? cn("font-semibold text-pra-navy", isAi ? "bg-pra-ai-surface/70" : "bg-pra-surface-subtle")
@@ -238,7 +238,7 @@ function NavLink({
           <span className="absolute inset-y-1.5 left-0 w-[3px] rounded-r-full bg-gradient-to-b from-pra-primary to-pra-cyan" aria-hidden />
         )}
         <Icon className={cn(
-          "h-4 w-4 shrink-0 transition-colors",
+          "h-[18px] w-[18px] shrink-0 transition-colors",
           active ? "text-pra-primary" : isAi ? "text-pra-primary/60 group-hover:text-pra-primary" : "group-hover:text-pra-primary"
         )} />
         <span className="flex-1">{label}</span>
@@ -281,7 +281,7 @@ function SubLink({
       href={href}
       onClick={onClick}
       className={cn(
-        "flex items-center gap-2 rounded-md py-1.5 pl-10 pr-3 text-sm transition-all duration-150",
+        "flex items-center gap-2 rounded-md py-2 pl-10 pr-3 text-sm transition-all duration-150",
         active
           ? "bg-pra-surface-subtle font-semibold text-pra-navy"
           : "text-muted-foreground hover:bg-pra-surface-subtle/60 hover:text-pra-navy"
@@ -310,13 +310,13 @@ function SubGroupHeader({
     <button
       onClick={onToggle}
       className={cn(
-        "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150",
+        "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150",
         hasActiveChild
           ? "text-pra-navy font-semibold"
           : "text-muted-foreground hover:bg-pra-surface-subtle/60 hover:text-pra-navy"
       )}
     >
-      <Icon className={cn("h-4 w-4 shrink-0", hasActiveChild ? "text-pra-primary" : undefined)} />
+      <Icon className={cn("h-[18px] w-[18px] shrink-0", hasActiveChild ? "text-pra-primary" : undefined)} />
       <span className="flex-1 text-start">{item.label}</span>
       {item.tag && <TagBadge tag={item.tag} />}
       <ChevronDown className={cn(
