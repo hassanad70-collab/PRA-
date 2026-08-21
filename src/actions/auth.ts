@@ -370,6 +370,12 @@ export async function verifyPhoneOtp(formData: FormData): Promise<ActionResult> 
     return { success: false, error: errs.token?.[0] ?? errs.phone?.[0] ?? "Invalid input" };
   }
 
+  // Rate-limit the verify step to prevent brute-forcing the 6-digit token.
+  const rl = await rateLimitByIpAndTarget("phone-otp-verify", parsed.data.phone, 5, 15 * 60 * 1000);
+  if (!rl.allowed) {
+    return { success: false, error: "Too many verification attempts. Please request a new code." };
+  }
+
   const supabase = await createClient();
   const { data, error } = await supabase.auth.verifyOtp({
     phone: parsed.data.phone,
@@ -378,6 +384,10 @@ export async function verifyPhoneOtp(formData: FormData): Promise<ActionResult> 
   });
 
   if (error) {
+    const msg = error.message.toLowerCase();
+    if (msg.includes("expired")) {
+      return { success: false, error: "The code has expired. Please request a new one." };
+    }
     return { success: false, error: "Invalid or expired code. Please check the code and try again." };
   }
 
@@ -386,28 +396,43 @@ export async function verifyPhoneOtp(formData: FormData): Promise<ActionResult> 
 
   const admin = createAdminClient();
 
-  // Check whether this is a first-time phone login by looking for a candidates row.
-  const { data: existingCandidate } = await admin
-    .from("candidates")
-    .select("id")
+  // The on_auth_user_created trigger creates a profiles row for every new Supabase
+  // auth user. Read it to determine role and whether this is a first-time phone login.
+  const { data: profile } = await admin
+    .from("profiles")
+    .select("role")
     .eq("id", userId)
     .maybeSingle();
 
-  const isNewUser = !existingCandidate;
+  const role = profile?.role ?? "candidate";
+  const locale = await getRedirectLocale();
 
-  if (isNewUser) {
-    // Ensure candidates row exists so the dashboard doesn't 404.
-    await admin.from("candidates").insert({ id: userId });
+  if (role === "candidate") {
+    // New candidate via phone OTP won't have a candidates row yet.
+    const { data: existingCandidate } = await admin
+      .from("candidates")
+      .select("id")
+      .eq("id", userId)
+      .maybeSingle();
+
+    if (!existingCandidate) {
+      await admin.from("candidates").insert({ id: userId });
+      revalidatePath("/", "layout");
+      redirect(`/${locale}/complete-profile`);
+    }
+
+    revalidatePath("/", "layout");
+    redirect(`/${locale}/candidate/dashboard`);
   }
 
   revalidatePath("/", "layout");
-  const locale = await getRedirectLocale();
 
-  if (isNewUser) {
-    redirect(`/${locale}/complete-profile`);
+  if (role === "recruiter" || role === "hr_manager") {
+    redirect(`/${locale}/recruiter/dashboard`);
   }
 
-  redirect(`/${locale}/candidate/dashboard`);
+  // super_admin
+  redirect(`/admin/dashboard`);
 }
 
 export async function completeProfile(formData: FormData): Promise<ActionResult> {

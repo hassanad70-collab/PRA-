@@ -442,7 +442,7 @@
       "subtitle": "Enter your mobile number to receive a verification code",
       "countryLabel": "Country",
       "phoneLabel": "Mobile number",
-      "phonePlaceholderHint": "Enter the national number without the country code",
+      "phonePlaceholderHint": "Enter without leading zero or country code (e.g. 1012345678 for Egypt)",
       "sendOtpButton": "Send verification code",
       "secureNote": "A one-time code will be sent via SMS. Standard messaging rates may apply.",
       "orSignIn": "Or sign in with",

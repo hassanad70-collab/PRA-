@@ -53,7 +53,9 @@ export function PhoneOtpForm() {
   const [resendSeconds, setResendSeconds] = React.useState(0);
   const otpInputRef = React.useRef<HTMLInputElement>(null);
 
-  const phone = `${countryCode}${nationalNumber.replace(/\s/g, "")}`;
+  // Strip whitespace AND leading zeros (trunk prefix — e.g. Egypt 01012… → 1012…).
+  const normalizedNational = nationalNumber.replace(/\s/g, "").replace(/^0+/, "");
+  const phone = `${countryCode}${normalizedNational}`;
 
   // Countdown timer for OTP resend.
   React.useEffect(() => {
