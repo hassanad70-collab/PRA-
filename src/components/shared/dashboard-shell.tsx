@@ -219,6 +219,7 @@ function NavLink({
   isPinned?: boolean;
 }) {
   const active = pathname === href || pathname.startsWith(`${href}/`);
+  const isAi = tag === "ai";
   const Icon = ICON_MAP[icon];
   return (
     <div className="group relative">
@@ -226,14 +227,20 @@ function NavLink({
         href={href}
         onClick={onClick}
         className={cn(
-          "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+          "relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150",
           onPin && "pr-8",
           active
-            ? "bg-pra-primary/12 text-pra-primary font-semibold"
-            : "text-muted-foreground hover:bg-accent hover:text-foreground"
+            ? cn("font-semibold text-pra-navy", isAi ? "bg-pra-ai-surface/70" : "bg-pra-surface-subtle")
+            : "text-muted-foreground hover:bg-pra-surface-subtle/60 hover:text-pra-navy"
         )}
       >
-        <Icon className="h-4 w-4 shrink-0" />
+        {active && (
+          <span className="absolute inset-y-1.5 left-0 w-[3px] rounded-r-full bg-gradient-to-b from-pra-primary to-pra-cyan" aria-hidden />
+        )}
+        <Icon className={cn(
+          "h-4 w-4 shrink-0 transition-colors",
+          active ? "text-pra-primary" : isAi ? "text-pra-primary/60 group-hover:text-pra-primary" : "group-hover:text-pra-primary"
+        )} />
         <span className="flex-1">{label}</span>
         {tag && <TagBadge tag={tag} />}
         {badge != null && <CountBadge count={badge} />}
@@ -274,13 +281,13 @@ function SubLink({
       href={href}
       onClick={onClick}
       className={cn(
-        "flex items-center gap-2 rounded-md py-1.5 pl-10 pr-3 text-sm transition-colors",
+        "flex items-center gap-2 rounded-md py-1.5 pl-10 pr-3 text-sm transition-all duration-150",
         active
-          ? "bg-pra-primary/12 font-semibold text-pra-primary"
-          : "text-muted-foreground hover:bg-accent hover:text-foreground"
+          ? "bg-pra-surface-subtle font-semibold text-pra-navy"
+          : "text-muted-foreground hover:bg-pra-surface-subtle/60 hover:text-pra-navy"
       )}
     >
-      <span className="h-1 w-1 shrink-0 rounded-full bg-current opacity-40" />
+      <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", active ? "bg-pra-primary" : "bg-current opacity-30")} />
       <span className="flex-1">{label}</span>
       {tag && <TagBadge tag={tag} />}
       {badge != null && <CountBadge count={badge} />}
@@ -303,13 +310,13 @@ function SubGroupHeader({
     <button
       onClick={onToggle}
       className={cn(
-        "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+        "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150",
         hasActiveChild
-          ? "text-foreground"
-          : "text-muted-foreground hover:bg-accent hover:text-foreground"
+          ? "text-pra-navy font-semibold"
+          : "text-muted-foreground hover:bg-pra-surface-subtle/60 hover:text-pra-navy"
       )}
     >
-      <Icon className="h-4 w-4 shrink-0" />
+      <Icon className={cn("h-4 w-4 shrink-0", hasActiveChild ? "text-pra-primary" : undefined)} />
       <span className="flex-1 text-start">{item.label}</span>
       {item.tag && <TagBadge tag={item.tag} />}
       <ChevronDown className={cn(
@@ -543,7 +550,7 @@ export function DashboardShell({
           value={sidebarSearch}
           onChange={(e) => setSidebarSearch(e.target.value)}
           placeholder="Search…"
-          className="w-full rounded-lg border border-border bg-muted/30 py-1.5 pl-8 pr-7 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary/30"
+          className="w-full rounded-lg border border-border bg-background py-1.5 pl-8 pr-7 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-pra-primary/30 focus:border-pra-primary/30 transition-colors"
         />
         {sidebarSearch && (
           <button
@@ -582,7 +589,7 @@ export function DashboardShell({
           {/* Pinned section */}
           {pinnedItems.length > 0 && (
             <div className="mb-3">
-              <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
+              <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-400">
                 Pinned
               </p>
               <div className="space-y-0.5">
@@ -607,7 +614,7 @@ export function DashboardShell({
           {/* Recent section */}
           {recentItems.length > 0 && (
             <div className="mb-3">
-              <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
+              <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-400">
                 Recent
               </p>
               <div className="space-y-0.5">
@@ -638,7 +645,7 @@ export function DashboardShell({
                   group.collapsible ? (
                     <button
                       onClick={() => toggleGroup(group.label!)}
-                      className="flex w-full items-center justify-between mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+                      className="flex w-full items-center justify-between mb-1 px-3 text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-400 hover:text-slate-500 transition-colors"
                     >
                       <span>{group.label}</span>
                       <ChevronDown className={cn(
@@ -647,7 +654,7 @@ export function DashboardShell({
                       )} />
                     </button>
                   ) : (
-                    <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
+                    <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-400">
                       {group.label}
                     </p>
                   )
@@ -729,25 +736,28 @@ export function DashboardShell({
 
   const SidebarContent = (
     <div className="flex h-full flex-col">
-      <Link href="/" className="flex items-center gap-2 px-6 py-5 font-semibold">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-pra-primary-hover to-pra-primary text-white">
-          <Sparkles className="h-4 w-4" />
+      <Link href="/" className="flex items-center gap-3 border-b border-border/60 px-5 py-4">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-pra-primary to-pra-cyan text-white shadow-md shadow-pra-primary/20">
+          <Sparkles className="h-[18px] w-[18px]" />
         </div>
-        <span className="text-sm">PRA Talent Intelligence</span>
+        <div>
+          <div className="text-sm font-bold tracking-tight text-pra-navy">PRA</div>
+          <div className="-mt-0.5 text-[10px] font-semibold uppercase tracking-widest text-pra-cyan">Talent Intelligence</div>
+        </div>
       </Link>
 
       {SidebarNav}
 
-      <div className="border-t border-border p-3">
+      <div className="border-t border-border/60 p-3">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left hover:bg-accent">
+            <button className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-pra-surface-subtle">
               <Avatar className="h-8 w-8">
-                <AvatarFallback className="text-xs">{initials(user.full_name)}</AvatarFallback>
+                <AvatarFallback className="bg-gradient-to-br from-pra-primary to-pra-cyan text-xs font-semibold text-white">{initials(user.full_name)}</AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium">{user.full_name}</p>
-                <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+                <p className="truncate text-sm font-semibold text-pra-navy">{user.full_name}</p>
+                <p className="truncate text-[11px] text-muted-foreground">{user.email}</p>
               </div>
             </button>
           </DropdownMenuTrigger>
