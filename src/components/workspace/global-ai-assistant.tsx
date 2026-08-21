@@ -645,12 +645,12 @@ export function GlobalAiAssistant() {
         data-testid="global-ai-tab"
         className={cn(
           "hidden md:flex fixed bottom-6 z-[55]",
-          "items-center gap-2.5 px-5 h-[54px] min-w-[150px]",
-          "rounded-[15px] border-0 cursor-pointer",
+          "items-center gap-3 px-6 h-[52px] min-w-[188px]",
+          "rounded-[14px] border-0 cursor-pointer",
           "text-white font-semibold text-sm",
-          "shadow-[0_4px_14px_0_rgba(37,99,235,0.25)]",
+          "shadow-[0_6px_20px_0_rgba(37,99,235,0.30)]",
           "transition-all duration-200",
-          "hover:shadow-[0_6px_20px_0_rgba(37,99,235,0.35)] hover:-translate-y-px",
+          "hover:shadow-[0_8px_28px_0_rgba(37,99,235,0.40)] hover:-translate-y-0.5",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pra-primary focus-visible:ring-offset-2",
           isRTL ? "left-6" : "right-6"
         )}

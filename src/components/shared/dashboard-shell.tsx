@@ -184,8 +184,8 @@ const DEFAULT_LABELS = { settings: "Settings", signOut: "Sign out", openMenu: "O
 function TagBadge({ tag }: { tag: "ai" | "beta" | "new" }) {
   return (
     <span className={cn(
-      "rounded px-1 py-0.5 text-[9px] font-bold uppercase tracking-wider leading-none",
-      tag === "ai"   && "bg-pra-primary/10 text-pra-primary",
+      "rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider leading-none",
+      tag === "ai"   && "bg-gradient-to-r from-pra-primary/15 to-pra-cyan/15 text-pra-primary ring-1 ring-inset ring-pra-primary/20",
       tag === "beta" && "bg-pra-warning/10 text-pra-warning",
       tag === "new"  && "bg-pra-success/10 text-pra-success",
     )}>
@@ -229,7 +229,7 @@ function NavLink({
           "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
           onPin && "pr-8",
           active
-            ? "bg-primary/10 text-primary"
+            ? "bg-pra-primary/12 text-pra-primary font-semibold"
             : "text-muted-foreground hover:bg-accent hover:text-foreground"
         )}
       >
@@ -276,7 +276,7 @@ function SubLink({
       className={cn(
         "flex items-center gap-2 rounded-md py-1.5 pl-10 pr-3 text-sm transition-colors",
         active
-          ? "bg-primary/10 font-medium text-primary"
+          ? "bg-pra-primary/12 font-semibold text-pra-primary"
           : "text-muted-foreground hover:bg-accent hover:text-foreground"
       )}
     >

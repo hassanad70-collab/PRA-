@@ -17,8 +17,8 @@ import {
   Sparkles,
   Star,
   Target,
-  TrendingUp,
   Upload,
+  User,
   Activity,
 } from "lucide-react";
 
@@ -142,7 +142,10 @@ export default async function CandidateDashboardPage({ params }: { params: Promi
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">{t("welcomeBack", { name: firstName })}</h1>
+        <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-pra-cyan/30 bg-pra-ai-surface px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-pra-cyan">
+          <Sparkles className="h-3 w-3" /> AI Talent Intelligence
+        </div>
+        <h1 className="text-2xl font-semibold tracking-tight text-pra-navy dark:text-foreground">{t("welcomeBack", { name: firstName })}</h1>
         <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
       </div>
 
@@ -150,14 +153,15 @@ export default async function CandidateDashboardPage({ params }: { params: Promi
 
       {/* Today's Goal */}
       {todayGoal && (
-        <Card className="border-primary/30 bg-primary/5">
-          <CardContent className="flex flex-col items-start justify-between gap-4 pt-6 sm:flex-row sm:items-center">
+        <Card className="relative overflow-hidden border-pra-primary/30 bg-gradient-to-r from-pra-primary/8 to-transparent">
+          <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-pra-primary to-pra-cyan" aria-hidden />
+          <CardContent className="flex flex-col items-start justify-between gap-4 pl-7 pt-6 sm:flex-row sm:items-center">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/15">
-                <Star className="h-5 w-5 text-primary" />
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-pra-primary/15">
+                <Star className="h-5 w-5 text-pra-primary" />
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-primary">Today&apos;s Goal</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-pra-primary">Today&apos;s Goal</p>
                 <p className="mt-0.5 font-medium">{todayGoal.label}</p>
                 <p className="text-sm text-muted-foreground">
                   {pendingTasks.length === 1
@@ -177,10 +181,11 @@ export default async function CandidateDashboardPage({ params }: { params: Promi
 
       {/* Upload prompt (only when no resume AND no today goal shown) */}
       {!candidate?.primary_resume_id && !todayGoal && (
-        <Card className="border-primary/30 bg-primary/5">
-          <CardContent className="flex flex-col items-start justify-between gap-4 pt-6 sm:flex-row sm:items-center">
+        <Card className="relative overflow-hidden border-pra-primary/30 bg-gradient-to-r from-pra-primary/8 to-transparent">
+          <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-pra-primary to-pra-cyan" aria-hidden />
+          <CardContent className="flex flex-col items-start justify-between gap-4 pl-7 pt-6 sm:flex-row sm:items-center">
             <div className="flex items-center gap-3">
-              <Sparkles className="h-8 w-8 text-primary" />
+              <Sparkles className="h-8 w-8 text-pra-primary" />
               <div>
                 <p className="font-medium">{t("uploadResumeTitle")}</p>
                 <p className="text-sm text-muted-foreground">{t("uploadResumeSubtitle")}</p>
@@ -198,11 +203,14 @@ export default async function CandidateDashboardPage({ params }: { params: Promi
       {/* Stats grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
-          <CardContent className="flex items-center justify-between pt-6">
-            <div>
+          <CardContent className="pt-5">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-pra-primary/10">
+                <User className="h-4 w-4 text-pra-primary" />
+              </div>
               <p className="text-sm text-muted-foreground">{tShared("profileCompletion")}</p>
-              <p className="mt-1 text-2xl font-bold">{profilePct}%</p>
             </div>
+            <p className="text-2xl font-bold">{profilePct}%</p>
           </CardContent>
           <div className="px-6 pb-6">
             <Progress value={profilePct} />
@@ -210,7 +218,7 @@ export default async function CandidateDashboardPage({ params }: { params: Promi
         </Card>
 
         <Card>
-          <CardContent className="flex items-center justify-between pt-6 pb-6">
+          <CardContent className="flex items-center justify-between gap-3 pt-6 pb-6">
             <div>
               <p className="text-sm text-muted-foreground">Resume Score</p>
               <p className="mt-1 text-2xl font-bold">{resumeScore}</p>
@@ -223,7 +231,7 @@ export default async function CandidateDashboardPage({ params }: { params: Promi
         </Card>
 
         <Card>
-          <CardContent className="flex items-center justify-between pt-6 pb-6">
+          <CardContent className="flex items-center justify-between gap-3 pt-6 pb-6">
             <div>
               <p className="text-sm text-muted-foreground">{t("latestAtsScore")}</p>
               <p className="mt-1 text-2xl font-bold">{atsScore?.overall_score ?? "—"}</p>
@@ -237,10 +245,15 @@ export default async function CandidateDashboardPage({ params }: { params: Promi
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="pt-6 pb-6">
-            <p className="text-sm text-muted-foreground">AI Usage</p>
-            <p className="mt-1 text-2xl font-bold">{totalAiUsage}</p>
+        <Card className="border-pra-cyan/20 bg-gradient-to-br from-pra-ai-surface/60 to-transparent">
+          <CardContent className="pt-5 pb-6">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-pra-primary/15 to-pra-cyan/15">
+                <Sparkles className="h-4 w-4 text-pra-primary" />
+              </div>
+              <p className="text-sm text-muted-foreground">AI Usage</p>
+            </div>
+            <p className="text-2xl font-bold">{totalAiUsage}</p>
             <p className="mt-1 text-xs text-muted-foreground">
               {totalAiUsage === 0
                 ? "No AI tools used yet"
@@ -253,17 +266,27 @@ export default async function CandidateDashboardPage({ params }: { params: Promi
       {/* Applications + Interviews row */}
       <div className="grid gap-4 sm:grid-cols-2">
         <Card>
-          <CardContent className="pt-6 pb-6">
-            <p className="text-sm text-muted-foreground">{t("activeApplications")}</p>
-            <p className="mt-1 text-2xl font-bold">{activeApplications.length}</p>
+          <CardContent className="pt-5 pb-6">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-pra-primary/10">
+                <Briefcase className="h-4 w-4 text-pra-primary" />
+              </div>
+              <p className="text-sm text-muted-foreground">{t("activeApplications")}</p>
+            </div>
+            <p className="text-2xl font-bold">{activeApplications.length}</p>
             <p className="mt-1 text-xs text-muted-foreground">{t("totalSubmitted", { count: applications.length })}</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="pt-6 pb-6">
-            <p className="text-sm text-muted-foreground">Upcoming Interviews</p>
-            <p className="mt-1 text-2xl font-bold">{upcomingInterviews.length}</p>
+          <CardContent className="pt-5 pb-6">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-pra-primary/10">
+                <Calendar className="h-4 w-4 text-pra-primary" />
+              </div>
+              <p className="text-sm text-muted-foreground">Upcoming Interviews</p>
+            </div>
+            <p className="text-2xl font-bold">{upcomingInterviews.length}</p>
             <p className="mt-1 text-xs text-muted-foreground">
               {upcomingInterviews.length > 0
                 ? `Next: ${new Date(upcomingInterviews[0].scheduled_at).toLocaleDateString()}`
@@ -275,10 +298,14 @@ export default async function CandidateDashboardPage({ params }: { params: Promi
 
       {/* Recommended Jobs + Upcoming Interviews detail */}
       <div className="grid gap-6 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <TrendingUp className="h-4 w-4" /> {t("aiRecommendedJobs")}
+        <Card className="lg:col-span-2 overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between rounded-t-xl border-b border-pra-cyan/20 bg-pra-ai-surface/50 py-4">
+            <CardTitle className="flex items-center gap-2.5 text-base">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-pra-primary to-pra-cyan shadow-sm shadow-pra-primary/20">
+                <Sparkles className="h-3.5 w-3.5 text-white" />
+              </div>
+              {t("aiRecommendedJobs")}
+              <span className="rounded-full border border-pra-cyan/30 bg-pra-ai-surface px-2 py-0.5 text-[10px] font-semibold tracking-wide text-pra-cyan">AI</span>
             </CardTitle>
             <Button variant="ghost" size="sm" asChild>
               <Link href="/candidate/jobs">
@@ -286,7 +313,7 @@ export default async function CandidateDashboardPage({ params }: { params: Promi
               </Link>
             </Button>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-2 pt-4">
             {recommendations.length === 0 && (
               <p className="py-8 text-center text-sm text-muted-foreground">{t("noRecommendations")}</p>
             )}
@@ -294,7 +321,7 @@ export default async function CandidateDashboardPage({ params }: { params: Promi
               <Link
                 key={match.id}
                 href={`/candidate/jobs/${match.job_id}`}
-                className="flex items-center justify-between rounded-xl border border-border p-4 transition-colors hover:bg-accent"
+                className="flex items-center justify-between rounded-xl border border-border p-4 transition-all hover:border-pra-primary/25 hover:bg-pra-surface-subtle"
               >
                 <div className="min-w-0">
                   <p className="truncate font-medium">{match.job?.title}</p>
@@ -441,21 +468,21 @@ export default async function CandidateDashboardPage({ params }: { params: Promi
         <CardContent>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              { href: "/candidate/workspace/assistant",       icon: Bot,        label: "AI Assistant",            color: "text-primary bg-primary/10" },
-              { href: "/candidate/workspace/studio",          icon: PenLine,    label: "Resume Studio",           color: "text-pra-primary bg-pra-primary/10" },
-              { href: "/candidate/workspace/ats-checker",     icon: Target,     label: "ATS Resume Check",        color: "text-pra-warning bg-pra-warning/10" },
-              { href: "/candidate/workspace/cover-letters",   icon: FileText,   label: "Cover Letters",           color: "text-pra-cyan bg-pra-cyan/10" },
-              { href: "/candidate/workspace/interview-prep",  icon: Mic,        label: "Interview Prep",          color: "text-pra-success bg-pra-success/10" },
-              { href: "/candidate/workspace/interview-center",icon: Brain,      label: "Interview Intelligence",  color: "text-pra-primary bg-pra-primary/10" },
-              { href: "/candidate/workspace/app-intelligence",icon: BarChart2,  label: "Application Intelligence",color: "text-pra-cyan bg-pra-cyan/10" },
-              { href: "/candidate/jobs",                      icon: Search,     label: "Browse Jobs",             color: "text-pra-success bg-pra-success/10" },
-            ].map(({ href, icon: Icon, label, color }) => (
+              { href: "/candidate/workspace/assistant",       icon: Bot,        label: "AI Assistant",            ai: true },
+              { href: "/candidate/workspace/studio",          icon: PenLine,    label: "Resume Studio",           ai: true },
+              { href: "/candidate/workspace/ats-checker",     icon: Target,     label: "ATS Resume Check",        ai: true },
+              { href: "/candidate/workspace/cover-letters",   icon: FileText,   label: "Cover Letters",           ai: true },
+              { href: "/candidate/workspace/interview-prep",  icon: Mic,        label: "Interview Prep",          ai: true },
+              { href: "/candidate/workspace/interview-center",icon: Brain,      label: "Interview Intelligence",  ai: true },
+              { href: "/candidate/workspace/app-intelligence",icon: BarChart2,  label: "App Intelligence",        ai: true },
+              { href: "/candidate/jobs",                      icon: Search,     label: "Browse Jobs",             ai: false },
+            ].map(({ href, icon: Icon, label, ai }) => (
               <Link
                 key={href}
                 href={href}
-                className="flex flex-col items-center gap-2 rounded-xl border border-border p-4 text-center transition-all hover:bg-accent hover:shadow-sm"
+                className="flex flex-col items-center gap-2 rounded-xl border border-border p-4 text-center transition-all hover:border-pra-primary/20 hover:bg-pra-surface-subtle hover:shadow-sm"
               >
-                <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${color}`}>
+                <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${ai ? "bg-gradient-to-br from-pra-primary/12 to-pra-cyan/12 text-pra-primary" : "bg-pra-success/10 text-pra-success"}`}>
                   <Icon className="h-5 w-5" />
                 </div>
                 <span className="text-sm font-medium">{label}</span>
