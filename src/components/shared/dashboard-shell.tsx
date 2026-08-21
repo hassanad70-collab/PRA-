@@ -231,15 +231,18 @@ function NavLink({
           onPin && "pr-8",
           active
             ? cn("font-semibold text-pra-navy", isAi ? "bg-pra-ai-surface/70" : "bg-pra-surface-subtle")
-            : "text-muted-foreground hover:bg-pra-surface-subtle/60 hover:text-pra-navy"
+            : "text-muted-foreground hover:bg-pra-surface-subtle hover:text-pra-navy"
         )}
       >
         {active && (
-          <span className="absolute inset-y-1.5 left-0 w-[3px] rounded-r-full bg-gradient-to-b from-pra-primary to-pra-cyan" aria-hidden />
+          <span className={cn(
+            "absolute inset-y-1.5 left-0 w-[3px] rounded-r-full",
+            isAi ? "bg-gradient-to-b from-pra-primary to-pra-cyan" : "bg-pra-primary"
+          )} aria-hidden />
         )}
         <Icon className={cn(
           "h-[18px] w-[18px] shrink-0 transition-colors",
-          active ? "text-pra-primary" : isAi ? "text-pra-primary/60 group-hover:text-pra-primary" : "group-hover:text-pra-primary"
+          active ? "text-pra-primary" : isAi ? "text-pra-primary/60 group-hover:text-pra-primary" : "text-pra-primary/45 group-hover:text-pra-primary"
         )} />
         <span className="flex-1">{label}</span>
         {tag && <TagBadge tag={tag} />}
@@ -284,10 +287,10 @@ function SubLink({
         "flex items-center gap-2 rounded-md py-2 pl-10 pr-3 text-sm transition-all duration-150",
         active
           ? "bg-pra-surface-subtle font-semibold text-pra-navy"
-          : "text-muted-foreground hover:bg-pra-surface-subtle/60 hover:text-pra-navy"
+          : "text-muted-foreground hover:bg-pra-surface-subtle hover:text-pra-navy"
       )}
     >
-      <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", active ? "bg-pra-primary" : "bg-current opacity-30")} />
+      <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", active ? "bg-pra-primary" : "bg-pra-primary/30")} />
       <span className="flex-1">{label}</span>
       {tag && <TagBadge tag={tag} />}
       {badge != null && <CountBadge count={badge} />}
@@ -313,10 +316,10 @@ function SubGroupHeader({
         "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150",
         hasActiveChild
           ? "text-pra-navy font-semibold"
-          : "text-muted-foreground hover:bg-pra-surface-subtle/60 hover:text-pra-navy"
+          : "text-muted-foreground hover:bg-pra-surface-subtle hover:text-pra-navy"
       )}
     >
-      <Icon className={cn("h-[18px] w-[18px] shrink-0", hasActiveChild ? "text-pra-primary" : undefined)} />
+      <Icon className={cn("h-[18px] w-[18px] shrink-0", hasActiveChild ? "text-pra-primary" : "text-pra-primary/45")} />
       <span className="flex-1 text-start">{item.label}</span>
       {item.tag && <TagBadge tag={item.tag} />}
       <ChevronDown className={cn(
