@@ -33,6 +33,7 @@ export default async function CareerCoachPage({
       roadmap: null,
       pending_actions: [],
       all_actions: [],
+      recent_checkins: [],
       next_checkin_due: null,
       progress: null,
     };
@@ -70,6 +71,7 @@ export default async function CareerCoachPage({
       roadmap,
       pending_actions: pendingActions,
       all_actions: allActions,
+      recent_checkins: checkins.slice(0, 5),
       next_checkin_due: nextCheckinDue,
       progress: {
         ...progress,

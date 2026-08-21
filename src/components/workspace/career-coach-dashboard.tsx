@@ -42,6 +42,7 @@ import {
   generateCareerRoadmapAction,
   generateWeeklyActionsAction,
   updateActionStatusAction,
+  submitCheckinAction,
 } from "@/actions/career-coach";
 import { cn } from "@/lib/utils";
 import type {
@@ -49,7 +50,10 @@ import type {
   CareerAssessment,
   CareerRoadmap,
   CareerAction,
+  CareerCheckin,
   CareerProgressResult,
+  CheckinAiResponse,
+  CheckinMood,
   GoalStatus,
   ActionStatus,
 } from "@/types/career-coach";
@@ -62,6 +66,7 @@ export interface CoachDashboardData {
   roadmap: CareerRoadmap | null;
   pending_actions: CareerAction[];
   all_actions: CareerAction[];
+  recent_checkins: CareerCheckin[];
   next_checkin_due: string | null;
   progress: CareerProgressResult | null;
 }
@@ -667,6 +672,302 @@ function PendingActionsCard({
   );
 }
 
+// ─── Check-in helpers ─────────────────────────────────────────────────────────
+
+const MOOD_META: Record<CheckinMood, { label: string; emoji: string; color: string }> = {
+  great:      { label: "Great",      emoji: "🚀", color: "text-green-600 dark:text-green-400" },
+  good:       { label: "Good",       emoji: "😊", color: "text-blue-600  dark:text-blue-400" },
+  neutral:    { label: "Okay",       emoji: "😐", color: "text-slate-500" },
+  struggling: { label: "Struggling", emoji: "😓", color: "text-amber-600 dark:text-amber-400" },
+  off_track:  { label: "Off Track",  emoji: "😰", color: "text-red-600   dark:text-red-400" },
+};
+
+const MOOD_BUTTON_COLOR: Record<CheckinMood, string> = {
+  great:      "bg-green-50 border-green-300 text-green-700 hover:bg-green-100 dark:bg-green-950/30 dark:border-green-700 dark:text-green-400",
+  good:       "bg-blue-50  border-blue-300  text-blue-700  hover:bg-blue-100  dark:bg-blue-950/30  dark:border-blue-700  dark:text-blue-400",
+  neutral:    "bg-slate-50 border-slate-300 text-slate-600 hover:bg-slate-100 dark:bg-slate-800    dark:border-slate-600 dark:text-slate-300",
+  struggling: "bg-amber-50 border-amber-300 text-amber-700 hover:bg-amber-100 dark:bg-amber-950/30 dark:border-amber-700 dark:text-amber-400",
+  off_track:  "bg-red-50   border-red-300   text-red-700   hover:bg-red-100   dark:bg-red-950/30   dark:border-red-700   dark:text-red-400",
+};
+
+const ORDERED_MOODS: CheckinMood[] = ["great", "good", "neutral", "struggling", "off_track"];
+
+// ─── Check-in Dialog ──────────────────────────────────────────────────────────
+
+interface CheckInDialogProps {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  onSubmit: (input: {
+    accomplished: string | null;
+    blockers: string | null;
+    changes: string | null;
+    support_needed: string | null;
+    mood: CheckinMood;
+  }) => Promise<CheckinAiResponse | null>;
+  isSubmitting: boolean;
+}
+
+function CheckInDialog({ open, onOpenChange, onSubmit, isSubmitting }: CheckInDialogProps) {
+  const [mood, setMood] = useState<CheckinMood | null>(null);
+  const [accomplished, setAccomplished] = useState("");
+  const [blockers, setBlockers] = useState("");
+  const [changes, setChanges] = useState("");
+  const [aiResponse, setAiResponse] = useState<CheckinAiResponse | null>(null);
+
+  function handleClose() {
+    onOpenChange(false);
+    setTimeout(() => {
+      setMood(null);
+      setAccomplished("");
+      setBlockers("");
+      setChanges("");
+      setAiResponse(null);
+    }, 300);
+  }
+
+  async function handleSubmit() {
+    if (!mood) return;
+    const response = await onSubmit({
+      accomplished: accomplished.trim() || null,
+      blockers: blockers.trim() || null,
+      changes: changes.trim() || null,
+      support_needed: null,
+      mood,
+    });
+    setAiResponse(response);
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto" data-testid="checkin-dialog">
+        {!aiResponse ? (
+          <>
+            <DialogHeader>
+              <DialogTitle>Weekly Check-in</DialogTitle>
+            </DialogHeader>
+            <p className="-mt-1 text-sm text-muted-foreground">
+              Reflect on your week and get AI coaching feedback.
+            </p>
+
+            <div className="space-y-2">
+              <p className="text-sm font-medium">How is your progress feeling this week?</p>
+              <div className="flex flex-wrap gap-2">
+                {ORDERED_MOODS.map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setMood(m)}
+                    data-testid={`checkin-mood-${m}`}
+                    className={cn(
+                      "flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-medium transition-colors",
+                      MOOD_BUTTON_COLOR[m],
+                      mood === m && "ring-2 ring-primary ring-offset-1"
+                    )}
+                  >
+                    <span>{MOOD_META[m].emoji}</span>
+                    <span>{MOOD_META[m].label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-sm font-medium" htmlFor="ci-accomplished">
+                What did you accomplish this week?{" "}
+                <span className="font-normal text-muted-foreground">(optional)</span>
+              </label>
+              <textarea
+                id="ci-accomplished"
+                data-testid="checkin-accomplished-input"
+                className="w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring min-h-[72px]"
+                placeholder="e.g. Completed the React course, applied to 2 jobs…"
+                value={accomplished}
+                onChange={(e) => setAccomplished(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-sm font-medium" htmlFor="ci-blockers">
+                Any blockers or challenges?{" "}
+                <span className="font-normal text-muted-foreground">(optional)</span>
+              </label>
+              <textarea
+                id="ci-blockers"
+                data-testid="checkin-blockers-input"
+                className="w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring min-h-[60px]"
+                placeholder="e.g. Struggled with time management…"
+                value={blockers}
+                onChange={(e) => setBlockers(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-sm font-medium" htmlFor="ci-changes">
+                Anything you want to change next week?{" "}
+                <span className="font-normal text-muted-foreground">(optional)</span>
+              </label>
+              <textarea
+                id="ci-changes"
+                data-testid="checkin-changes-input"
+                className="w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring min-h-[60px]"
+                placeholder="e.g. Dedicate more time to practice…"
+                value={changes}
+                onChange={(e) => setChanges(e.target.value)}
+              />
+            </div>
+
+            <DialogFooter className="gap-2 pt-1">
+              <Button variant="outline" onClick={handleClose} disabled={isSubmitting}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSubmit}
+                disabled={!mood || isSubmitting}
+                data-testid="checkin-submit-button"
+                className="gap-1.5"
+              >
+                {isSubmitting ? (
+                  <><Loader2 className="h-3 w-3 animate-spin" /> Analyzing…</>
+                ) : (
+                  "Submit Check-in"
+                )}
+              </Button>
+            </DialogFooter>
+          </>
+        ) : (
+          <div data-testid="checkin-success-state" className="space-y-4 py-2">
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
+                <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
+              </div>
+              <div>
+                <p className="font-semibold text-sm">Check-in submitted!</p>
+                <p className="text-xs text-muted-foreground">Your AI coach has responded.</p>
+              </div>
+            </div>
+
+            <div className="rounded-lg border bg-muted/30 p-4 space-y-3">
+              <p className="text-sm leading-relaxed">{aiResponse.summary}</p>
+              {aiResponse.encouragement && (
+                <p className="text-sm text-muted-foreground italic">{aiResponse.encouragement}</p>
+              )}
+              {aiResponse.updated_priorities?.length > 0 && (
+                <div className="space-y-1">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                    Focus for next week
+                  </p>
+                  <ul className="space-y-0.5">
+                    {aiResponse.updated_priorities.map((p, i) => (
+                      <li key={i} className="flex items-start gap-1.5 text-sm">
+                        <ChevronRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+                        {p}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            <DialogFooter>
+              <Button onClick={handleClose} className="w-full" data-testid="checkin-done-button">
+                Done
+              </Button>
+            </DialogFooter>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─── Check-in Card ────────────────────────────────────────────────────────────
+
+interface CheckInCardProps {
+  checkins: CareerCheckin[];
+  nextCheckinDue: string | null;
+  onCheckin: () => void;
+}
+
+function CheckInCard({ checkins, nextCheckinDue, onCheckin }: CheckInCardProps) {
+  const isDue = !nextCheckinDue || new Date(nextCheckinDue) <= new Date();
+
+  return (
+    <Card data-testid="checkin-card">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="h-4 w-4 text-primary" />
+            <CardTitle className="text-base">Weekly Check-ins</CardTitle>
+          </div>
+          {nextCheckinDue && (
+            <Badge variant={isDue ? "default" : "secondary"} className="text-xs">
+              {isDue
+                ? "Check-in due"
+                : `Next: ${new Date(nextCheckinDue).toLocaleDateString(undefined, { month: "short", day: "numeric" })}`}
+            </Badge>
+          )}
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {checkins.length === 0 ? (
+          <div className="flex flex-col items-center gap-3 py-6 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+              <TrendingUp className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold">Start tracking your progress</p>
+              <p className="mt-0.5 max-w-xs text-xs text-muted-foreground">
+                Submit your first weekly check-in to get AI coaching feedback and build your consistency score.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {checkins.slice(0, 3).map((c) => {
+              const meta = MOOD_META[c.mood];
+              return (
+                <div
+                  key={c.id}
+                  data-testid={`checkin-item-${c.id}`}
+                  className="flex items-start gap-3 rounded-lg border p-3"
+                >
+                  <span className="mt-0.5 text-lg leading-none">{meta.emoji}</span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className={cn("text-xs font-medium", meta.color)}>{meta.label}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(c.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                      </span>
+                    </div>
+                    {c.ai_response?.summary ? (
+                      <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+                        {c.ai_response.summary}
+                      </p>
+                    ) : c.accomplished ? (
+                      <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{c.accomplished}</p>
+                    ) : null}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        <Button
+          size="sm"
+          variant={checkins.length === 0 ? "default" : "outline"}
+          className="w-full gap-1.5"
+          onClick={onCheckin}
+          data-testid="submit-checkin-button"
+        >
+          <TrendingUp className="h-3.5 w-3.5" />
+          {checkins.length === 0 ? "Submit First Check-in" : "New Check-in"}
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
 // ─── Next Steps Card ──────────────────────────────────────────────────────────
 
 interface NextStepsCardProps {
@@ -677,6 +978,7 @@ interface NextStepsCardProps {
   nextCheckinDue: string | null;
   onTriggerAssessment: () => void;
   onGenerateRoadmap: () => void;
+  onCheckin: () => void;
   isAssessing: boolean;
   isRoadmapping: boolean;
 }
@@ -689,6 +991,7 @@ function NextStepsCard({
   nextCheckinDue,
   onTriggerAssessment,
   onGenerateRoadmap,
+  onCheckin,
   isAssessing,
   isRoadmapping,
 }: NextStepsCardProps) {
@@ -710,7 +1013,7 @@ function NextStepsCard({
     icon = Zap;
   } else if (checkinCount === 0) {
     heading = "Complete Your First Check-in";
-    hint = "Share your weekly progress and get AI-powered coaching feedback. (Coming in Phase 2D)";
+    hint = "Share your weekly progress and get AI-powered coaching feedback.";
     icon = TrendingUp;
   } else {
     heading = "You are on track!";
@@ -774,6 +1077,20 @@ function NextStepsCard({
             </Button>
           </div>
         )}
+
+        {hasActions && checkinCount === 0 && (
+          <div className="mt-3 border-t pt-3">
+            <Button
+              size="sm"
+              className="gap-1.5"
+              onClick={onCheckin}
+              data-testid="next-step-checkin-button"
+            >
+              <TrendingUp className="h-3 w-3" />
+              Submit Check-in
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -823,11 +1140,14 @@ export function CareerCoachDashboard({ data }: Props) {
   const [isAssessing, startAssessing] = useTransition();
   const [isRoadmapping, startRoadmapping] = useTransition();
   const [isGeneratingActions, startGeneratingActions] = useTransition();
+  const [isCheckingIn, startCheckingIn] = useTransition();
 
   const [goalDialogOpen, setGoalDialogOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [confirmStatus, setConfirmStatus] = useState<GoalStatus | null>(null);
   const [togglingActionId, setTogglingActionId] = useState<string | null>(null);
+  const [checkinDialogOpen, setCheckinDialogOpen] = useState(false);
+  const [checkinKey, setCheckinKey] = useState(0);
 
   const goal = data.active_goal;
   const progress = data.progress;
@@ -922,6 +1242,33 @@ export function CareerCoachDashboard({ data }: Props) {
     });
   }
 
+  function openCheckinDialog() {
+    setCheckinKey((k) => k + 1);
+    setCheckinDialogOpen(true);
+  }
+
+  async function handleSubmitCheckin(input: {
+    accomplished: string | null;
+    blockers: string | null;
+    changes: string | null;
+    support_needed: string | null;
+    mood: CheckinMood;
+  }): Promise<CheckinAiResponse | null> {
+    if (!goal) return null;
+    return new Promise((resolve) => {
+      startCheckingIn(async () => {
+        const res = await submitCheckinAction(goal.id, input);
+        if (res.success) {
+          refresh();
+          resolve(res.data?.ai_response ?? null);
+        } else {
+          toast.error(res.error ?? "Check-in failed. Please try again.");
+          resolve(null);
+        }
+      });
+    });
+  }
+
   const confirmTitle =
     confirmStatus === "paused"    ? "Pause this goal?" :
     confirmStatus === "active"    ? "Resume this goal?" :
@@ -1008,6 +1355,13 @@ export function CareerCoachDashboard({ data }: Props) {
         isLoading={isRoadmapping}
       />
 
+      {/* Check-ins — full width, shown once goal exists */}
+      <CheckInCard
+        checkins={data.recent_checkins}
+        nextCheckinDue={data.next_checkin_due}
+        onCheckin={openCheckinDialog}
+      />
+
       {/* Next Steps — full width */}
       <NextStepsCard
         hasAssessment={hasAssessment}
@@ -1017,6 +1371,7 @@ export function CareerCoachDashboard({ data }: Props) {
         nextCheckinDue={data.next_checkin_due}
         onTriggerAssessment={handleRunAssessment}
         onGenerateRoadmap={handleGenerateRoadmap}
+        onCheckin={openCheckinDialog}
         isAssessing={isAssessing}
         isRoadmapping={isRoadmapping}
       />
@@ -1036,6 +1391,14 @@ export function CareerCoachDashboard({ data }: Props) {
         body={confirmBody}
         onConfirm={executeStatusChange}
         isPending={isPending}
+      />
+
+      <CheckInDialog
+        key={checkinKey}
+        open={checkinDialogOpen}
+        onOpenChange={setCheckinDialogOpen}
+        onSubmit={handleSubmitCheckin}
+        isSubmitting={isCheckingIn}
       />
     </div>
   );

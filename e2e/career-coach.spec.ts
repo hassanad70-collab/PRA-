@@ -560,6 +560,80 @@ test.describe("Career Coach — Phase 2C UI (seeded state)", () => {
     await expect(page.getByTestId("generate-actions-button")).toBeEnabled();
   });
 
+  test("next-step checkin button visible when actions exist but no checkins", async ({ page }) => {
+    const admin = adminClient();
+    await admin.from("career_assessments").insert({
+      user_id: userId, goal_id: goalId,
+      strengths: [], weaknesses: [], opportunities: [], skill_gaps: [],
+      experience_gaps: [], leadership_gaps: [], suggested_roles: [], raw_data: {},
+    });
+    const { data: roadmapRow } = await admin
+      .from("career_roadmaps")
+      .insert({ user_id: userId, goal_id: goalId,
+        phases: [{ phase: 1, label: "Foundation", duration_weeks: 4, focus: "Core", milestones: [] }] })
+      .select("id").single();
+    await admin.from("career_weekly_actions").insert({
+      user_id: userId, goal_id: goalId, roadmap_id: roadmapRow!.id,
+      title: "Action item", action_type: "learning", status: "pending", week_number: 1, source: "ai",
+    });
+
+    await page.goto(COACH_URL);
+    await expect(page.getByTestId("next-step-checkin-button")).toBeVisible({ timeout: 8_000 });
+    await expect(page.getByTestId("next-step-checkin-button")).toBeEnabled();
+  });
+
+  test("checkin card is visible with active goal", async ({ page }) => {
+    await page.goto(COACH_URL);
+    await expect(page.getByTestId("checkin-card")).toBeVisible({ timeout: 8_000 });
+    await expect(page.getByTestId("submit-checkin-button")).toBeVisible({ timeout: 3_000 });
+  });
+
+  test("checkin dialog opens and mood selector is visible", async ({ page }) => {
+    await page.goto(COACH_URL);
+    await page.getByTestId("submit-checkin-button").click();
+    await expect(page.getByTestId("checkin-dialog")).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByTestId("checkin-mood-great")).toBeVisible({ timeout: 3_000 });
+    await expect(page.getByTestId("checkin-mood-good")).toBeVisible();
+    await expect(page.getByTestId("checkin-mood-neutral")).toBeVisible();
+    await expect(page.getByTestId("checkin-mood-struggling")).toBeVisible();
+    await expect(page.getByTestId("checkin-mood-off_track")).toBeVisible();
+    await expect(page.getByTestId("checkin-accomplished-input")).toBeVisible();
+    await expect(page.getByTestId("checkin-submit-button")).toBeVisible();
+    // Submit is disabled until mood is selected
+    await expect(page.getByTestId("checkin-submit-button")).toBeDisabled();
+  });
+
+  test("checkin submit button is enabled after selecting a mood", async ({ page }) => {
+    await page.goto(COACH_URL);
+    await page.getByTestId("submit-checkin-button").click();
+    await expect(page.getByTestId("checkin-dialog")).toBeVisible({ timeout: 5_000 });
+    await page.getByTestId("checkin-mood-good").click();
+    await expect(page.getByTestId("checkin-submit-button")).toBeEnabled({ timeout: 2_000 });
+  });
+
+  test("checkin card shows seeded check-in history", async ({ page }) => {
+    const admin = adminClient();
+    const { data: checkinRow } = await admin
+      .from("career_checkins")
+      .insert({
+        user_id: userId,
+        goal_id: goalId,
+        mood: "good",
+        accomplished: "Completed the course",
+        blockers: null,
+        changes: null,
+        support_needed: null,
+      })
+      .select("id")
+      .single();
+    expect(checkinRow).not.toBeNull();
+
+    await page.goto(COACH_URL);
+    await expect(page.getByTestId(`checkin-item-${checkinRow!.id}`)).toBeVisible({ timeout: 8_000 });
+    // Button label changes to "New Check-in" when history exists
+    await expect(page.getByTestId("submit-checkin-button")).toContainText("New Check-in", { timeout: 3_000 });
+  });
+
   test("actions checklist renders and action can be toggled", async ({ page }) => {
     const admin = adminClient();
     await admin.from("career_assessments").insert({
