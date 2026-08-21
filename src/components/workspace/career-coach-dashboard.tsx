@@ -19,7 +19,7 @@ import {
   Pencil,
   Sparkles,
   Clock,
-  Lock,
+  Loader2,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -36,7 +36,13 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { GoalDialog } from "./career-coach-goal-dialog";
-import { setGoalStatusAction } from "@/actions/career-coach";
+import {
+  setGoalStatusAction,
+  triggerCareerAssessmentAction,
+  generateCareerRoadmapAction,
+  generateWeeklyActionsAction,
+  updateActionStatusAction,
+} from "@/actions/career-coach";
 import { cn } from "@/lib/utils";
 import type {
   CareerGoal,
@@ -45,6 +51,7 @@ import type {
   CareerAction,
   CareerProgressResult,
   GoalStatus,
+  ActionStatus,
 } from "@/types/career-coach";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -54,6 +61,7 @@ export interface CoachDashboardData {
   latest_assessment: CareerAssessment | null;
   roadmap: CareerRoadmap | null;
   pending_actions: CareerAction[];
+  all_actions: CareerAction[];
   next_checkin_due: string | null;
   progress: CareerProgressResult | null;
 }
@@ -343,7 +351,13 @@ function CoachReadinessCard({ hasGoal, hasAssessment, hasRoadmap }: ReadinessPro
 
 // ─── Assessment Summary Card ──────────────────────────────────────────────────
 
-function AssessmentSummaryCard({ assessment }: { assessment: CareerAssessment | null }) {
+interface AssessmentCardProps {
+  assessment: CareerAssessment | null;
+  onTrigger: () => void;
+  isLoading: boolean;
+}
+
+function AssessmentSummaryCard({ assessment, onTrigger, isLoading }: AssessmentCardProps) {
   if (!assessment) {
     return (
       <Card data-testid="assessment-card">
@@ -353,17 +367,27 @@ function AssessmentSummaryCard({ assessment }: { assessment: CareerAssessment | 
             <CardTitle className="text-base">Career Assessment</CardTitle>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center gap-3 py-6 text-center">
-            <Lock className="h-8 w-8 text-muted-foreground/40" />
-            <p className="text-sm text-muted-foreground">
-              Run your first career assessment to unlock personalized strengths and gap analysis.
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Get a personalized AI analysis of your strengths, skill gaps, and career readiness
+            based on your profile, resume, and job match data.
+          </p>
+          <Button
+            className="w-full gap-2"
+            onClick={onTrigger}
+            disabled={isLoading}
+            data-testid="run-assessment-button"
+          >
+            {isLoading
+              ? <Loader2 className="h-4 w-4 animate-spin" />
+              : <Sparkles className="h-4 w-4" />}
+            {isLoading ? "Analyzing your profile…" : "Run My Assessment"}
+          </Button>
+          {isLoading && (
+            <p className="text-center text-xs text-muted-foreground animate-pulse">
+              AI is reviewing your profile, resume, and career data…
             </p>
-            <Button size="sm" variant="outline" disabled>
-              <Lock className="mr-1.5 h-3 w-3" />
-              Coming in next phase
-            </Button>
-          </div>
+          )}
         </CardContent>
       </Card>
     );
@@ -421,10 +445,110 @@ function AssessmentSummaryCard({ assessment }: { assessment: CareerAssessment | 
   );
 }
 
+// ─── Roadmap Card ─────────────────────────────────────────────────────────────
+
+interface RoadmapCardProps {
+  roadmap: CareerRoadmap | null;
+  hasAssessment: boolean;
+  onGenerate: () => void;
+  isLoading: boolean;
+}
+
+function RoadmapCard({ roadmap, hasAssessment, onGenerate, isLoading }: RoadmapCardProps) {
+  if (!hasAssessment) return null;
+
+  if (!roadmap) {
+    return (
+      <Card data-testid="roadmap-card">
+        <CardHeader className="pb-3">
+          <div className="flex items-center gap-2">
+            <Layers className="h-4 w-4 text-primary" />
+            <CardTitle className="text-base">Career Roadmap</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Build a phased, personalized roadmap to reach your target role — tailored to your assessment results.
+          </p>
+          <Button
+            className="w-full gap-2"
+            onClick={onGenerate}
+            disabled={isLoading}
+            data-testid="generate-roadmap-button"
+          >
+            {isLoading
+              ? <Loader2 className="h-4 w-4 animate-spin" />
+              : <Layers className="h-4 w-4" />}
+            {isLoading ? "Building your roadmap…" : "Generate Career Roadmap"}
+          </Button>
+          {isLoading && (
+            <p className="text-center text-xs text-muted-foreground animate-pulse">
+              AI is designing your personalized career roadmap…
+            </p>
+          )}
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card data-testid="roadmap-card">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <Layers className="h-4 w-4 text-primary" />
+            <CardTitle className="text-base">Career Roadmap</CardTitle>
+          </div>
+          <Badge variant="secondary" className="text-xs">{roadmap.phases.length} phases</Badge>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-2.5">
+          {roadmap.phases.map((phase, i) => (
+            <div key={i} className="flex items-start gap-3 rounded-lg border border-border/60 p-3">
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-bold text-primary">
+                {i + 1}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm font-semibold leading-snug">{phase.label}</p>
+                  <span className="shrink-0 text-xs text-muted-foreground">{phase.duration_months}mo</span>
+                </div>
+                <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">{phase.focus}</p>
+                {phase.milestones.length > 0 && (
+                  <p className="mt-1 text-[11px] text-primary/70">
+                    {phase.milestones.length} milestone{phase.milestones.length !== 1 ? "s" : ""}
+                  </p>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 // ─── Pending Actions Card ─────────────────────────────────────────────────────
 
-function PendingActionsCard({ actions, hasRoadmap }: { actions: CareerAction[]; hasRoadmap: boolean }) {
-  if (!hasRoadmap || actions.length === 0) {
+interface PendingActionsCardProps {
+  actions: CareerAction[];
+  hasRoadmap: boolean;
+  onGenerateActions: () => void;
+  isGenerating: boolean;
+  onToggleAction: (id: string, status: ActionStatus) => void;
+  togglingActionId: string | null;
+}
+
+function PendingActionsCard({
+  actions,
+  hasRoadmap,
+  onGenerateActions,
+  isGenerating,
+  onToggleAction,
+  togglingActionId,
+}: PendingActionsCardProps) {
+  if (!hasRoadmap) {
     return (
       <Card data-testid="actions-card">
         <CardHeader className="pb-3">
@@ -434,20 +558,49 @@ function PendingActionsCard({ actions, hasRoadmap }: { actions: CareerAction[]; 
           </div>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col items-center gap-3 py-6 text-center">
-            <Lock className="h-8 w-8 text-muted-foreground/40" />
-            <p className="text-sm text-muted-foreground">
-              Generate your career roadmap to unlock weekly AI-recommended actions.
-            </p>
-            <Button size="sm" variant="outline" disabled>
-              <Lock className="mr-1.5 h-3 w-3" />
-              Coming in next phase
-            </Button>
-          </div>
+          <p className="py-4 text-center text-sm text-muted-foreground">
+            Generate your career roadmap first to unlock weekly AI-recommended actions.
+          </p>
         </CardContent>
       </Card>
     );
   }
+
+  if (actions.length === 0) {
+    return (
+      <Card data-testid="actions-card">
+        <CardHeader className="pb-3">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="h-4 w-4 text-primary" />
+            <CardTitle className="text-base">This Week&apos;s Actions</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Get AI-recommended actions for this week based on your roadmap and skill gaps.
+          </p>
+          <Button
+            className="w-full gap-2"
+            onClick={onGenerateActions}
+            disabled={isGenerating}
+            data-testid="generate-actions-button"
+          >
+            {isGenerating
+              ? <Loader2 className="h-4 w-4 animate-spin" />
+              : <Zap className="h-4 w-4" />}
+            {isGenerating ? "Generating actions…" : "Generate This Week's Actions"}
+          </Button>
+          {isGenerating && (
+            <p className="text-center text-xs text-muted-foreground animate-pulse">
+              AI is selecting the best actions for your current phase…
+            </p>
+          )}
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const completedCount = actions.filter((a) => a.status === "completed").length;
 
   return (
     <Card data-testid="actions-card">
@@ -455,29 +608,60 @@ function PendingActionsCard({ actions, hasRoadmap }: { actions: CareerAction[]; 
         <div className="flex items-center gap-2">
           <CheckCircle2 className="h-4 w-4 text-primary" />
           <CardTitle className="text-base">This Week&apos;s Actions</CardTitle>
-          <Badge variant="secondary" className="ml-auto text-xs">{actions.length}</Badge>
+          <Badge
+            variant={completedCount === actions.length ? "default" : "secondary"}
+            className="ml-auto text-xs"
+          >
+            {completedCount}/{actions.length}
+          </Badge>
         </div>
       </CardHeader>
-      <CardContent className="space-y-2">
-        {actions.slice(0, 5).map((action) => (
-          <div key={action.id} className="flex items-start gap-2 py-1.5 border-b last:border-0">
-            <Circle className="mt-1 h-3.5 w-3.5 flex-shrink-0 text-muted-foreground" />
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium leading-snug truncate">{action.title}</p>
-              <div className="flex items-center gap-2 mt-0.5">
-                <Badge variant="outline" className="text-[10px] py-0 h-4">
-                  {ACTION_TYPE_LABEL[action.action_type] ?? action.action_type}
-                </Badge>
-                {action.due_date && (
-                  <span className="text-xs text-muted-foreground flex items-center gap-0.5">
-                    <Clock className="h-3 w-3" />
-                    {new Date(action.due_date).toLocaleDateString()}
-                  </span>
-                )}
+      <CardContent className="space-y-1">
+        {actions.slice(0, 8).map((action) => {
+          const done = action.status === "completed";
+          const toggling = togglingActionId === action.id;
+          return (
+            <button
+              key={action.id}
+              onClick={() => onToggleAction(action.id, action.status as ActionStatus)}
+              disabled={toggling}
+              className="flex w-full items-start gap-2.5 rounded-lg px-2 py-2 text-left transition-colors hover:bg-accent disabled:opacity-60"
+              data-testid={`action-item-${action.id}`}
+            >
+              {toggling ? (
+                <Loader2 className="mt-0.5 h-4 w-4 shrink-0 animate-spin text-muted-foreground" />
+              ) : done ? (
+                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-pra-success" />
+              ) : (
+                <Circle className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+              )}
+              <div className="min-w-0 flex-1">
+                <p className={cn(
+                  "text-sm font-medium leading-snug",
+                  done && "line-through text-muted-foreground"
+                )}>
+                  {action.title}
+                </p>
+                <div className="mt-0.5 flex items-center gap-2">
+                  <Badge variant="outline" className="h-4 py-0 text-[10px]">
+                    {ACTION_TYPE_LABEL[action.action_type] ?? action.action_type}
+                  </Badge>
+                  {action.due_date && (
+                    <span className="flex items-center gap-0.5 text-xs text-muted-foreground">
+                      <Clock className="h-3 w-3" />
+                      {new Date(action.due_date).toLocaleDateString()}
+                    </span>
+                  )}
+                </div>
               </div>
-            </div>
-          </div>
-        ))}
+            </button>
+          );
+        })}
+        {actions.length > 8 && (
+          <p className="pt-1 text-center text-xs text-muted-foreground">
+            +{actions.length - 8} more actions
+          </p>
+        )}
       </CardContent>
     </Card>
   );
@@ -488,11 +672,26 @@ function PendingActionsCard({ actions, hasRoadmap }: { actions: CareerAction[]; 
 interface NextStepsCardProps {
   hasAssessment: boolean;
   hasRoadmap: boolean;
+  hasActions: boolean;
   checkinCount: number;
   nextCheckinDue: string | null;
+  onTriggerAssessment: () => void;
+  onGenerateRoadmap: () => void;
+  isAssessing: boolean;
+  isRoadmapping: boolean;
 }
 
-function NextStepsCard({ hasAssessment, hasRoadmap, checkinCount, nextCheckinDue }: NextStepsCardProps) {
+function NextStepsCard({
+  hasAssessment,
+  hasRoadmap,
+  hasActions,
+  checkinCount,
+  nextCheckinDue,
+  onTriggerAssessment,
+  onGenerateRoadmap,
+  isAssessing,
+  isRoadmapping,
+}: NextStepsCardProps) {
   let heading: string;
   let hint: string;
   let icon = ChevronRight;
@@ -505,9 +704,13 @@ function NextStepsCard({ hasAssessment, hasRoadmap, checkinCount, nextCheckinDue
     heading = "Generate Career Roadmap";
     hint = "Build a phased, personalized roadmap to reach your target role.";
     icon = Layers;
+  } else if (!hasActions) {
+    heading = "Generate This Week's Actions";
+    hint = "Get AI-recommended weekly actions tailored to your roadmap and current phase.";
+    icon = Zap;
   } else if (checkinCount === 0) {
     heading = "Complete Your First Check-in";
-    hint = "Share your weekly progress and get AI-powered coaching feedback.";
+    hint = "Share your weekly progress and get AI-powered coaching feedback. (Coming in Phase 2D)";
     icon = TrendingUp;
   } else {
     heading = "You are on track!";
@@ -527,25 +730,47 @@ function NextStepsCard({ hasAssessment, hasRoadmap, checkinCount, nextCheckinDue
       </CardHeader>
       <CardContent>
         <div className="flex items-start gap-3">
-          <div className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
+          <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
             <Icon className="h-4 w-4 text-primary" />
           </div>
-          <div>
-            <p className="font-semibold text-sm">{heading}</p>
+          <div className="flex-1">
+            <p className="text-sm font-semibold">{heading}</p>
             <p className="mt-0.5 text-sm text-muted-foreground">{hint}</p>
             {nextCheckinDue && checkinCount > 0 && (
-              <p className="mt-1.5 text-xs text-muted-foreground flex items-center gap-1">
+              <p className="mt-1.5 flex items-center gap-1 text-xs text-muted-foreground">
                 <Calendar className="h-3 w-3" />
                 Next check-in suggested: {new Date(nextCheckinDue).toLocaleDateString()}
               </p>
             )}
           </div>
         </div>
-        {(!hasAssessment || !hasRoadmap) && (
-          <div className="mt-3 pt-3 border-t">
-            <Button size="sm" variant="outline" disabled className="gap-1.5">
-              <Lock className="h-3 w-3" />
-              Available in next phase
+
+        {!hasAssessment && (
+          <div className="mt-3 border-t pt-3">
+            <Button
+              size="sm"
+              className="gap-1.5"
+              onClick={onTriggerAssessment}
+              disabled={isAssessing}
+              data-testid="next-step-assessment-button"
+            >
+              {isAssessing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+              {isAssessing ? "Analyzing…" : "Run Assessment"}
+            </Button>
+          </div>
+        )}
+
+        {hasAssessment && !hasRoadmap && (
+          <div className="mt-3 border-t pt-3">
+            <Button
+              size="sm"
+              className="gap-1.5"
+              onClick={onGenerateRoadmap}
+              disabled={isRoadmapping}
+              data-testid="next-step-roadmap-button"
+            >
+              {isRoadmapping ? <Loader2 className="h-3 w-3 animate-spin" /> : <Layers className="h-3 w-3" />}
+              {isRoadmapping ? "Building…" : "Generate Roadmap"}
             </Button>
           </div>
         )}
@@ -588,13 +813,21 @@ function ConfirmDialog({ open, onOpenChange, title, body, onConfirm, isPending }
 
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 
+function calcWeekNum(createdAt: string): number {
+  return Math.max(1, Math.ceil((Date.now() - new Date(createdAt).getTime()) / (7 * 24 * 60 * 60 * 1000)));
+}
+
 export function CareerCoachDashboard({ data }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [isAssessing, startAssessing] = useTransition();
+  const [isRoadmapping, startRoadmapping] = useTransition();
+  const [isGeneratingActions, startGeneratingActions] = useTransition();
 
   const [goalDialogOpen, setGoalDialogOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [confirmStatus, setConfirmStatus] = useState<GoalStatus | null>(null);
+  const [togglingActionId, setTogglingActionId] = useState<string | null>(null);
 
   const goal = data.active_goal;
   const progress = data.progress;
@@ -635,6 +868,60 @@ export function CareerCoachDashboard({ data }: Props) {
     });
   }
 
+  function handleRunAssessment() {
+    if (!goal) return;
+    startAssessing(async () => {
+      const res = await triggerCareerAssessmentAction(goal.id);
+      if (res.success) {
+        toast.success("Assessment complete! Your strengths and gaps are ready.");
+        refresh();
+      } else {
+        toast.error(res.error ?? "Assessment failed. Please try again.");
+      }
+    });
+  }
+
+  function handleGenerateRoadmap() {
+    if (!goal) return;
+    startRoadmapping(async () => {
+      const res = await generateCareerRoadmapAction(goal.id);
+      if (res.success) {
+        toast.success("Career roadmap generated!");
+        refresh();
+      } else {
+        toast.error(res.error ?? "Roadmap generation failed. Please try again.");
+      }
+    });
+  }
+
+  function handleGenerateActions() {
+    if (!goal) return;
+    startGeneratingActions(async () => {
+      const weekNum = calcWeekNum(goal.created_at);
+      const res = await generateWeeklyActionsAction(goal.id, weekNum);
+      if (res.success) {
+        toast.success("Weekly actions generated!");
+        refresh();
+      } else {
+        toast.error(res.error ?? "Action generation failed. Please try again.");
+      }
+    });
+  }
+
+  function handleToggleAction(actionId: string, currentStatus: ActionStatus) {
+    const newStatus: ActionStatus = currentStatus === "completed" ? "pending" : "completed";
+    setTogglingActionId(actionId);
+    startTransition(async () => {
+      const res = await updateActionStatusAction(actionId, newStatus);
+      setTogglingActionId(null);
+      if (res.success) {
+        refresh();
+      } else {
+        toast.error(res.error ?? "Failed to update action.");
+      }
+    });
+  }
+
   const confirmTitle =
     confirmStatus === "paused"    ? "Pause this goal?" :
     confirmStatus === "active"    ? "Resume this goal?" :
@@ -662,6 +949,7 @@ export function CareerCoachDashboard({ data }: Props) {
 
   const hasAssessment = !!data.latest_assessment;
   const hasRoadmap = !!data.roadmap;
+  const hasActions = data.all_actions.length > 0;
   const checkinCount = progress?.breakdown.checkin_count ?? 0;
 
   return (
@@ -696,17 +984,41 @@ export function CareerCoachDashboard({ data }: Props) {
 
         {/* Right */}
         <div className="space-y-6">
-          <AssessmentSummaryCard assessment={data.latest_assessment} />
-          <PendingActionsCard actions={data.pending_actions} hasRoadmap={hasRoadmap} />
+          <AssessmentSummaryCard
+            assessment={data.latest_assessment}
+            onTrigger={handleRunAssessment}
+            isLoading={isAssessing}
+          />
+          <PendingActionsCard
+            actions={data.all_actions}
+            hasRoadmap={hasRoadmap}
+            onGenerateActions={handleGenerateActions}
+            isGenerating={isGeneratingActions}
+            onToggleAction={handleToggleAction}
+            togglingActionId={togglingActionId}
+          />
         </div>
       </div>
+
+      {/* Roadmap — full width, shown once assessment exists */}
+      <RoadmapCard
+        roadmap={data.roadmap}
+        hasAssessment={hasAssessment}
+        onGenerate={handleGenerateRoadmap}
+        isLoading={isRoadmapping}
+      />
 
       {/* Next Steps — full width */}
       <NextStepsCard
         hasAssessment={hasAssessment}
         hasRoadmap={hasRoadmap}
+        hasActions={hasActions}
         checkinCount={checkinCount}
         nextCheckinDue={data.next_checkin_due}
+        onTriggerAssessment={handleRunAssessment}
+        onGenerateRoadmap={handleGenerateRoadmap}
+        isAssessing={isAssessing}
+        isRoadmapping={isRoadmapping}
       />
 
       {/* Dialogs */}

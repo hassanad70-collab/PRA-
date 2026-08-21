@@ -1,7 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 
-import { login } from "./helpers/auth";
+import { STORAGE_STATE } from "./helpers/auth";
 import { TEST_USERS } from "./global-setup";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -32,14 +32,14 @@ async function deleteGoals(userId: string) {
 }
 
 async function loginAsCandidate(page: Page) {
-  await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
-  await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
+  await page.goto("/en/candidate/dashboard");
 }
 
 async function loginAsRecruiter(page: Page) {
-  await login(page, TEST_USERS.recruiter.email, TEST_USERS.recruiter.password);
-  await expect(page).toHaveURL(/\/recruiter\/dashboard$/, { timeout: 15_000 });
+  await page.goto("/en/recruiter/dashboard");
 }
+
+test.use({ storageState: STORAGE_STATE.candidate });
 
 // ─── Block 1: Access and empty state ─────────────────────────────────────────
 
@@ -262,18 +262,21 @@ test.describe("Career Coach — progress display", () => {
     await expect(page.getByText(/separate from your progress score/i)).toBeVisible({ timeout: 3_000 });
   });
 
-  test("assessment card shows locked state when no assessment exists", async ({ page }) => {
+  test("assessment card shows trigger button when no assessment exists", async ({ page }) => {
     await page.goto(COACH_URL);
     const card = page.getByTestId("assessment-card");
     await expect(card).toBeVisible({ timeout: 8_000 });
-    await expect(card.getByText(/coming in next phase/i)).toBeVisible({ timeout: 3_000 });
+    await expect(page.getByTestId("run-assessment-button")).toBeVisible({ timeout: 3_000 });
+    await expect(page.getByTestId("run-assessment-button")).toBeEnabled({ timeout: 3_000 });
   });
 
-  test("actions card shows locked state when no roadmap exists", async ({ page }) => {
+  test("actions card shows roadmap-first prompt when no roadmap exists", async ({ page }) => {
     await page.goto(COACH_URL);
     const card = page.getByTestId("actions-card");
     await expect(card).toBeVisible({ timeout: 8_000 });
-    await expect(card.getByText(/coming in next phase/i)).toBeVisible({ timeout: 3_000 });
+    // No "generate actions" button without a roadmap
+    await expect(page.getByTestId("generate-actions-button")).not.toBeVisible({ timeout: 3_000 });
+    await expect(card.getByText(/roadmap/i)).toBeVisible({ timeout: 3_000 });
   });
 });
 
@@ -299,6 +302,8 @@ test.describe("Career Coach — Global AI Assistant coexistence", () => {
 // ─── Block 6: Security — recruiter cannot access candidate coach ───────────────
 
 test.describe("Career Coach — access control", () => {
+  test.use({ storageState: STORAGE_STATE.recruiter });
+
   test("recruiter is redirected away from candidate career-coach page", async ({ page }) => {
     await loginAsRecruiter(page);
     await page.goto(COACH_URL);
@@ -359,5 +364,251 @@ test.describe("Career Coach — Arabic/RTL", () => {
     // Should show Arabic heading or empty state
     const body = page.locator("body");
     await expect(body).not.toContainText("Application error", { timeout: 5_000 });
+  });
+});
+
+// ─── Block 9: Phase 2C — Assessment, Roadmap, Actions UI ─────────────────────
+
+test.describe("Career Coach — Phase 2C UI (seeded state)", () => {
+  let userId: string;
+  let goalId: string;
+
+  test.beforeAll(async () => {
+    userId = await getCandidateId();
+  });
+
+  test.beforeEach(async ({ page }) => {
+    await deleteGoals(userId);
+    // Seed a fresh active goal and capture its id
+    const admin = adminClient();
+    const { data } = await admin
+      .from("career_goals")
+      .insert({
+        user_id: userId,
+        title: "Phase 2C Test Goal",
+        target_role: "Senior Engineer",
+        current_role: "Engineer",
+        status: "active",
+      })
+      .select("id")
+      .single();
+    goalId = data!.id;
+    await loginAsCandidate(page);
+  });
+
+  // ── Assessment card ──────────────────────────────────────────────────────────
+
+  test("run-assessment button is visible with active goal and no assessment", async ({ page }) => {
+    await page.goto(COACH_URL);
+    await expect(page.getByTestId("assessment-card")).toBeVisible({ timeout: 8_000 });
+    await expect(page.getByTestId("run-assessment-button")).toBeVisible({ timeout: 3_000 });
+    await expect(page.getByTestId("run-assessment-button")).toBeEnabled();
+  });
+
+  test("next-step assessment button is visible from NextStepsCard with no assessment", async ({ page }) => {
+    await page.goto(COACH_URL);
+    await expect(page.getByTestId("next-step-assessment-button")).toBeVisible({ timeout: 8_000 });
+  });
+
+  test("assessment card shows results when assessment is seeded", async ({ page }) => {
+    const admin = adminClient();
+    await admin.from("career_assessments").insert({
+      user_id: userId,
+      goal_id: goalId,
+      strengths: ["Strong communicator", "Systems thinking"],
+      weaknesses: ["Limited cloud experience"],
+      opportunities: ["Growing demand for full-stack"],
+      skill_gaps: [{ skill: "Kubernetes", priority: "high", estimated_months: 2 }],
+      experience_gaps: [],
+      leadership_gaps: [],
+      suggested_roles: ["Staff Engineer"],
+      raw_data: {},
+    });
+
+    await page.goto(COACH_URL);
+    await expect(page.getByTestId("assessment-card")).toBeVisible({ timeout: 8_000 });
+    // Run button should be gone
+    await expect(page.getByTestId("run-assessment-button")).not.toBeVisible({ timeout: 3_000 });
+    // Strengths section should be present
+    await expect(page.getByTestId("assessment-card").getByText("Strong communicator")).toBeVisible({ timeout: 5_000 });
+  });
+
+  // ── Roadmap card ─────────────────────────────────────────────────────────────
+
+  test("roadmap card is not rendered when no assessment exists", async ({ page }) => {
+    await page.goto(COACH_URL);
+    await expect(page.getByTestId("roadmap-card")).not.toBeVisible({ timeout: 5_000 });
+  });
+
+  test("roadmap card shows generate button after assessment is seeded", async ({ page }) => {
+    const admin = adminClient();
+    await admin.from("career_assessments").insert({
+      user_id: userId,
+      goal_id: goalId,
+      strengths: ["Leadership"],
+      weaknesses: [],
+      opportunities: [],
+      skill_gaps: [],
+      experience_gaps: [],
+      leadership_gaps: [],
+      suggested_roles: [],
+      raw_data: {},
+    });
+
+    await page.goto(COACH_URL);
+    await expect(page.getByTestId("roadmap-card")).toBeVisible({ timeout: 8_000 });
+    await expect(page.getByTestId("generate-roadmap-button")).toBeVisible({ timeout: 3_000 });
+    await expect(page.getByTestId("generate-roadmap-button")).toBeEnabled();
+  });
+
+  test("next-step roadmap button visible after assessment but before roadmap", async ({ page }) => {
+    const admin = adminClient();
+    await admin.from("career_assessments").insert({
+      user_id: userId,
+      goal_id: goalId,
+      strengths: ["Leadership"],
+      weaknesses: [],
+      opportunities: [],
+      skill_gaps: [],
+      experience_gaps: [],
+      leadership_gaps: [],
+      suggested_roles: [],
+      raw_data: {},
+    });
+
+    await page.goto(COACH_URL);
+    await expect(page.getByTestId("next-step-roadmap-button")).toBeVisible({ timeout: 8_000 });
+  });
+
+  test("roadmap card shows phases when roadmap is seeded", async ({ page }) => {
+    const admin = adminClient();
+    await admin.from("career_assessments").insert({
+      user_id: userId,
+      goal_id: goalId,
+      strengths: ["Leadership"],
+      weaknesses: [],
+      opportunities: [],
+      skill_gaps: [],
+      experience_gaps: [],
+      leadership_gaps: [],
+      suggested_roles: [],
+      raw_data: {},
+    });
+    const { data: roadmapRow } = await admin
+      .from("career_roadmaps")
+      .insert({
+        user_id: userId,
+        goal_id: goalId,
+        phases: [
+          {
+            phase: 1,
+            label: "Foundation",
+            duration_weeks: 4,
+            focus: "Core skills",
+            milestones: ["Complete course A"],
+          },
+          {
+            phase: 2,
+            label: "Growth",
+            duration_weeks: 8,
+            focus: "Applied projects",
+            milestones: ["Ship project B"],
+          },
+        ],
+      })
+      .select("id")
+      .single();
+    expect(roadmapRow).not.toBeNull();
+
+    await page.goto(COACH_URL);
+    await expect(page.getByTestId("roadmap-card")).toBeVisible({ timeout: 8_000 });
+    await expect(page.getByTestId("generate-roadmap-button")).not.toBeVisible({ timeout: 3_000 });
+    await expect(page.getByTestId("roadmap-card").getByText("Foundation")).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByTestId("roadmap-card").getByText("Growth")).toBeVisible({ timeout: 5_000 });
+  });
+
+  // ── Actions card ─────────────────────────────────────────────────────────────
+
+  test("generate-actions button appears when roadmap is seeded", async ({ page }) => {
+    const admin = adminClient();
+    await admin.from("career_assessments").insert({
+      user_id: userId,
+      goal_id: goalId,
+      strengths: [],
+      weaknesses: [],
+      opportunities: [],
+      skill_gaps: [],
+      experience_gaps: [],
+      leadership_gaps: [],
+      suggested_roles: [],
+      raw_data: {},
+    });
+    const { data: roadmapRow } = await admin
+      .from("career_roadmaps")
+      .insert({
+        user_id: userId,
+        goal_id: goalId,
+        phases: [{ phase: 1, label: "Foundation", duration_weeks: 4, focus: "Core", milestones: [] }],
+      })
+      .select("id")
+      .single();
+    expect(roadmapRow).not.toBeNull();
+
+    await page.goto(COACH_URL);
+    await expect(page.getByTestId("actions-card")).toBeVisible({ timeout: 8_000 });
+    await expect(page.getByTestId("generate-actions-button")).toBeVisible({ timeout: 3_000 });
+    await expect(page.getByTestId("generate-actions-button")).toBeEnabled();
+  });
+
+  test("actions checklist renders and action can be toggled", async ({ page }) => {
+    const admin = adminClient();
+    await admin.from("career_assessments").insert({
+      user_id: userId,
+      goal_id: goalId,
+      strengths: [],
+      weaknesses: [],
+      opportunities: [],
+      skill_gaps: [],
+      experience_gaps: [],
+      leadership_gaps: [],
+      suggested_roles: [],
+      raw_data: {},
+    });
+    const { data: roadmapRow } = await admin
+      .from("career_roadmaps")
+      .insert({
+        user_id: userId,
+        goal_id: goalId,
+        phases: [{ phase: 1, label: "Foundation", duration_weeks: 4, focus: "Core", milestones: [] }],
+      })
+      .select("id")
+      .single();
+    const { data: actionRow } = await admin
+      .from("career_weekly_actions")
+      .insert({
+        user_id: userId,
+        goal_id: goalId,
+        roadmap_id: roadmapRow!.id,
+        title: "Read system design book",
+        description: "Read chapters 1-3",
+        action_type: "learning",
+        status: "pending",
+        week_number: 1,
+        source: "ai",
+      })
+      .select("id")
+      .single();
+    expect(actionRow).not.toBeNull();
+
+    await page.goto(COACH_URL);
+    const actionItem = page.getByTestId(`action-item-${actionRow!.id}`);
+    await expect(actionItem).toBeVisible({ timeout: 8_000 });
+    // Generate button should not be visible when actions exist
+    await expect(page.getByTestId("generate-actions-button")).not.toBeVisible({ timeout: 3_000 });
+
+    // Toggle action to completed
+    await actionItem.click();
+    // After toggle, the item should still be visible (the UI updates optimistically or refreshes)
+    await expect(actionItem).toBeVisible({ timeout: 8_000 });
   });
 });
