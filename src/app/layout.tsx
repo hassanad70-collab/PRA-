@@ -36,6 +36,10 @@ export const metadata: Metadata = {
     title: "PRA Talent Intelligence Platform",
     description,
   },
+  icons: {
+    icon: "/pra-logo.webp",
+    apple: "/pra-logo.webp",
+  },
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

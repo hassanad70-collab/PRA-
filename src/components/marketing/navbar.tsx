@@ -1,10 +1,11 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
-  ChevronDown, Compass, FileCheck2, FilePenLine, Mail, Menu, MessagesSquare, Sparkles, X,
+  ChevronDown, Compass, FileCheck2, FilePenLine, Mail, Menu, MessagesSquare, X,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -120,9 +121,7 @@ export function Navbar() {
       <div className="container flex h-14 items-center justify-between">
         {/* Brand */}
         <Link href="/" className="flex items-center gap-2 font-semibold shrink-0">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-pra-primary-hover to-pra-primary text-white">
-            <Sparkles className="h-4 w-4" />
-          </div>
+          <Image src="/pra-logo.webp" alt="PRA" width={32} height={32} className="h-8 w-8 object-contain" />
           <span className="hidden sm:inline">{t("brand")}</span>
         </Link>
 

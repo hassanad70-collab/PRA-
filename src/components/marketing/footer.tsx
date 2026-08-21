@@ -1,5 +1,5 @@
+import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { Sparkles } from "lucide-react";
 
 import { LanguageSwitcher } from "@/components/shared/language-switcher";
 import { Link } from "@/i18n/navigation";
@@ -36,9 +36,7 @@ export function Footer() {
         <div className="grid grid-cols-2 gap-8 md:grid-cols-5">
           <div className="col-span-2">
             <Link href="/" className="flex items-center gap-2 font-semibold">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-pra-primary-hover to-pra-primary text-white">
-                <Sparkles className="h-4 w-4" />
-              </div>
+              <Image src="/pra-logo.webp" alt="PRA" width={32} height={32} className="h-8 w-8 object-contain" />
               {t("brand")}
             </Link>
             <p className="mt-4 max-w-xs text-sm text-muted-foreground">{tFooter("tagline")}</p>

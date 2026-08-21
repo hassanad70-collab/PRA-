@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -740,9 +741,7 @@ export function DashboardShell({
   const SidebarContent = (
     <div className="flex h-full flex-col">
       <Link href="/" className="flex items-center gap-3 border-b border-border/60 px-5 py-4">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-pra-primary to-pra-cyan text-white shadow-md shadow-pra-primary/20">
-          <Sparkles className="h-[18px] w-[18px]" />
-        </div>
+        <Image src="/pra-logo.webp" alt="PRA" width={36} height={36} className="h-9 w-9 shrink-0 object-contain" />
         <div>
           <div className="text-sm font-bold tracking-tight text-pra-navy">PRA</div>
           <div className="-mt-0.5 text-[10px] font-semibold uppercase tracking-widest text-pra-cyan">Talent Intelligence</div>

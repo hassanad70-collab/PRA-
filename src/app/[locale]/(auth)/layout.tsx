@@ -1,5 +1,5 @@
+import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { Sparkles } from "lucide-react";
 
 import { Link } from "@/i18n/navigation";
 
@@ -11,9 +11,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     <div className="grid min-h-screen lg:grid-cols-2">
       <div className="flex flex-col justify-center px-6 py-12 sm:px-12 lg:px-20">
         <Link href="/" className="mb-10 flex items-center gap-2 text-lg font-semibold">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-pra-primary-hover to-pra-primary text-white">
-            <Sparkles className="h-4 w-4" />
-          </div>
+          <Image src="/pra-logo.webp" alt="PRA" width={40} height={40} className="h-10 w-10 object-contain" />
           {t("brand")}
         </Link>
         <div className="mx-auto w-full max-w-sm">{children}</div>
