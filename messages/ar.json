@@ -508,7 +508,74 @@
       "messages": "الرسائل",
       "resumeSubGroup": "السيرة الذاتية",
       "interviewSubGroup": "المقابلات",
-      "careerCoach": "المدرب المهني"
+      "careerCoach": "المدرب المهني",
+      "subscription": "الاشتراك"
+    },
+    "Subscription": {
+      "pageTitle": "خطط الاشتراك",
+      "pageSubtitle": "اختر الخطة التي تناسب أهدافك المهنية.",
+      "monthlyLabel": "شهري",
+      "annualLabel": "سنوي",
+      "annualSaving": "وفّر ~17%",
+      "perMonth": "/ شهر",
+      "perYear": "/ سنة",
+      "freePrice": "مجاني",
+      "currentPlanLabel": "خطتك الحالية",
+      "upgradeLabel": "الترقية",
+      "manageLabel": "إدارة",
+      "comingSoon": "قريبًا",
+      "mostPopular": "الأكثر شيوعًا ⭐",
+      "everythingInFree": "كل ما في الخطة المجانية",
+      "everythingInProfessional": "كل ما في الخطة الاحترافية",
+      "paymentNote": "معالجة الدفع ستكون متاحة قريبًا. لن يتم خصم أي مبالغ في الوقت الحالي.",
+      "plans": {
+        "free": {
+          "name": "مجاني",
+          "description": "ابدأ رحلتك المهنية",
+          "features": {
+            "profile": "الملف الشخصي",
+            "jobSearch": "البحث عن وظائف",
+            "applyJobs": "التقديم على الوظائف",
+            "appTracking": "متابعة الطلبات",
+            "basicResume": "سيرة ذاتية أساسية",
+            "atsChecks": "فحصان ATS / شهريًا",
+            "careerGuidance": "إرشاد مهني أساسي",
+            "aiCredits": "5 أرصدة ذكاء اصطناعي / شهريًا"
+          }
+        },
+        "professional": {
+          "name": "احترافي",
+          "description": "بناء ملف مهني أقوى",
+          "features": {
+            "resumeStudio": "استوديو السيرة الذاتية الكامل",
+            "atsChecks": "20 فحصًا ATS / شهريًا",
+            "careerCoach": "المدرب المهني",
+            "careerAdvisor": "المستشار المهني",
+            "coverLetters": "خطابات التقديم",
+            "interviewPrep": "التحضير للمقابلات",
+            "jobMatching": "مطابقة الوظائف",
+            "linkedinOptimizer": "تحسين LinkedIn",
+            "salaryInsights": "تحليلات الرواتب",
+            "aiCredits": "100 رصيد ذكاء اصطناعي / شهريًا",
+            "priorityProcessing": "معالجة ذات أولوية"
+          }
+        },
+        "careerPro": {
+          "name": "كاريير برو 👑",
+          "description": "تجربة ذكاء مهني متكاملة",
+          "features": {
+            "careerRoadmap": "خارطة طريق مهنية متقدمة",
+            "resumeOptimization": "تحسين متقدم للسيرة الذاتية",
+            "interviewSim": "محاكاة مقابلات متقدمة",
+            "premiumJobMatching": "مطابقة وظائف مميزة",
+            "salaryInsights": "تحليلات رواتب متقدمة",
+            "portfolioOptimization": "تحسين ملف الأعمال",
+            "careerAnalytics": "تحليلات مهنية متقدمة",
+            "aiCredits": "300 رصيد ذكاء اصطناعي / شهريًا",
+            "priorityAi": "معالجة ذكاء اصطناعي بأولوية"
+          }
+        }
+      }
     },
     "Workspace": {
       "Chatbot": {

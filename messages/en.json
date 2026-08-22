@@ -508,7 +508,74 @@
       "messages": "Messages",
       "resumeSubGroup": "Resume",
       "interviewSubGroup": "Interview",
-      "careerCoach": "Career Coach"
+      "careerCoach": "Career Coach",
+      "subscription": "Subscription"
+    },
+    "Subscription": {
+      "pageTitle": "Subscription Plans",
+      "pageSubtitle": "Choose the plan that fits your career goals.",
+      "monthlyLabel": "Monthly",
+      "annualLabel": "Annual",
+      "annualSaving": "Save ~17%",
+      "perMonth": "/ month",
+      "perYear": "/ year",
+      "freePrice": "Free",
+      "currentPlanLabel": "Current Plan",
+      "upgradeLabel": "Upgrade",
+      "manageLabel": "Manage",
+      "comingSoon": "Coming Soon",
+      "mostPopular": "Most Popular ⭐",
+      "everythingInFree": "Everything in Free",
+      "everythingInProfessional": "Everything in Professional",
+      "paymentNote": "Payment processing coming soon. No charges will be made at this time.",
+      "plans": {
+        "free": {
+          "name": "Free",
+          "description": "Start your career journey",
+          "features": {
+            "profile": "Profile",
+            "jobSearch": "Job Search",
+            "applyJobs": "Apply for Jobs",
+            "appTracking": "Application Tracking",
+            "basicResume": "Basic Resume",
+            "atsChecks": "2 ATS Checks / month",
+            "careerGuidance": "Basic Career Guidance",
+            "aiCredits": "5 AI Credits / month"
+          }
+        },
+        "professional": {
+          "name": "Professional",
+          "description": "Build a stronger career profile",
+          "features": {
+            "resumeStudio": "Full Resume Studio",
+            "atsChecks": "20 ATS Checks / month",
+            "careerCoach": "Career Coach",
+            "careerAdvisor": "Career Advisor",
+            "coverLetters": "Cover Letters",
+            "interviewPrep": "Interview Preparation",
+            "jobMatching": "Job Matching",
+            "linkedinOptimizer": "LinkedIn Optimizer",
+            "salaryInsights": "Salary Insights",
+            "aiCredits": "100 AI Credits / month",
+            "priorityProcessing": "Priority Processing"
+          }
+        },
+        "careerPro": {
+          "name": "Career Pro 👑",
+          "description": "Your complete career intelligence experience",
+          "features": {
+            "careerRoadmap": "Advanced Career Roadmap",
+            "resumeOptimization": "Advanced Resume Optimization",
+            "interviewSim": "Advanced Interview Simulation",
+            "premiumJobMatching": "Premium Job Matching",
+            "salaryInsights": "Advanced Salary Insights",
+            "portfolioOptimization": "Portfolio Optimization",
+            "careerAnalytics": "Advanced Career Analytics",
+            "aiCredits": "300 AI Credits / month",
+            "priorityAi": "Priority AI Processing"
+          }
+        }
+      }
     },
     "Workspace": {
       "Chatbot": {

@@ -106,6 +106,7 @@ export default async function CandidateLayout({
       items: [
         { href: p("/profile"),       label: tNav("profile"),        icon: "User" },
         { href: p("/notifications"), label: tNav("notifications"),  icon: "Bell",    badge: unreadNotifications },
+        { href: p("/subscription"),  label: tNav("subscription"),   icon: "CreditCard" },
         { href: p("/settings"),      label: tNav("settings"),       icon: "Settings" },
       ],
     },
