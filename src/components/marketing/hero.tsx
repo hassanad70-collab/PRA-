@@ -2,7 +2,7 @@
 
 import { m } from "framer-motion";
 import { useTranslations } from "next-intl";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
@@ -17,15 +17,6 @@ export function Hero() {
       <div className="absolute start-1/2 top-0 -z-10 h-[600px] w-[900px] -translate-x-1/2 rounded-full bg-gradient-to-tr from-pra-primary/15 via-pra-primary/10 to-pra-cyan/10 blur-3xl rtl:translate-x-1/2" />
 
       <div className="container flex flex-col items-center text-center">
-        <m.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-secondary/50 px-4 py-1.5 text-sm font-medium"
-        >
-          <Sparkles className="h-3.5 w-3.5 text-primary" />
-          {t("eyebrow")}
-        </m.div>
 
         <m.h1
           initial={{ opacity: 0, y: 16 }}
