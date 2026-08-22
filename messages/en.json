@@ -9,7 +9,7 @@
       "description": "Open roles across every company on PRA Talent Intelligence. Free to browse, no account required."
     },
     "atsChecker": {
-      "title": "Free AI Resume Checker — Instant ATS Score",
+      "title": "ATS Resume Checker — Instant Score",
       "description": "Get an instant, AI-powered ATS compatibility score for your resume. Free, no account required."
     },
     "login": {
@@ -153,7 +153,7 @@
           "value": 80
         }
       ],
-      "title": "Free AI Resume Checker — see your <highlight>ATS score</highlight> in seconds",
+      "title": "Free ATS Resume Checker — see your <highlight>ATS score</highlight> in seconds",
       "subtitle": "Upload your resume and get a complete, AI-powered ATS compatibility analysis instantly — no account, no credit card, no waiting.",
       "points": [
         "Complete ATS compatibility score — no hidden or gated sections",
@@ -178,7 +178,7 @@
         },
         {
           "key": "resume_builder",
-          "label": "AI Resume Builder",
+          "label": "Resume Builder",
           "description": "Build a professional, ATS-optimized resume from scratch with AI guidance."
         },
         {
@@ -193,7 +193,7 @@
         },
         {
           "key": "career_advisor",
-          "label": "AI Career Advisor",
+          "label": "Career Advisor",
           "description": "Get personalized guidance on your next career move, skill gaps, and growth path."
         }
       ]
@@ -361,7 +361,7 @@
     "noOpenRoles": "No open roles right now — check back soon."
   },
   "AtsChecker": {
-    "title": "Free AI Resume Checker",
+    "title": "Free ATS Resume Checker",
     "subtitle": "Get an instant, AI-powered ATS compatibility score — no account required. Your first analysis is completely free.",
     "dropzoneIdle": "Drag & drop your resume here",
     "dropzoneAnalyzing": "Analyzing your resume…",
@@ -482,7 +482,7 @@
       "signOut": "Sign out",
       "openMenu": "Open menu",
       "aiWorkspaceGroup": "AI Career Workspace",
-      "aiAssistant": "AI Career Chatbot",
+      "aiAssistant": "Career Chat",
       "myResumes": "My Resumes",
       "resumeStudio": "Resume Studio",
       "atsChecker": "ATS Resume Checker",
@@ -508,7 +508,7 @@
       "messages": "Messages",
       "resumeSubGroup": "Resume",
       "interviewSubGroup": "Interview",
-      "careerCoach": "AI Career Coach"
+      "careerCoach": "Career Coach"
     },
     "Workspace": {
       "Chatbot": {
@@ -664,7 +664,7 @@
     "Resume": {
       "title": "Resume Intelligence",
       "subtitle": "Upload your resume for instant AI parsing, ATS scoring, and job matching.",
-      "builderTitle": "AI Resume Builder",
+      "builderTitle": "Resume Builder",
       "builderSubtitle": "Build a polished resume from your profile, refine it with AI, and export it as PDF or Word.",
       "openBuilder": "Open builder",
       "yourResumes": "Your resumes",
@@ -698,7 +698,7 @@
       "title": "AI ATS Score"
     },
     "ResumeBuilder": {
-      "title": "AI Resume Builder",
+      "title": "Resume Builder",
       "subtitle": "Build a resume from your profile, let AI polish the wording, and export it as PDF or Word.",
       "newDraft": "New draft",
       "emptyHint": "No resume drafts yet. Create one and we'll start it from your profile.",
@@ -1097,7 +1097,7 @@
       "sentAgo": "Sent"
     },
     "CareerCoach": {
-      "title": "AI Career Coach",
+      "title": "Career Coach",
       "subtitle": "Your personalized, persistent career development companion.",
       "empty": {
         "heading": "Start Your Career Journey",
