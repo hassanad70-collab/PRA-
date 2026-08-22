@@ -1,10 +1,12 @@
 import { test, expect } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 
-import { login } from "./helpers/auth";
+import { STORAGE_STATE } from "./helpers/auth";
 import { TEST_USERS, TEST_JOB_SLUG } from "./global-setup";
 
 test.describe("Job application", () => {
+  test.use({ storageState: STORAGE_STATE.candidate });
+
   test.beforeAll(async () => {
     // Ensure the test candidate has at least one resume to apply with,
     // independent of whether resume-upload.spec.ts has run yet.
@@ -27,9 +29,6 @@ test.describe("Job application", () => {
   });
 
   test("candidate can apply to a published job end-to-end through the UI", async ({ page }) => {
-    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
-    await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
-
     // Withdraw any prior test application so this test is repeatable.
     const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
       auth: { autoRefreshToken: false, persistSession: false },
@@ -49,9 +48,6 @@ test.describe("Job application", () => {
   });
 
   test("a candidate cannot apply to the same job twice", async ({ page }) => {
-    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
-    await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
-
     const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
       auth: { autoRefreshToken: false, persistSession: false },
     });

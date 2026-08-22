@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 
-import { login } from "./helpers/auth";
+import { STORAGE_STATE } from "./helpers/auth";
 import { TEST_JOB_SLUG, TEST_USERS } from "./global-setup";
 
 /**
@@ -51,6 +51,8 @@ async function ensureResume(admin: ReturnType<typeof adminClient>, candidateId: 
 }
 
 test.describe.serial("Recruiter Intelligence v2.0", () => {
+  test.use({ storageState: STORAGE_STATE.recruiter });
+
   let jobId: string;
   let applicationId: string;
   let applicationOtherId: string;
@@ -143,9 +145,7 @@ test.describe.serial("Recruiter Intelligence v2.0", () => {
   });
 
   test("Phase 1: Executive Dashboard shows the extended hiring KPIs", async ({ page }) => {
-    await login(page, TEST_USERS.recruiter.email, TEST_USERS.recruiter.password);
-    await expect(page).toHaveURL(/\/recruiter\/dashboard$/, { timeout: 15_000 });
-
+    await page.goto("/en/recruiter/dashboard");
     await expect(page.getByRole("heading", { name: "Hiring Command Center" })).toBeVisible();
     await expect(page.getByText("Offers pending")).toBeVisible();
     await expect(page.getByText("Hires this month")).toBeVisible();
@@ -157,9 +157,6 @@ test.describe.serial("Recruiter Intelligence v2.0", () => {
   });
 
   test("Phase 2: recruiter can generate an AI candidate insight (deterministic fallback)", async ({ page }) => {
-    await login(page, TEST_USERS.recruiter.email, TEST_USERS.recruiter.password);
-    await expect(page).toHaveURL(/\/recruiter\/dashboard$/, { timeout: 15_000 });
-
     await page.goto(`/recruiter/applications/${applicationId}`);
     await expect(page.getByRole("heading", { name: "AI Candidate Insight" })).toBeVisible();
     await page.getByRole("button", { name: "Generate AI insight" }).click();
@@ -170,9 +167,6 @@ test.describe.serial("Recruiter Intelligence v2.0", () => {
   });
 
   test("Phase 3: recruiter can compare two candidates side by side", async ({ page }) => {
-    await login(page, TEST_USERS.recruiter.email, TEST_USERS.recruiter.password);
-    await expect(page).toHaveURL(/\/recruiter\/dashboard$/, { timeout: 15_000 });
-
     await page.goto(`/recruiter/jobs/${jobId}/compare?ids=${applicationId},${applicationOtherId}`);
     await expect(page.getByRole("heading", { name: "Candidate Comparison" })).toBeVisible();
     await expect(page.getByText(TEST_USERS.candidate.fullName)).toBeVisible();
@@ -182,9 +176,6 @@ test.describe.serial("Recruiter Intelligence v2.0", () => {
   });
 
   test("Phase 4: Shortlist tab ranks candidates and exposes approve/reject actions", async ({ page }) => {
-    await login(page, TEST_USERS.recruiter.email, TEST_USERS.recruiter.password);
-    await expect(page).toHaveURL(/\/recruiter\/dashboard$/, { timeout: 15_000 });
-
     await page.goto(`/recruiter/jobs/${jobId}/candidates`);
     await expect(page.getByText(TEST_USERS.candidate.fullName)).toBeVisible();
     await expect(page.getByText(/Suggested next action/).first()).toBeVisible();
@@ -194,9 +185,7 @@ test.describe.serial("Recruiter Intelligence v2.0", () => {
   });
 
   test("Phase 5: Recruiter Copilot answers an example query (deterministic fallback when AI is disabled)", async ({ page }) => {
-    await login(page, TEST_USERS.recruiter.email, TEST_USERS.recruiter.password);
-    await expect(page).toHaveURL(/\/recruiter\/dashboard$/, { timeout: 15_000 });
-
+    await page.goto("/en/recruiter/dashboard");
     await page.getByRole("button", { name: "Copilot" }).click();
     await expect(page.getByRole("heading", { name: "Recruiter Copilot" })).toBeVisible();
     await page.getByText("Who should I interview first?").click();
@@ -205,9 +194,6 @@ test.describe.serial("Recruiter Intelligence v2.0", () => {
   });
 
   test("Phase 6: Hiring Analytics page renders trend charts and CSV export buttons", async ({ page }) => {
-    await login(page, TEST_USERS.recruiter.email, TEST_USERS.recruiter.password);
-    await expect(page).toHaveURL(/\/recruiter\/dashboard$/, { timeout: 15_000 });
-
     await page.goto("/recruiter/analytics");
     await expect(page.getByRole("heading", { name: "Hiring Analytics" })).toBeVisible();
     await expect(page.getByText("Interview conversion rate")).toBeVisible();
@@ -223,9 +209,6 @@ test.describe.serial("Recruiter Intelligence v2.0", () => {
     // Both fixture applications must be in the same status for a clean,
     // predictable bulk-move assertion.
     await admin.from("applications").update({ status: "submitted" }).in("id", [applicationId, applicationOtherId]);
-
-    await login(page, TEST_USERS.recruiter.email, TEST_USERS.recruiter.password);
-    await expect(page).toHaveURL(/\/recruiter\/dashboard$/, { timeout: 15_000 });
 
     await page.goto(`/recruiter/jobs/${jobId}/candidates`);
     await page.getByRole("tab", { name: /Applicants/ }).click();
@@ -262,9 +245,6 @@ test.describe.serial("Recruiter Intelligence v2.0", () => {
       .eq("id", interviewId);
 
     try {
-      await login(page, TEST_USERS.recruiter.email, TEST_USERS.recruiter.password);
-      await expect(page).toHaveURL(/\/recruiter\/dashboard$/, { timeout: 15_000 });
-
       await page.goto(`/recruiter/applications/${applicationId}`);
       await expect(page.getByText("Scorecard")).toBeVisible();
       // "Communication" also labels a dimension in the AI Screening Summary

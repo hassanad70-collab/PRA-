@@ -1,7 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 
-import { login } from "./helpers/auth";
+import { STORAGE_STATE } from "./helpers/auth";
 import { TEST_USERS } from "./global-setup";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -15,8 +15,7 @@ function adminClient() {
 }
 
 async function loginAsCandidate(page: Page) {
-  await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
-  await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
+  await page.goto("/en/candidate/dashboard");
 }
 
 async function getUserId(email: string): Promise<string> {
@@ -33,6 +32,8 @@ async function deleteCandidateSessions(userId: string) {
   const admin = adminClient();
   await admin.from("ai_chat_sessions").delete().eq("user_id", userId);
 }
+
+test.use({ storageState: STORAGE_STATE.candidate });
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
 

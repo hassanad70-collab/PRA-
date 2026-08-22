@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 
-import { login } from "./helpers/auth";
+import { STORAGE_STATE } from "./helpers/auth";
 import { TEST_USERS, TEST_JOB_SLUG } from "./global-setup";
 
 /**
@@ -19,10 +19,7 @@ function adminClient() {
 }
 
 test.describe("Recruiter AI Assistant", () => {
-  test.beforeEach(async ({ page }) => {
-    await login(page, TEST_USERS.recruiter.email, TEST_USERS.recruiter.password);
-    await expect(page).toHaveURL(/\/recruiter\/dashboard$/, { timeout: 15_000 });
-  });
+  test.use({ storageState: STORAGE_STATE.recruiter });
 
   test("recruiter can draft a job posting with AI", async ({ page }) => {
     await page.goto("/recruiter/jobs/new");

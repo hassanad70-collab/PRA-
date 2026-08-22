@@ -2,11 +2,15 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 import { createClient } from "@supabase/supabase-js";
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 
-import { login } from "./helpers/auth";
+import { STORAGE_STATE } from "./helpers/auth";
 import { makeTestResumePdfFile, TEST_RESUME_LINES } from "./helpers/fixtures";
 import { TEST_USERS } from "./global-setup";
+
+// All suites in this file run as the fixture candidate — auth is pre-loaded
+// from storage state, no per-test Supabase login API call is made.
+test.use({ storageState: STORAGE_STATE.candidate });
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -17,7 +21,7 @@ import { TEST_USERS } from "./global-setup";
  * success or graceful-failure toast. Returns the toast text.
  */
 async function uploadViaResumesPage(
-  page: Parameters<typeof login>[0],
+  page: Page,
   filePath: string
 ): Promise<string> {
   await page.goto("/candidate/workspace/resumes");
@@ -80,10 +84,6 @@ function makeTestResumePdf(lines: string[]): Buffer {
 // ---------------------------------------------------------------------------
 
 test.describe("Resume upload — filename acceptance", () => {
-  test.beforeEach(async ({ page }) => {
-    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
-    await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
-  });
 
   test("standard English filename uploads successfully", async ({ page }) => {
     const pdfPath = makeTestResumePdfFile(TEST_RESUME_LINES);
@@ -160,9 +160,6 @@ test.describe("Resume upload — filename acceptance", () => {
 
 test.describe("Resume upload — UUID-based storage paths", () => {
   test("View button href is a Supabase signed URL generated from file_path, not the original filename", async ({ page }) => {
-    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
-    await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
-
     const tmpPath = path.join(os.tmpdir(), `My Special Resume ${Date.now()}.pdf`);
     fs.writeFileSync(tmpPath, makeTestResumePdf(TEST_RESUME_LINES));
     await uploadViaResumesPage(page, tmpPath);
@@ -189,10 +186,6 @@ test.describe("Resume upload — UUID-based storage paths", () => {
 // ---------------------------------------------------------------------------
 
 test.describe("Resume view — fresh signed URLs", () => {
-  test.beforeEach(async ({ page }) => {
-    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
-    await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
-  });
 
   test("My Resumes page re-signs URL on every load — both new and existing resumes have valid hrefs", async ({ page }) => {
     await page.goto("/candidate/workspace/resumes");
@@ -255,10 +248,6 @@ test.describe("Resume view — fresh signed URLs", () => {
 // ---------------------------------------------------------------------------
 
 test.describe("Resume upload — UX", () => {
-  test.beforeEach(async ({ page }) => {
-    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
-    await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
-  });
 
   test("upload zone shows a progress bar while the action is pending", async ({ page }) => {
     await page.goto("/candidate/workspace/resumes");
@@ -334,9 +323,6 @@ test.describe("Resume upload — UX", () => {
 
 test.describe("Auth consistency — no guest prompts for authenticated users", () => {
   test("authenticated candidate uploading a resume is never shown a sign-in error", async ({ page }) => {
-    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
-    await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
-
     const pdfPath = makeTestResumePdfFile(TEST_RESUME_LINES);
     await page.goto("/candidate/workspace/resumes");
     await page.waitForLoadState("networkidle");
@@ -353,9 +339,6 @@ test.describe("Auth consistency — no guest prompts for authenticated users", (
   });
 
   test("authenticated candidate navigating between dashboard and resumes page stays authenticated", async ({ page }) => {
-    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
-    await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
-
     // Multi-hop navigation — session must persist across all hops
     await page.goto("/candidate/workspace/resumes");
     await page.waitForLoadState("networkidle");
@@ -372,9 +355,6 @@ test.describe("Auth consistency — no guest prompts for authenticated users", (
   });
 
   test("session persists after page refresh on resumes page", async ({ page }) => {
-    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
-    await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
-
     await page.goto("/candidate/workspace/resumes");
     await page.waitForLoadState("networkidle");
     await page.reload();
@@ -392,9 +372,6 @@ test.describe("Auth consistency — no guest prompts for authenticated users", (
 
 test.describe("Resume FK guarantee — candidates row always exists", () => {
   test("upload never fails with a foreign key violation (candidate record guaranteed)", async ({ page }) => {
-    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
-    await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
-
     const pdfPath = makeTestResumePdfFile(TEST_RESUME_LINES);
     await page.goto("/candidate/workspace/resumes");
     await page.waitForLoadState("networkidle");
@@ -410,9 +387,6 @@ test.describe("Resume FK guarantee — candidates row always exists", () => {
   });
 
   test("multiple rapid uploads do not cause FK violations", async ({ page }) => {
-    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
-    await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
-
     await page.goto("/candidate/workspace/resumes");
     await page.waitForLoadState("networkidle");
 

@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 
-import { login, logout } from "./helpers/auth";
+import { login, STORAGE_STATE } from "./helpers/auth";
 import { TEST_USERS, TEST_JOB_SLUG } from "./global-setup";
 
 /**
@@ -19,6 +19,8 @@ function adminClient() {
 }
 
 test.describe.serial("AI Interview Assistant", () => {
+  test.use({ storageState: STORAGE_STATE.recruiter });
+
   let jobId: string;
   let applicationId: string;
 
@@ -70,9 +72,6 @@ test.describe.serial("AI Interview Assistant", () => {
   });
 
   test("recruiter can generate an AI interview question bank for a job", async ({ page }) => {
-    await login(page, TEST_USERS.recruiter.email, TEST_USERS.recruiter.password);
-    await expect(page).toHaveURL(/\/recruiter\/dashboard$/, { timeout: 15_000 });
-
     await page.goto(`/recruiter/jobs/${jobId}`);
     await page.getByRole("tab", { name: "Interview Questions" }).click();
     await page.getByRole("button", { name: /Generate with AI|Regenerate with AI/ }).click();
@@ -82,9 +81,6 @@ test.describe.serial("AI Interview Assistant", () => {
   });
 
   test("recruiter can schedule an interview and the candidate sees it on their applications page", async ({ page }) => {
-    await login(page, TEST_USERS.recruiter.email, TEST_USERS.recruiter.password);
-    await expect(page).toHaveURL(/\/recruiter\/dashboard$/, { timeout: 15_000 });
-
     await page.goto(`/recruiter/applications/${applicationId}`);
     await page.getByRole("button", { name: "Schedule interview" }).click();
 
@@ -97,7 +93,8 @@ test.describe.serial("AI Interview Assistant", () => {
     await expect(page.getByText("Scheduled", { exact: true })).toBeVisible({ timeout: 10_000 });
     await expect(page.getByText("https://meet.example.test/e2e-interview")).toBeVisible();
 
-    await logout(page);
+    // Clear cookies locally (no server-side signOut) to avoid revoking the shared recruiter session.
+    await page.context().clearCookies();
     await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
     await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
     await page.goto("/candidate/applications");
@@ -105,9 +102,6 @@ test.describe.serial("AI Interview Assistant", () => {
   });
 
   test("recruiter can submit interview feedback, marking it completed", async ({ page }) => {
-    await login(page, TEST_USERS.recruiter.email, TEST_USERS.recruiter.password);
-    await expect(page).toHaveURL(/\/recruiter\/dashboard$/, { timeout: 15_000 });
-
     await page.goto(`/recruiter/applications/${applicationId}`);
     await page.getByRole("button", { name: "Give feedback" }).click();
     await page.getByRole("button", { name: "Save feedback" }).click();

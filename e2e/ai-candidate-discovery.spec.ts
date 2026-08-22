@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 
-import { login } from "./helpers/auth";
+import { STORAGE_STATE } from "./helpers/auth";
 import { TEST_OTHER_COMPANY_JOB_SLUG, TEST_USERS } from "./global-setup";
 
 function adminClient() {
@@ -18,6 +18,8 @@ function adminClient() {
  * just at the query layer.
  */
 test.describe("AI candidate discovery (opt-in matching)", () => {
+  test.use({ storageState: STORAGE_STATE.recruiterOther });
+
   test("a recruiter cannot open a non-opted-in candidate's profile via direct URL", async ({ page }) => {
     const admin = adminClient();
     const { data: candidateProfile } = await admin
@@ -30,9 +32,6 @@ test.describe("AI candidate discovery (opt-in matching)", () => {
     // Make sure this candidate is neither opted in nor AI-matched to this company.
     await admin.from("candidates").update({ is_open_to_work: false }).eq("id", candidateProfile!.id);
     await admin.from("job_matches").delete().eq("job_id", job!.id).eq("candidate_id", candidateProfile!.id);
-
-    await login(page, TEST_USERS.recruiterOther.email, TEST_USERS.recruiterOther.password);
-    await expect(page).toHaveURL(/\/recruiter\/dashboard$/, { timeout: 15_000 });
 
     // Next.js's App Router doesn't reliably surface a 404 HTTP status for a
     // nested dynamic route's notFound() boundary under this project's custom
@@ -88,9 +87,6 @@ test.describe("AI candidate discovery (opt-in matching)", () => {
     if (matchUpsert.error) throw new Error(`Failed to seed job_matches: ${matchUpsert.error.message}`);
 
     try {
-      await login(page, TEST_USERS.recruiterOther.email, TEST_USERS.recruiterOther.password);
-      await expect(page).toHaveURL(/\/recruiter\/dashboard$/, { timeout: 15_000 });
-
       await page.goto(`/recruiter/jobs/${job!.id}/candidates`);
       await page.getByRole("tab", { name: /AI Recommended/i }).click();
 

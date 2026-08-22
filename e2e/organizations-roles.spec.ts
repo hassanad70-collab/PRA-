@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 
-import { login, logout } from "./helpers/auth";
+import { login } from "./helpers/auth";
 import { TEST_USERS } from "./global-setup";
 
 const INVITED_EMAIL = "e2e.invited.member@example.test";
@@ -27,7 +27,6 @@ test.describe.serial("Organizations & Roles", () => {
   test("owner can generate an invite link, and it lets a new person join the company", async ({ page }) => {
     await login(page, TEST_USERS.recruiter.email, TEST_USERS.recruiter.password);
     await expect(page).toHaveURL(/\/recruiter\/dashboard$/, { timeout: 15_000 });
-
     await page.goto("/recruiter/settings/team");
     await page.getByRole("button", { name: "Invite teammate" }).click();
     await page.getByLabel("Email").fill(INVITED_EMAIL);
@@ -43,10 +42,10 @@ test.describe.serial("Organizations & Roles", () => {
     const invitePath = inviteUrl ? new URL(inviteUrl).pathname : null;
     expect(invitePath).toMatch(/^\/invite\//);
 
-    // Close the dialog first -- it's still open and would otherwise cover
-    // the header's account menu button that logout() needs to click.
+    // Close the dialog first, then clear cookies (local logout without revoking
+    // the server-side session so the shared recruiter.json storageState stays valid).
     await page.getByRole("button", { name: "Done" }).click();
-    await logout(page);
+    await page.context().clearCookies();
     await page.goto(invitePath!);
     await expect(page.getByRole("heading", { name: /Join/ })).toBeVisible();
 
@@ -61,11 +60,11 @@ test.describe.serial("Organizations & Roles", () => {
   test("the invited member (default recruiter role) does not see the invite button, but the owner sees them on the team list", async ({ page }) => {
     await login(page, TEST_USERS.recruiter.email, TEST_USERS.recruiter.password);
     await expect(page).toHaveURL(/\/recruiter\/dashboard$/, { timeout: 15_000 });
-
     await page.goto("/recruiter/settings/team");
     await expect(page.getByText("E2E Invited Member")).toBeVisible();
 
-    await logout(page);
+    // Clear cookies locally (no server-side signOut) to avoid revoking the shared recruiter session.
+    await page.context().clearCookies();
     await login(page, INVITED_EMAIL, INVITED_PASSWORD);
     await expect(page).toHaveURL(/\/recruiter\/dashboard$/, { timeout: 15_000 });
 
@@ -76,7 +75,6 @@ test.describe.serial("Organizations & Roles", () => {
   test("owner can change the member's role and then remove them", async ({ page }) => {
     await login(page, TEST_USERS.recruiter.email, TEST_USERS.recruiter.password);
     await expect(page).toHaveURL(/\/recruiter\/dashboard$/, { timeout: 15_000 });
-
     await page.goto("/recruiter/settings/team");
     await page.getByRole("combobox").click();
     await page.getByRole("option", { name: "Viewer" }).click();

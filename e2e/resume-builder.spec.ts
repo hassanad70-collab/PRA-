@@ -1,7 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-import { login } from "./helpers/auth";
-import { TEST_USERS } from "./global-setup";
+import { STORAGE_STATE } from "./helpers/auth";
 
 /**
  * OPENAI_API_KEY isn't configured in this environment, so AI regeneration
@@ -12,9 +11,9 @@ import { TEST_USERS } from "./global-setup";
  * quality of AI output.
  */
 test.describe("AI Resume Builder", () => {
+  test.use({ storageState: STORAGE_STATE.candidate });
+
   test("candidate can create a draft and access all sections and export options in Resume Studio", async ({ page }) => {
-    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
-    await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
 
     // Resume Studio is the new home for the AI Resume Builder.
     await page.goto("/candidate/workspace/studio");
@@ -48,9 +47,6 @@ test.describe("AI Resume Builder", () => {
   });
 
   test("draft list shows a created draft and can be reopened", async ({ page }) => {
-    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
-    await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
-
     await page.goto("/candidate/workspace/studio");
     await expect(page.getByText("My Resume").first()).toBeVisible({ timeout: 10_000 });
   });

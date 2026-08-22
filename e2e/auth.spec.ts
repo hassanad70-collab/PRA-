@@ -31,7 +31,15 @@ test.describe("Authentication", () => {
   });
 
   test("logout clears the session and protected pages become inaccessible again", async ({ page }) => {
-    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
+    // Use a throwaway account so that revoking its session (scope=global) does not
+    // invalidate the shared candidate.json storageState used by later test files.
+    const throwawayEmail = `e2e.logout.${Date.now()}@example.test`;
+    await page.goto("/register");
+    await page.getByPlaceholder("Jane Doe").fill("Logout Test");
+    await page.getByPlaceholder("you@example.com").fill(throwawayEmail);
+    await page.getByLabel("Password", { exact: true }).fill("TestPass123!");
+    await page.getByLabel("Confirm password").fill("TestPass123!");
+    await page.getByRole("button", { name: "Create candidate account" }).click();
     await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
 
     await logout(page);

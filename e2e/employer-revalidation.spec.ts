@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 
-import { login } from "./helpers/auth";
+import { STORAGE_STATE } from "./helpers/auth";
 import { TEST_USERS } from "./global-setup";
 
 /**
@@ -27,6 +27,8 @@ function adminClient() {
 }
 
 test.describe.serial("DEBT-001 regression: employer mutations revalidate locale-prefixed recruiter routes", () => {
+  test.use({ storageState: STORAGE_STATE.recruiter });
+
   let candidateId: string;
   let recruiterId: string;
 
@@ -48,9 +50,6 @@ test.describe.serial("DEBT-001 regression: employer mutations revalidate locale-
   });
 
   test("locale-prefixed candidate-search page renders at /en/recruiter/candidate-search", async ({ page }) => {
-    await login(page, TEST_USERS.recruiter.email, TEST_USERS.recruiter.password);
-    await expect(page).toHaveURL(/\/recruiter\/dashboard$/, { timeout: 15_000 });
-
     await page.goto("/en/recruiter/candidate-search");
     // Must stay on the locale-prefixed URL (middleware must not strip the locale).
     await expect(page).toHaveURL(/\/en\/recruiter\/candidate-search/, { timeout: 10_000 });
@@ -58,9 +57,6 @@ test.describe.serial("DEBT-001 regression: employer mutations revalidate locale-
   });
 
   test("saveCandidateAction: saved candidate is visible on /en/recruiter/saved-candidates after save", async ({ page }) => {
-    await login(page, TEST_USERS.recruiter.email, TEST_USERS.recruiter.password);
-    await expect(page).toHaveURL(/\/recruiter\/dashboard$/, { timeout: 15_000 });
-
     // Navigate to the explicitly locale-prefixed candidate search URL.
     await page.goto("/en/recruiter/candidate-search");
     await expect(page).toHaveURL(/\/en\/recruiter\/candidate-search/, { timeout: 10_000 });
@@ -95,9 +91,6 @@ test.describe.serial("DEBT-001 regression: employer mutations revalidate locale-
       .from("saved_candidates")
       .upsert({ recruiter_id: recruiterId, candidate_id: candidateId }, { onConflict: "recruiter_id,candidate_id" });
 
-    await login(page, TEST_USERS.recruiter.email, TEST_USERS.recruiter.password);
-    await expect(page).toHaveURL(/\/recruiter\/dashboard$/, { timeout: 15_000 });
-
     await page.goto("/en/recruiter/saved-candidates");
     await expect(page).toHaveURL(/\/en\/recruiter\/saved-candidates/, { timeout: 10_000 });
 
@@ -129,9 +122,6 @@ test.describe.serial("DEBT-001 regression: employer mutations revalidate locale-
     // revalidateRecruiterPath("/company-profile"), revalidating both
     // /en/recruiter/company-profile and /ar/recruiter/company-profile.
     // This test ensures the locale-prefixed URL is reachable and renders correctly.
-    await login(page, TEST_USERS.recruiter.email, TEST_USERS.recruiter.password);
-    await expect(page).toHaveURL(/\/recruiter\/dashboard$/, { timeout: 15_000 });
-
     await page.goto("/en/recruiter/company-profile");
     await expect(page).toHaveURL(/\/en\/recruiter\/company-profile/, { timeout: 10_000 });
 
@@ -143,9 +133,6 @@ test.describe.serial("DEBT-001 regression: employer mutations revalidate locale-
     // addToTalentPoolAction / removeFromTalentPoolAction / toggleTalentPoolFavoriteAction
     // call revalidateRecruiterPath("/talent-pool"). This test verifies the locale-prefixed
     // route is reachable and renders correctly (the heading and empty/pool state).
-    await login(page, TEST_USERS.recruiter.email, TEST_USERS.recruiter.password);
-    await expect(page).toHaveURL(/\/recruiter\/dashboard$/, { timeout: 15_000 });
-
     await page.goto("/en/recruiter/talent-pool");
     await expect(page).toHaveURL(/\/en\/recruiter\/talent-pool/, { timeout: 10_000 });
 

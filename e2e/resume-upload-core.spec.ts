@@ -3,14 +3,12 @@ import os from "os";
 import path from "path";
 import { test, expect } from "@playwright/test";
 
-import { login } from "./helpers/auth";
-import { TEST_USERS } from "./global-setup";
+import { STORAGE_STATE } from "./helpers/auth";
 import { makeTestResumePdfFile, TEST_RESUME_LINES } from "./helpers/fixtures";
 
 test.describe("Resume upload", () => {
+  test.use({ storageState: STORAGE_STATE.candidate });
   test("My Resumes page shows upload component and not a broken redirect button", async ({ page }) => {
-    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
-    await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
 
     await page.goto("/candidate/workspace/resumes");
     await page.waitForLoadState("networkidle");
@@ -28,8 +26,6 @@ test.describe("Resume upload", () => {
   });
 
   test("candidate can upload a PDF from My Resumes page and it appears in the list", async ({ page }) => {
-    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
-    await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
 
     await page.goto("/candidate/workspace/resumes");
     await page.waitForLoadState("networkidle");
@@ -53,8 +49,6 @@ test.describe("Resume upload", () => {
   });
 
   test("View button on My Resumes page points to a real signed URL, not a blank/null href", async ({ page }) => {
-    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
-    await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
 
     await page.goto("/candidate/workspace/resumes");
     await page.waitForLoadState("networkidle");
@@ -74,8 +68,6 @@ test.describe("Resume upload", () => {
   });
 
   test("candidate can upload a real PDF resume through the ATS Checker and it processes without crashing", async ({ page }) => {
-    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
-    await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
 
     await page.goto("/candidate/workspace/ats-checker");
     // Wait for the client component to hydrate before driving the file input —
@@ -103,8 +95,6 @@ test.describe("Resume upload", () => {
   });
 
   test("oversized files are rejected client-side with a clear message, not silently dropped", async ({ page }) => {
-    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
-    await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
     await page.goto("/candidate/workspace/ats-checker");
     await page.waitForLoadState("networkidle");
 

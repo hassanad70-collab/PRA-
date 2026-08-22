@@ -1,7 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 
-import { login } from "./helpers/auth";
+import { STORAGE_STATE } from "./helpers/auth";
 import { TEST_USERS } from "./global-setup";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -15,13 +15,11 @@ function adminClient() {
 }
 
 async function loginAsCandidate(page: Page) {
-  await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
-  await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
+  await page.goto("/en/candidate/dashboard");
 }
 
 async function loginAsRecruiter(page: Page) {
-  await login(page, TEST_USERS.recruiter.email, TEST_USERS.recruiter.password);
-  await expect(page).toHaveURL(/\/recruiter\/dashboard$/, { timeout: 15_000 });
+  await page.goto("/en/recruiter/dashboard");
 }
 
 async function getUserId(email: string): Promise<string> {
@@ -38,6 +36,8 @@ async function deleteCandidateSessions(userId: string) {
   const admin = adminClient();
   await admin.from("ai_chat_sessions").delete().eq("user_id", userId);
 }
+
+test.use({ storageState: STORAGE_STATE.candidate });
 
 // ─── Block 1a: Floating tab visibility (candidate pages) ─────────────────────
 
@@ -68,6 +68,8 @@ test.describe("Global AI Assistant — floating tab visibility on candidate page
 // Separate describe so the candidate-login beforeEach does not interfere.
 
 test.describe("Global AI Assistant — NOT shown on recruiter portal", () => {
+  test.use({ storageState: STORAGE_STATE.recruiter });
+
   test("floating tab is NOT shown on the recruiter portal", async ({ page }) => {
     await loginAsRecruiter(page);
     await page.goto("/en/recruiter/dashboard");

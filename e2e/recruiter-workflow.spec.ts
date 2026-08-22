@@ -1,12 +1,14 @@
 import { test, expect } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 
-import { login } from "./helpers/auth";
+import { STORAGE_STATE } from "./helpers/auth";
 import { TEST_USERS, TEST_JOB_SLUG } from "./global-setup";
 
 test.describe("Recruiter workflow", () => {
+  test.use({ storageState: STORAGE_STATE.recruiter });
+
   test.beforeEach(async ({ page }) => {
-    await login(page, TEST_USERS.recruiter.email, TEST_USERS.recruiter.password);
+    await page.goto("/recruiter/dashboard");
     await expect(page).toHaveURL(/\/recruiter\/dashboard$/, { timeout: 15_000 });
   });
 

@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 
-import { login } from "./helpers/auth";
+import { STORAGE_STATE } from "./helpers/auth";
 import { TEST_USERS } from "./global-setup";
 
 /**
@@ -20,9 +20,10 @@ function adminClient() {
 }
 
 test.describe("Resume Intelligence Hub — Suggestion History (Unit C)", () => {
+  test.use({ storageState: STORAGE_STATE.candidate });
+
   test.beforeEach(async ({ page }) => {
-    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
-    await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
+    await page.goto("/candidate/dashboard");
   });
 
   test("accepting a suggestion logs a pending event, updates it to accepted, and it appears in History", async ({ page }) => {

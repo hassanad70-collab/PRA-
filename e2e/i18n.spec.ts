@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-import { login } from "./helpers/auth";
+import { STORAGE_STATE } from "./helpers/auth";
 import { TEST_USERS } from "./global-setup";
 
 test.describe("Internationalization (English / Arabic)", () => {
@@ -142,9 +142,10 @@ test.describe("Internationalization (English / Arabic)", () => {
 // /{locale}/candidate/*, with a temporary backward-compatibility redirect
 // for legacy links (see the TODO(tech-debt) in src/middleware.ts).
 test.describe("Candidate portal internationalization", () => {
+  test.use({ storageState: STORAGE_STATE.candidate });
+
   test("dashboard renders correctly in both locales with correct lang/dir", async ({ page }) => {
-    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
-    await expect(page).toHaveURL(/\/en\/candidate\/dashboard$/, { timeout: 15_000 });
+    await page.goto("/en/candidate/dashboard");
     await expect(page.getByRole("heading", { name: /welcome back/i })).toBeVisible();
     expect(await page.locator("html").getAttribute("lang")).toBe("en");
     expect(await page.locator("html").getAttribute("dir")).toBe("ltr");
@@ -156,17 +157,11 @@ test.describe("Candidate portal internationalization", () => {
   });
 
   test("legacy unprefixed candidate URLs redirect to the locale-prefixed equivalent", async ({ page }) => {
-    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
-    await expect(page).toHaveURL(/\/en\/candidate\/dashboard$/, { timeout: 15_000 });
-
     await page.goto("/candidate/profile");
     await expect(page).toHaveURL(/\/en\/candidate\/profile$/);
   });
 
   test("language switcher preserves the current candidate page and updates html lang/dir", async ({ page }) => {
-    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
-    await expect(page).toHaveURL(/\/en\/candidate\/dashboard$/, { timeout: 15_000 });
-
     await page.goto("/en/candidate/profile");
     await expect(page).toHaveURL(/\/en\/candidate\/profile$/);
 
@@ -179,9 +174,6 @@ test.describe("Candidate portal internationalization", () => {
   });
 
   test("candidate Interviews page (Unit H) renders correctly in both locales", async ({ page }) => {
-    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
-    await expect(page).toHaveURL(/\/en\/candidate\/dashboard$/, { timeout: 15_000 });
-
     await page.goto("/en/candidate/interviews");
     await expect(page.getByRole("heading", { name: "Interviews" })).toBeVisible();
     expect(await page.locator("html").getAttribute("lang")).toBe("en");
@@ -194,9 +186,6 @@ test.describe("Candidate portal internationalization", () => {
   });
 
   test("ATS Resume Checker workspace page renders in both locales", async ({ page }) => {
-    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
-    await expect(page).toHaveURL(/\/en\/candidate\/dashboard$/, { timeout: 15_000 });
-
     await page.goto("/en/candidate/workspace/ats-checker");
     await expect(page.getByRole("heading", { name: "ATS Resume Checker", level: 1 })).toBeVisible();
 
@@ -206,8 +195,7 @@ test.describe("Candidate portal internationalization", () => {
   });
 
   test("no internal candidate navigation link generates a legacy unprefixed URL", async ({ page }) => {
-    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
-    await expect(page).toHaveURL(/\/en\/candidate\/dashboard$/, { timeout: 15_000 });
+    await page.goto("/en/candidate/dashboard");
 
     // Scope to the sidebar to avoid matching duplicate links in dashboard Quick Actions.
     // Some nav links have AI/beta tags appended to their accessible name, so use
@@ -220,9 +208,6 @@ test.describe("Candidate portal internationalization", () => {
   });
 
   test("RTL layout renders correctly on the candidate dashboard, desktop and mobile", async ({ page }) => {
-    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
-    await expect(page).toHaveURL(/\/en\/candidate\/dashboard$/, { timeout: 15_000 });
-
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto("/ar/candidate/dashboard");
     expect(await page.locator("html").getAttribute("dir")).toBe("rtl");

@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 
-import { login } from "./helpers/auth";
+import { STORAGE_STATE } from "./helpers/auth";
 import { TEST_USERS } from "./global-setup";
 
 /**
@@ -142,13 +142,12 @@ async function seedResumeAndScore(
 }
 
 test.describe("Resume Health Checklist consistency", () => {
+  test.use({ storageState: STORAGE_STATE.candidate });
   test("reports Email, Phone, Experience, Education, and Skills as detected when parsed_data actually contains them", async ({ page }) => {
     const admin = adminClient();
     const { data: candidateProfile } = await admin.from("profiles").select("id").eq("email", TEST_USERS.candidate.email).single();
     await seedResumeAndScore(admin, candidateProfile!.id, { parsedData: FULLY_PARSED, parseStatus: "completed" });
 
-    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
-    await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
     await page.goto("/candidate/workspace/ats-checker");
 
     await expect(page.getByText("Resume health checklist")).toBeVisible();
@@ -175,8 +174,6 @@ test.describe("Resume Health Checklist consistency", () => {
       parseStatus: "completed_partial",
     });
 
-    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
-    await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
     await page.goto("/candidate/workspace/ats-checker");
 
     // The notice must be visible and explain the gap -- not just five
@@ -208,8 +205,6 @@ test.describe("Resume Health Checklist consistency", () => {
       parseStatus: "completed_partial",
     });
 
-    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
-    await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
     await page.goto("/candidate/workspace/ats-checker");
 
     await page.getByRole("button", { name: "Retry extraction" }).click();
@@ -230,8 +225,6 @@ test.describe("Resume Health Checklist consistency", () => {
       parseErrorCode: "rate_limit",
     });
 
-    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
-    await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
     await page.goto("/candidate/workspace/ats-checker");
 
     await expect(page.getByText(/rate limit/i)).toBeVisible();
@@ -247,8 +240,6 @@ test.describe("Resume Health Checklist consistency", () => {
       parseErrorCode: "missing_api_key",
     });
 
-    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
-    await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
     await page.goto("/candidate/workspace/ats-checker");
 
     await expect(page.getByText(/isn't enabled for this environment/i)).toBeVisible();
@@ -266,8 +257,6 @@ test.describe("Resume Health Checklist consistency", () => {
       rawText: "مرشح تجريبي\nمهندس برمجيات أول في شركة تجريبية\nبكالوريوس علوم الحاسب من جامعة تجريبية\nTypeScript, React",
     });
 
-    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
-    await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
     await page.goto("/ar/candidate/workspace/ats-checker");
 
     await expect(page.getByText("قائمة فحص صحة السيرة الذاتية")).toBeVisible();

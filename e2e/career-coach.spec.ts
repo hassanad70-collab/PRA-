@@ -572,9 +572,9 @@ test.describe("Career Coach — Phase 2C UI (seeded state)", () => {
       .insert({ user_id: userId, goal_id: goalId,
         phases: [{ phase: 1, label: "Foundation", duration_weeks: 4, focus: "Core", milestones: [] }] })
       .select("id").single();
-    await admin.from("career_weekly_actions").insert({
+    await admin.from("career_actions").insert({
       user_id: userId, goal_id: goalId, roadmap_id: roadmapRow!.id,
-      title: "Action item", action_type: "learning", status: "pending", week_number: 1, source: "ai",
+      title: "Action item", action_type: "course", status: "pending", week_number: 1, source: "ai",
     });
 
     await page.goto(COACH_URL);
@@ -658,14 +658,14 @@ test.describe("Career Coach — Phase 2C UI (seeded state)", () => {
       .select("id")
       .single();
     const { data: actionRow } = await admin
-      .from("career_weekly_actions")
+      .from("career_actions")
       .insert({
         user_id: userId,
         goal_id: goalId,
         roadmap_id: roadmapRow!.id,
         title: "Read system design book",
         description: "Read chapters 1-3",
-        action_type: "learning",
+        action_type: "course",
         status: "pending",
         week_number: 1,
         source: "ai",

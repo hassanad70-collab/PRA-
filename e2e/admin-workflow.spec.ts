@@ -1,13 +1,10 @@
 import { test, expect } from "@playwright/test";
 
-import { login } from "./helpers/auth";
+import { STORAGE_STATE } from "./helpers/auth";
 import { TEST_USERS } from "./global-setup";
 
 test.describe("Admin workflow", () => {
-  test.beforeEach(async ({ page }) => {
-    await login(page, TEST_USERS.admin.email, TEST_USERS.admin.password);
-    await expect(page).toHaveURL(/\/admin/, { timeout: 15_000 });
-  });
+  test.use({ storageState: STORAGE_STATE.admin });
 
   test("dashboard shows platform-wide KPIs with no console errors", async ({ page }) => {
     const errors: string[] = [];

@@ -1,11 +1,12 @@
 import { test, expect } from "@playwright/test";
 
-import { login } from "./helpers/auth";
-import { TEST_USERS } from "./global-setup";
+import { STORAGE_STATE } from "./helpers/auth";
 
 test.describe("Candidate workflow", () => {
+  test.use({ storageState: STORAGE_STATE.candidate });
+
   test.beforeEach(async ({ page }) => {
-    await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
+    await page.goto("/candidate/dashboard");
     await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
   });
 

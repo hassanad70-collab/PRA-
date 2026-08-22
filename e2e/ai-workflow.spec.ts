@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 
-import { login } from "./helpers/auth";
+import { STORAGE_STATE } from "./helpers/auth";
 import { TEST_USERS } from "./global-setup";
 import { makeTestResumePdfFile, TEST_RESUME_LINES } from "./helpers/fixtures";
 
@@ -25,8 +25,6 @@ function adminClient() {
 }
 
 async function uploadAndGetResumeId(page: import("@playwright/test").Page) {
-  await login(page, TEST_USERS.candidate.email, TEST_USERS.candidate.password);
-  await expect(page).toHaveURL(/\/candidate\/dashboard$/, { timeout: 15_000 });
   await page.goto("/candidate/workspace/ats-checker");
   // Wait for the client component to hydrate before driving the file input —
   // setInputFiles() can fire the change event before React has attached its
@@ -54,6 +52,8 @@ async function uploadAndGetResumeId(page: import("@playwright/test").Page) {
 }
 
 test.describe("AI pipeline (resume parsing / ATS scoring / job matching)", () => {
+  test.use({ storageState: STORAGE_STATE.candidate });
+
   test("resume processing reaches a terminal parse_status and never leaves a row stuck as 'processing'", async ({ page }) => {
     const resume = await uploadAndGetResumeId(page);
     expect(resume.parse_status).toMatch(/completed|failed/);

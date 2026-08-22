@@ -384,6 +384,12 @@ export async function verifyPhoneOtp(formData: FormData): Promise<ActionResult> 
   });
 
   if (error) {
+    // Track wrong-code failures with a tighter per-phone window.
+    // After 3 wrong attempts in 5 minutes the user must request a fresh OTP.
+    const failRl = await rateLimitByIpAndTarget("phone-otp-fail", parsed.data.phone, 3, 5 * 60 * 1000);
+    if (!failRl.allowed) {
+      return { success: false, error: "Too many incorrect attempts. Please request a new code." };
+    }
     const msg = error.message.toLowerCase();
     if (msg.includes("expired")) {
       return { success: false, error: "The code has expired. Please request a new one." };
@@ -396,19 +402,28 @@ export async function verifyPhoneOtp(formData: FormData): Promise<ActionResult> 
 
   const admin = createAdminClient();
 
-  // The on_auth_user_created trigger creates a profiles row for every new Supabase
-  // auth user. Read it to determine role and whether this is a first-time phone login.
+  // The on_auth_user_created trigger creates a profiles row synchronously for
+  // every new auth.users row. Read it to determine role for routing.
   const { data: profile } = await admin
     .from("profiles")
     .select("role")
     .eq("id", userId)
     .maybeSingle();
 
-  const role = profile?.role ?? "candidate";
+  // A missing profile means the DB trigger didn't fire — do not silently
+  // assume candidate and create an account. Surface the error instead.
+  if (!profile) {
+    return { success: false, error: "Account setup is incomplete. Please sign in with email or contact support." };
+  }
+
+  const role = profile.role;
   const locale = await getRedirectLocale();
 
+  revalidatePath("/", "layout");
+
   if (role === "candidate") {
-    // New candidate via phone OTP won't have a candidates row yet.
+    // First phone login for a candidate: the trigger creates a profiles row but
+    // not a candidates row. Create it and send to complete-profile.
     const { data: existingCandidate } = await admin
       .from("candidates")
       .select("id")
@@ -417,22 +432,19 @@ export async function verifyPhoneOtp(formData: FormData): Promise<ActionResult> 
 
     if (!existingCandidate) {
       await admin.from("candidates").insert({ id: userId });
-      revalidatePath("/", "layout");
       redirect(`/${locale}/complete-profile`);
     }
 
-    revalidatePath("/", "layout");
     redirect(`/${locale}/candidate/dashboard`);
   }
 
-  revalidatePath("/", "layout");
-
+  // Recruiter / HR Manager / Company Admin → recruiter workspace.
   if (role === "recruiter" || role === "hr_manager") {
     redirect(`/${locale}/recruiter/dashboard`);
   }
 
-  // super_admin
-  redirect(`/admin/dashboard`);
+  // super_admin → admin panel (matches /auth/callback routing).
+  redirect(`/admin`);
 }
 
 export async function completeProfile(formData: FormData): Promise<ActionResult> {

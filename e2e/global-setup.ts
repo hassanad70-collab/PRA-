@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { chromium } from "@playwright/test";
 
 /**
  * Idempotently provisions the fixed test accounts + a published test job
@@ -182,6 +183,67 @@ async function globalSetup() {
     });
     if (error) throw new Error(`Failed to create other-company test job: ${error.message}`);
   }
+
+  // Authenticate each test role once via the browser UI and persist the session
+  // cookies + localStorage to files. Tests that don't exercise auth flows
+  // directly (i.e. everything except auth.spec.ts and auth-session-consistency.spec.ts)
+  // load these files via test.use({ storageState }), eliminating ~160 redundant
+  // Supabase auth API calls per suite run and making the suite immune to the
+  // Supabase auth rate limit (~170 logins/hour).
+  const authDir = path.join(__dirname, ".auth");
+  if (!fs.existsSync(authDir)) fs.mkdirSync(authDir, { recursive: true });
+
+  const browser = await chromium.launch();
+
+  async function saveStorageState(
+    email: string,
+    password: string,
+    waitForUrl: RegExp,
+    storageFile: string
+  ) {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    await page.goto("http://localhost:3100/login");
+    await page.getByPlaceholder("you@company.com").fill(email);
+    await page.getByPlaceholder("••••••••").fill(password);
+    await page.getByRole("button", { name: "Sign in" }).click();
+    await page.waitForURL(waitForUrl, { timeout: 15_000 });
+    await context.storageState({ path: storageFile });
+    await context.close();
+  }
+
+  await saveStorageState(
+    TEST_USERS.candidate.email,
+    TEST_USERS.candidate.password,
+    /\/candidate\/dashboard$/,
+    path.join(authDir, "candidate.json")
+  );
+  await saveStorageState(
+    TEST_USERS.candidateOther.email,
+    TEST_USERS.candidateOther.password,
+    /\/candidate\/dashboard$/,
+    path.join(authDir, "candidate-other.json")
+  );
+  await saveStorageState(
+    TEST_USERS.recruiter.email,
+    TEST_USERS.recruiter.password,
+    /\/recruiter\/dashboard$/,
+    path.join(authDir, "recruiter.json")
+  );
+  await saveStorageState(
+    TEST_USERS.recruiterOther.email,
+    TEST_USERS.recruiterOther.password,
+    /\/recruiter\/dashboard$/,
+    path.join(authDir, "recruiter-other.json")
+  );
+  await saveStorageState(
+    TEST_USERS.admin.email,
+    TEST_USERS.admin.password,
+    /\/admin/,
+    path.join(authDir, "admin.json")
+  );
+
+  await browser.close();
 }
 
 export default globalSetup;
