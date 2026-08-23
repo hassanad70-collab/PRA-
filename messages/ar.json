@@ -521,10 +521,13 @@
       "perYear": "/ سنة",
       "freePrice": "مجاني",
       "currentPlanLabel": "خطتك الحالية",
-      "upgradeLabel": "الترقية",
       "manageLabel": "إدارة",
-      "comingSoon": "قريبًا",
       "mostPopular": "الأكثر شيوعًا ⭐",
+      "upgradeProfessionalLabel": "الترقية إلى الاحترافي",
+      "upgradeCareerProLabel": "الترقية إلى كاريير برو",
+      "upgradeModalTitle": "تفعيل الدفع قيد التنفيذ",
+      "upgradeModalDesc": "نحن نعمل على تفعيل معالجة الدفع لـ {plan}. ستتلقى إشعارًا فور توفره.",
+      "upgradeModalClose": "حسنًا",
       "everythingInFree": "كل ما في الخطة المجانية",
       "everythingInProfessional": "كل ما في الخطة الاحترافية",
       "paymentNote": "معالجة الدفع ستكون متاحة قريبًا. لن يتم خصم أي مبالغ في الوقت الحالي.",
@@ -540,7 +543,7 @@
             "basicResume": "سيرة ذاتية أساسية",
             "atsChecks": "فحصان ATS / شهريًا",
             "careerGuidance": "إرشاد مهني أساسي",
-            "aiCredits": "5 أرصدة ذكاء اصطناعي / شهريًا"
+            "aiCredits": "5 أرصدة مهنية / شهريًا"
           }
         },
         "professional": {
@@ -556,7 +559,7 @@
             "jobMatching": "مطابقة الوظائف",
             "linkedinOptimizer": "تحسين LinkedIn",
             "salaryInsights": "تحليلات الرواتب",
-            "aiCredits": "100 رصيد ذكاء اصطناعي / شهريًا",
+            "aiCredits": "100 رصيد مهني / شهريًا",
             "priorityProcessing": "معالجة ذات أولوية"
           }
         },
@@ -571,8 +574,8 @@
             "salaryInsights": "تحليلات رواتب متقدمة",
             "portfolioOptimization": "تحسين ملف الأعمال",
             "careerAnalytics": "تحليلات مهنية متقدمة",
-            "aiCredits": "300 رصيد ذكاء اصطناعي / شهريًا",
-            "priorityAi": "معالجة ذكاء اصطناعي بأولوية"
+            "aiCredits": "300 رصيد مهني / شهريًا",
+            "priorityAi": "معالجة ذات أولوية"
           }
         }
       }

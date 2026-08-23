@@ -521,10 +521,13 @@
       "perYear": "/ year",
       "freePrice": "Free",
       "currentPlanLabel": "Current Plan",
-      "upgradeLabel": "Upgrade",
       "manageLabel": "Manage",
-      "comingSoon": "Coming Soon",
       "mostPopular": "Most Popular ⭐",
+      "upgradeProfessionalLabel": "Upgrade to Professional",
+      "upgradeCareerProLabel": "Upgrade to Career Pro",
+      "upgradeModalTitle": "Payment Activation in Progress",
+      "upgradeModalDesc": "We're activating payment processing for {plan}. You'll be notified as soon as it's available.",
+      "upgradeModalClose": "Got it",
       "everythingInFree": "Everything in Free",
       "everythingInProfessional": "Everything in Professional",
       "paymentNote": "Payment processing coming soon. No charges will be made at this time.",
@@ -540,7 +543,7 @@
             "basicResume": "Basic Resume",
             "atsChecks": "2 ATS Checks / month",
             "careerGuidance": "Basic Career Guidance",
-            "aiCredits": "5 AI Credits / month"
+            "aiCredits": "5 Career Credits / month"
           }
         },
         "professional": {
@@ -556,7 +559,7 @@
             "jobMatching": "Job Matching",
             "linkedinOptimizer": "LinkedIn Optimizer",
             "salaryInsights": "Salary Insights",
-            "aiCredits": "100 AI Credits / month",
+            "aiCredits": "100 Career Credits / month",
             "priorityProcessing": "Priority Processing"
           }
         },
@@ -571,8 +574,8 @@
             "salaryInsights": "Advanced Salary Insights",
             "portfolioOptimization": "Portfolio Optimization",
             "careerAnalytics": "Advanced Career Analytics",
-            "aiCredits": "300 AI Credits / month",
-            "priorityAi": "Priority AI Processing"
+            "aiCredits": "300 Career Credits / month",
+            "priorityAi": "Priority Processing"
           }
         }
       }
