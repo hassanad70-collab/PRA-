@@ -5,6 +5,14 @@ import { queueTemplateEmail } from "@/lib/email";
 
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 
+// In production (or any Vercel environment), the webhook secret MUST be
+// configured. Without it we'd process unverified payloads from anyone,
+// which could trigger fraudulent billing state changes.
+// In local development the secret is optional so engineers can test without
+// setting up a Stripe CLI proxy.
+const IS_PRODUCTION_LIKE =
+  process.env.NODE_ENV === "production" || !!process.env.VERCEL_ENV;
+
 /** Maximum age (seconds) of an accepted Stripe webhook — replay protection. */
 const WEBHOOK_TOLERANCE_SECONDS = 300;
 
@@ -53,6 +61,14 @@ export async function POST(req: Request) {
     event = JSON.parse(rawBody) as typeof event;
   } catch {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
+
+  // Fail-closed: reject all requests in production-like environments when the
+  // webhook secret is not configured. Without signature verification, any actor
+  // can POST arbitrary billing events and trigger fraudulent plan changes.
+  if (IS_PRODUCTION_LIKE && !STRIPE_WEBHOOK_SECRET) {
+    console.error("[stripe-webhook] STRIPE_WEBHOOK_SECRET is not configured — rejecting request");
+    return NextResponse.json({ error: "Webhook not configured" }, { status: 503 });
   }
 
   // Verify signature + timestamp when secret is configured.

@@ -22,7 +22,7 @@ test.describe("Candidate workflow", () => {
     await expect(sidebar.getByRole("link", { name: "Overview" })).toBeVisible();
 
     // AI Career Workspace group
-    await expect(sidebar.getByRole("link", { name: "AI Career Chatbot" })).toBeVisible();
+    await expect(sidebar.getByRole("link", { name: "Career Chat" })).toBeVisible();
     await expect(sidebar.getByRole("link", { name: "ATS Resume Checker" })).toBeVisible();
     await expect(sidebar.getByRole("link", { name: "Resume Studio" })).toBeVisible();
 

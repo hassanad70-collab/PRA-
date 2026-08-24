@@ -59,7 +59,7 @@ test.describe("AI Career Chatbot — session lifecycle", () => {
 
   test("sidebar nav link shows 'AI Career Chatbot' label", async ({ page }) => {
     const sidebar = page.getByRole("complementary");
-    await expect(sidebar.getByRole("link", { name: "AI Career Chatbot" })).toBeVisible();
+    await expect(sidebar.getByRole("link", { name: "Career Chat" })).toBeVisible();
   });
 
   test("New Chat button creates a new session and clears the input", async ({ page }) => {

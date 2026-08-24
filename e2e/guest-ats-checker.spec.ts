@@ -12,7 +12,7 @@ function adminClient() {
 test.describe("Guest ATS Resume Checker", () => {
   test("the page is public and requires no login", async ({ page }) => {
     await page.goto("/ai-tools/ats-checker");
-    await expect(page.getByRole("heading", { name: "Free AI Resume Checker" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Free ATS Resume Checker" })).toBeVisible();
     await expect(page.getByText("Drag & drop your resume here")).toBeVisible();
   });
 

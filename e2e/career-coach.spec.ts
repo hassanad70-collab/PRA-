@@ -71,7 +71,7 @@ test.describe("Career Coach — access and empty state", () => {
   test("career coach appears in nav under AI Career Workspace", async ({ page }) => {
     await page.goto("/en/candidate/dashboard");
     // The nav item should exist
-    const navItem = page.getByRole("link", { name: /AI Career Coach/i });
+    const navItem = page.getByRole("link", { name: /Career Coach/i });
     await expect(navItem).toBeVisible({ timeout: 8_000 });
   });
 });

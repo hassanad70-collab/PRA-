@@ -165,8 +165,25 @@ export async function updateApplicationStatus(applicationId: string, status: App
   } = await supabase.auth.getUser();
   if (!user) return { success: false, error: "You must be signed in." };
 
-  const { data: recruiter } = await supabase.from("recruiters").select("id").eq("id", user.id).single();
+  const { data: recruiter } = await supabase.from("recruiters").select("id, company_id").eq("id", user.id).single();
   if (!recruiter) return { success: false, error: "Only recruiters can update application status." };
+
+  // Defense-in-depth: explicitly verify the application belongs to a job at
+  // this recruiter's company before updating. RLS enforces the same constraint
+  // at the database layer, but an explicit check here makes the auth boundary
+  // visible at the action layer and produces a clear error rather than a silent
+  // no-op if RLS were ever misconfigured.
+  const { data: appCheck } = await supabase
+    .from("applications")
+    .select("id, jobs!inner(company_id)")
+    .eq("id", applicationId)
+    .single();
+
+  if (!appCheck) return { success: false, error: "Application not found." };
+  const appCompanyId = (appCheck.jobs as unknown as { company_id: string } | null)?.company_id;
+  if (appCompanyId !== recruiter.company_id) {
+    return { success: false, error: "You don't have permission to update this application." };
+  }
 
   const { data: updated, error } = await supabase
     .from("applications")

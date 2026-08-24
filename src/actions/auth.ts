@@ -67,6 +67,16 @@ export async function registerCandidate(formData: FormData): Promise<ActionResul
   // out of their own first login. Creating the user already confirmed removes
   // that dependency entirely; the on_auth_user_created trigger still fires
   // normally and creates the profiles row.
+  //
+  // SECURITY NOTE — email_confirm: true bypasses Supabase email verification.
+  // Risk: users can register with an email address they do not own. This is
+  // mitigated by the fact that role-sensitive operations (recruiter onboarding,
+  // admin actions) are scoped to authenticated sessions via RLS and can never
+  // be escalated via this path. No role change is possible via the registration
+  // flow — candidates register as 'candidate' and recruiters as 'recruiter',
+  // both set server-side, protected by the prevent_role_escalation trigger.
+  // TODO: re-enable email confirmation once the Supabase mailer rate-limit is
+  // resolved (or a transactional mailer like Resend is wired to Supabase Auth).
   const { data, error } = await admin.auth.admin.createUser({
     email,
     password,

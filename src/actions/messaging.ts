@@ -82,6 +82,7 @@ export async function recruiterSendMessageAction(
   await supabase.rpc("increment_unread" as never, { p_thread_id: threadId, p_role: "candidate" }).maybeSingle();
 
   // Fire-and-forget: notify candidate of new message
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://pra-eta-umber.vercel.app";
   dispatchNotification({
     userId: candidateId,
     type: "system",
@@ -90,8 +91,8 @@ export async function recruiterSendMessageAction(
     link: "/candidate/messages",
     email: {
       subject: "You have a new message on PRA Talent Intelligence",
-      htmlBody: `<p>You have received a new message from <strong>${recruiter.company?.name ?? "a recruiter"}</strong> on PRA Talent Intelligence.</p><p><a href="https://pra-eta-umber.vercel.app/en/candidate/messages">View message</a></p>`,
-      textBody: `You have a new message from ${recruiter.company?.name ?? "a recruiter"} on PRA Talent Intelligence. Visit https://pra-eta-umber.vercel.app/en/candidate/messages to read it.`,
+      htmlBody: `<p>You have received a new message from <strong>${recruiter.company?.name ?? "a recruiter"}</strong> on PRA Talent Intelligence.</p><p><a href="${siteUrl}/en/candidate/messages">View message</a></p>`,
+      textBody: `You have a new message from ${recruiter.company?.name ?? "a recruiter"} on PRA Talent Intelligence. Visit ${siteUrl}/en/candidate/messages to read it.`,
     },
   });
 
@@ -137,6 +138,7 @@ export async function candidateSendMessageAction(
     .eq("id", threadId);
 
   // Fire-and-forget: notify recruiter of candidate reply
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://pra-eta-umber.vercel.app";
   dispatchNotification({
     userId: thread.recruiter_id,
     type: "system",
@@ -145,8 +147,8 @@ export async function candidateSendMessageAction(
     link: "/recruiter/messages",
     email: {
       subject: "A candidate replied on PRA Talent Intelligence",
-      htmlBody: `<p>A candidate has replied to your message on PRA Talent Intelligence.</p><p><a href="https://pra-eta-umber.vercel.app/en/recruiter/messages">View message</a></p>`,
-      textBody: `A candidate replied to your message on PRA Talent Intelligence. Visit https://pra-eta-umber.vercel.app/en/recruiter/messages to read it.`,
+      htmlBody: `<p>A candidate has replied to your message on PRA Talent Intelligence.</p><p><a href="${siteUrl}/en/recruiter/messages">View message</a></p>`,
+      textBody: `A candidate replied to your message on PRA Talent Intelligence. Visit ${siteUrl}/en/recruiter/messages to read it.`,
     },
   });
 
@@ -159,7 +161,28 @@ export async function candidateSendMessageAction(
 
 export async function markThreadReadAction(threadId: string, role: "recruiter" | "candidate"): Promise<void> {
   const supabase = await createClient();
+
+  // Auth guard: require a valid session before touching any data.
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
   const col = role === "recruiter" ? "recruiter_unread_count" : "candidate_unread_count";
-  await supabase.from("message_threads").update({ [col]: 0 }).eq("id", threadId);
-  await supabase.from("messages").update({ is_read: true }).eq("thread_id", threadId).neq("sender_role", role);
+  const threadOwnerCol = role === "recruiter" ? "recruiter_id" : "candidate_id";
+
+  // Only zero out the unread count if the calling user actually owns this side
+  // of the thread. The extra .eq(threadOwnerCol, user.id) means a candidate
+  // cannot reset a recruiter's unread counter and vice-versa.
+  await supabase
+    .from("message_threads")
+    .update({ [col]: 0 })
+    .eq("id", threadId)
+    .eq(threadOwnerCol, user.id);
+
+  // Mark the other party's messages as read. RLS on messages ensures this user
+  // is a thread member before allowing the update.
+  await supabase
+    .from("messages")
+    .update({ is_read: true })
+    .eq("thread_id", threadId)
+    .neq("sender_role", role);
 }

@@ -10,6 +10,8 @@ const withBundleAnalyzer = createBundleAnalyzer({ enabled: process.env.ANALYZE =
 
 const securityHeaders = [
   // Prevent the page from being embedded in an iframe (clickjacking).
+  // Note: frame-ancestors in the CSP below takes precedence in modern browsers;
+  // X-Frame-Options is kept for legacy browsers that don't parse CSP.
   { key: "X-Frame-Options", value: "SAMEORIGIN" },
   // Prevent browsers from MIME-sniffing a response away from the declared type.
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -25,6 +27,37 @@ const securityHeaders = [
   ...(process.env.VERCEL_ENV === "production"
     ? [{ key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" }]
     : []),
+  // Content-Security-Policy-Report-Only — defines the target CSP without
+  // enforcement, so violations are visible in DevTools / the server logs without
+  // breaking the app. Switch this key to "Content-Security-Policy" once you have
+  // confirmed (via violation reports) that no legitimate resource is blocked.
+  //
+  // Current known violations to resolve before enforcing:
+  //   • Investigate what causes the admin dashboard page-load delay when
+  //     running in enforce mode (likely a font or script from an unlisted host).
+  //
+  // Concessions for Next.js 15 even in enforce mode:
+  //   • 'unsafe-inline' in script-src: Next.js hydration injects inline scripts.
+  //   • 'unsafe-eval' in script-src: some transpiled dependencies use eval().
+  //
+  // Supabase: *.supabase.co. OpenRouter AI: openrouter.ai. Google OAuth:
+  // accounts.google.com (frame + script).
+  {
+    key: "Content-Security-Policy-Report-Only",
+    value: [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://apis.google.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "font-src 'self' https://fonts.gstatic.com",
+      "img-src 'self' data: blob: https://*.supabase.co https://lh3.googleusercontent.com",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://openrouter.ai",
+      "frame-src https://accounts.google.com",
+      "frame-ancestors 'none'",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+    ].join("; "),
+  },
 ];
 
 const nextConfig: NextConfig = {

@@ -5,16 +5,22 @@ import { headers } from "next/headers";
 /**
  * In-memory sliding-window rate limiter for auth Server Actions (login,
  * registration, password reset) — the actions most exposed to scripted
- * abuse (credential stuffing, spam signups, reset-email flooding).
+ * abuse (credential stuffing, spam signups, reset-email flooding) — and for
+ * high-cost AI endpoints (mock-interview, etc.).
  *
- * Honest limitation: this state lives in the Node process's memory. On a
- * single long-running server (`next start` on a VM/container) it's fully
- * correct. On serverless platforms (Vercel etc.) each instance has its own
- * memory, so a request load-balanced across many instances/cold-starts can
- * exceed this limit in aggregate — it still stops naive single-instance
- * scripted abuse, but it is not a complete distributed rate limiter. For
- * real protection in a serverless deployment, replace this with a shared
- * store (e.g. Upstash Redis + @upstash/ratelimit) using the same call sites.
+ * Honest limitation (MED-06): this state lives in the Node process's memory.
+ * On a single long-running server (`next start` on a VM/container) it is
+ * fully correct. On serverless platforms (Vercel etc.) each instance has its
+ * own memory, so a request load-balanced across many instances/cold-starts can
+ * exceed the configured limit in aggregate. It still prevents naive
+ * single-instance scripted abuse and is better than no rate limiting at all.
+ *
+ * Recommended long-term fix: replace with Upstash Redis + @upstash/ratelimit:
+ *   import { Ratelimit } from "@upstash/ratelimit";
+ *   import { Redis } from "@upstash/redis";
+ *   const ratelimit = new Ratelimit({ redis: Redis.fromEnv(), ... });
+ * The call sites (checkRateLimit, rateLimitByIp, rateLimitByIpAndTarget) can
+ * be replaced one-by-one once UPSTASH_REDIS_REST_URL + _TOKEN are provisioned.
  */
 
 interface Bucket {

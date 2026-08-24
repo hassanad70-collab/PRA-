@@ -201,7 +201,7 @@ test.describe("Candidate portal internationalization", () => {
     // Some nav links have AI/beta tags appended to their accessible name, so use
     // substring matching (exact: false is the default).
     const sidebar = page.getByRole("complementary");
-    for (const name of ["Overview", "AI Career Chatbot", "ATS Resume Checker", "Browse Jobs", "Applications", "Interviews", "Settings"]) {
+    for (const name of ["Overview", "Career Chat", "ATS Resume Checker", "Browse Jobs", "Applications", "Interviews", "Settings"]) {
       const href = await sidebar.getByRole("link", { name }).getAttribute("href");
       expect(href, `${name} nav link should be locale-prefixed`).toMatch(/^\/en\/candidate\//);
     }

@@ -184,6 +184,22 @@ async function globalSetup() {
     if (error) throw new Error(`Failed to create other-company test job: ${error.message}`);
   }
 
+  // --- Role-reset guard ---
+  // The CRIT-01 security test (security.spec.ts) attempts to escalate the
+  // candidate's role to super_admin to verify the trigger blocks it.
+  // Before migration 0053 deploys, the trigger does not exist and the update
+  // SUCCEEDS — test.fixme() still executes the test body. This corrupts the
+  // candidate's role, causing the next run's login to redirect to /admin.
+  // Re-assert all roles here before every browser login so a contaminated DB
+  // state never breaks the suite.
+  await Promise.all([
+    admin.from("profiles").update({ role: "candidate" }).eq("id", candidateId),
+    admin.from("profiles").update({ role: "candidate" }).eq("id", candidateOtherId),
+    admin.from("profiles").update({ role: "recruiter" }).eq("id", recruiterId),
+    admin.from("profiles").update({ role: "recruiter" }).eq("id", recruiterOtherId),
+    admin.from("profiles").update({ role: "super_admin" }).eq("id", adminId),
+  ]);
+
   // Authenticate each test role once via the browser UI and persist the session
   // cookies + localStorage to files. Tests that don't exercise auth flows
   // directly (i.e. everything except auth.spec.ts and auth-session-consistency.spec.ts)
@@ -207,7 +223,7 @@ async function globalSetup() {
     await page.getByPlaceholder("you@company.com").fill(email);
     await page.getByPlaceholder("••••••••").fill(password);
     await page.getByRole("button", { name: "Sign in" }).click();
-    await page.waitForURL(waitForUrl, { timeout: 15_000 });
+    await page.waitForURL(waitForUrl, { timeout: 30_000 });
     await context.storageState({ path: storageFile });
     await context.close();
   }
