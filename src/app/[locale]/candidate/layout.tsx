@@ -52,11 +52,11 @@ export default async function CandidateLayout({
       label: tNav("aiWorkspaceGroup"),
       collapsible: true,
       items: [
+        { href: w("/studio"), label: tNav("resumeStudio"), icon: "PenLine" },
         {
           label: tNav("resumeSubGroup"),
           icon: "FileStack",
           children: [
-            { href: w("/studio"),      label: tNav("resumeStudio") },
             { href: w("/resumes"),     label: tNav("myResumes") },
             { href: w("/ats-checker"), label: tNav("atsChecker") },
           ],
