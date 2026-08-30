@@ -151,68 +151,72 @@ export default async function CandidateDashboardPage({ params }: { params: Promi
 
       <ContinueWidget />
 
-      {/* CV Creation Feature Card — #1 CTA */}
-      <Card className="group relative overflow-hidden border-pra-navy/25 bg-gradient-to-r from-pra-navy/[0.05] to-transparent shadow-sm transition-shadow duration-200 hover:shadow-md dark:from-pra-primary/8">
-        <div className="absolute inset-y-0 left-0 w-[4px] bg-gradient-to-b from-pra-navy via-pra-primary to-pra-cyan" aria-hidden />
-        <CardContent className="pl-7 pt-5 pb-5">
+      {/* ── CV CTA — primary onboarding action ── */}
+      <div className="relative overflow-hidden rounded-xl border border-pra-primary/40 bg-gradient-to-r from-pra-navy/10 via-pra-primary/[0.06] to-transparent shadow-md dark:from-pra-navy/20 dark:via-pra-primary/10">
+        <div className="absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-pra-navy via-pra-primary to-pra-cyan" aria-hidden />
+        <div className="px-7 py-6">
           {hasResume ? (
-            /* ── Returning user: has CVs ── */
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-start gap-3 sm:items-center">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-pra-primary/10 ring-1 ring-pra-primary/20 transition-colors duration-200 group-hover:bg-pra-primary/15 dark:bg-pra-primary/15">
-                  <PenLine className="h-5 w-5 text-pra-primary" aria-hidden />
+            /* ── Returning user ── */
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-start gap-4 sm:items-center">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-pra-primary/12 ring-1 ring-pra-primary/25 dark:bg-pra-primary/20">
+                  <FileText className="h-6 w-6 text-pra-primary" aria-hidden />
                 </div>
                 <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="font-semibold leading-tight text-pra-navy dark:text-foreground">Resume Studio</p>
-                    <Badge variant="outline" className="border-pra-primary/35 px-1.5 py-0 text-[10px] font-semibold text-pra-primary">
-                      {resumes.length} {resumes.length === 1 ? "CV" : "CVs"}
-                    </Badge>
-                  </div>
+                  <p className="text-lg font-bold leading-tight text-pra-navy dark:text-foreground">Your CV is Ready</p>
                   <p className="mt-0.5 text-sm text-muted-foreground">
-                    {resumes[0]?.uploaded_at
-                      ? `Last updated ${new Date(resumes[0].uploaded_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`
-                      : "Manage and build professional, job-ready CVs."}
+                    {resumes[0]?.file_name ?? "Resume"}&nbsp;·&nbsp;
+                    {resumes.length} {resumes.length === 1 ? "CV saved" : "CVs saved"}
                   </p>
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <Button variant="outline" size="sm" className="h-8 text-xs" asChild>
-                  <Link href="/candidate/workspace/resumes">My CVs</Link>
-                </Button>
-                <Button variant="outline" size="sm" className="h-8 text-xs" asChild>
+                <Button variant="outline" size="sm" asChild>
                   <Link href="/candidate/workspace/studio">Edit CV</Link>
                 </Button>
-                <Button variant="gradient" size="sm" className="h-8 text-xs" asChild>
+                <Button variant="outline" size="sm" asChild>
+                  <Link href="/candidate/workspace/resumes">View My CVs</Link>
+                </Button>
+                <Button variant="gradient" size="sm" asChild>
                   <Link href="/candidate/workspace/studio">
-                    <PenLine className="mr-1.5 h-3 w-3" aria-hidden /> Create New CV
+                    <PenLine className="mr-1.5 h-3.5 w-3.5" aria-hidden /> Create New CV
                   </Link>
                 </Button>
               </div>
             </div>
           ) : (
-            /* ── First-time user: no CVs ── */
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-start gap-3 sm:items-center">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-pra-primary/18 to-pra-cyan/10 ring-1 ring-pra-primary/25 transition-colors duration-200 group-hover:from-pra-primary/24 group-hover:to-pra-cyan/15">
-                  <FileText className="h-6 w-6 text-pra-primary" aria-hidden />
+            /* ── First-time user ── */
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-start gap-4 sm:items-center">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-pra-primary/20 to-pra-cyan/12 ring-1 ring-pra-primary/30 dark:from-pra-primary/25 dark:to-pra-cyan/15">
+                  <FileText className="h-7 w-7 text-pra-primary" aria-hidden />
                 </div>
                 <div>
-                  <p className="text-base font-semibold leading-tight text-pra-navy dark:text-foreground">Create Your CV</p>
-                  <p className="mt-0.5 text-sm text-muted-foreground">
-                    Create a professional CV tailored to your career goals.
+                  <p className="text-xl font-bold leading-tight text-pra-navy dark:text-foreground">
+                    Create Your Professional CV
+                  </p>
+                  <p className="mt-1 max-w-md text-sm text-muted-foreground">
+                    Build a professional, job-ready CV tailored to your career goals.
                   </p>
                 </div>
               </div>
-              <Button variant="gradient" size="lg" className="shrink-0 font-semibold" asChild>
-                <Link href="/candidate/workspace/studio">
-                  Create Your CV <ArrowUpRight className="ml-1.5 h-4 w-4" aria-hidden />
+              <div className="flex shrink-0 flex-col items-start gap-2 sm:items-end">
+                <Button variant="gradient" size="lg" className="font-semibold" asChild>
+                  <Link href="/candidate/workspace/studio">
+                    Create Your CV <ArrowUpRight className="ml-1.5 h-4 w-4" aria-hidden />
+                  </Link>
+                </Button>
+                <Link
+                  href="/candidate/workspace/resumes"
+                  className="text-xs text-muted-foreground underline-offset-4 hover:text-pra-primary hover:underline transition-colors"
+                >
+                  Already have a CV? Upload or manage your CV
                 </Link>
-              </Button>
+              </div>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Today's Goal */}
       {todayGoal && (
