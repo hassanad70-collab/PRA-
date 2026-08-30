@@ -52,7 +52,7 @@ export default async function CandidateLayout({
       label: tNav("aiWorkspaceGroup"),
       collapsible: true,
       items: [
-        { href: w("/studio"), label: tNav("resumeStudio"), icon: "PenLine" },
+        { href: w("/studio"), label: "Create Your CV", icon: "PenLine" },
         {
           label: tNav("resumeSubGroup"),
           icon: "FileStack",
