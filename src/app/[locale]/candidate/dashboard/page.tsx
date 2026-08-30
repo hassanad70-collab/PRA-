@@ -151,9 +151,9 @@ export default async function CandidateDashboardPage({ params }: { params: Promi
 
       <ContinueWidget />
 
-      {/* CV Creation Feature Card */}
-      <Card className="group relative overflow-hidden border-pra-primary/25 bg-gradient-to-r from-pra-navy/[0.03] to-transparent transition-shadow duration-200 hover:shadow-sm dark:from-pra-primary/5">
-        <div className="absolute inset-y-0 left-0 w-[3px] bg-gradient-to-b from-pra-navy via-pra-primary to-pra-cyan" aria-hidden />
+      {/* CV Creation Feature Card — #1 CTA */}
+      <Card className="group relative overflow-hidden border-pra-navy/25 bg-gradient-to-r from-pra-navy/[0.05] to-transparent shadow-sm transition-shadow duration-200 hover:shadow-md dark:from-pra-primary/8">
+        <div className="absolute inset-y-0 left-0 w-[4px] bg-gradient-to-b from-pra-navy via-pra-primary to-pra-cyan" aria-hidden />
         <CardContent className="pl-7 pt-5 pb-5">
           {hasResume ? (
             /* ── Returning user: has CVs ── */
@@ -194,19 +194,19 @@ export default async function CandidateDashboardPage({ params }: { params: Promi
             /* ── First-time user: no CVs ── */
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-start gap-3 sm:items-center">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-pra-primary/15 to-pra-cyan/8 ring-1 ring-pra-primary/20 transition-colors duration-200 group-hover:from-pra-primary/20 group-hover:to-pra-cyan/12">
-                  <FileText className="h-5 w-5 text-pra-primary" aria-hidden />
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-pra-primary/18 to-pra-cyan/10 ring-1 ring-pra-primary/25 transition-colors duration-200 group-hover:from-pra-primary/24 group-hover:to-pra-cyan/15">
+                  <FileText className="h-6 w-6 text-pra-primary" aria-hidden />
                 </div>
                 <div>
-                  <p className="font-semibold leading-tight text-pra-navy dark:text-foreground">Create Your CV</p>
+                  <p className="text-base font-semibold leading-tight text-pra-navy dark:text-foreground">Create Your CV</p>
                   <p className="mt-0.5 text-sm text-muted-foreground">
                     Create a professional CV tailored to your career goals.
                   </p>
                 </div>
               </div>
-              <Button variant="gradient" className="shrink-0" asChild>
+              <Button variant="gradient" size="lg" className="shrink-0 font-semibold" asChild>
                 <Link href="/candidate/workspace/studio">
-                  Create New CV <ArrowUpRight className="ml-1.5 h-4 w-4" aria-hidden />
+                  Create Your CV <ArrowUpRight className="ml-1.5 h-4 w-4" aria-hidden />
                 </Link>
               </Button>
             </div>
@@ -531,24 +531,24 @@ export default async function CandidateDashboardPage({ params }: { params: Promi
         <CardContent>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              { href: "/candidate/workspace/assistant",       icon: Bot,        label: "AI Assistant",            ai: true },
-              { href: "/candidate/workspace/studio",          icon: PenLine,    label: "Resume Studio",           ai: true },
-              { href: "/candidate/workspace/ats-checker",     icon: Target,     label: "ATS Resume Check",        ai: true },
-              { href: "/candidate/workspace/cover-letters",   icon: FileText,   label: "Cover Letters",           ai: true },
-              { href: "/candidate/workspace/interview-prep",  icon: Mic,        label: "Interview Prep",          ai: true },
-              { href: "/candidate/workspace/interview-center",icon: Brain,      label: "Interview Intelligence",  ai: true },
-              { href: "/candidate/workspace/app-intelligence",icon: BarChart2,  label: "App Intelligence",        ai: true },
-              { href: "/candidate/jobs",                      icon: Search,     label: "Browse Jobs",             ai: false },
-            ].map(({ href, icon: Icon, label, ai }) => (
+              { href: "/candidate/workspace/studio",          icon: FileText,   label: "Create Your CV",          ai: false, primary: true },
+              { href: "/candidate/workspace/assistant",       icon: Bot,        label: "AI Assistant",            ai: true,  primary: false },
+              { href: "/candidate/workspace/ats-checker",     icon: Target,     label: "ATS Resume Check",        ai: true,  primary: false },
+              { href: "/candidate/workspace/cover-letters",   icon: PenLine,    label: "Cover Letters",           ai: true,  primary: false },
+              { href: "/candidate/workspace/interview-prep",  icon: Mic,        label: "Interview Prep",          ai: true,  primary: false },
+              { href: "/candidate/workspace/interview-center",icon: Brain,      label: "Interview Intelligence",  ai: true,  primary: false },
+              { href: "/candidate/workspace/app-intelligence",icon: BarChart2,  label: "App Intelligence",        ai: true,  primary: false },
+              { href: "/candidate/jobs",                      icon: Search,     label: "Browse Jobs",             ai: false, primary: false },
+            ].map(({ href, icon: Icon, label, ai, primary }) => (
               <Link
                 key={href}
                 href={href}
-                className="flex flex-col items-center gap-2 rounded-xl border border-border p-4 text-center transition-all hover:border-pra-primary/20 hover:bg-pra-surface-subtle hover:shadow-sm"
+                className={`flex flex-col items-center gap-2 rounded-xl border p-4 text-center transition-all hover:shadow-sm ${primary ? "border-pra-primary/35 bg-pra-primary/5 hover:bg-pra-primary/8 hover:border-pra-primary/50" : "border-border hover:border-pra-primary/20 hover:bg-pra-surface-subtle"}`}
               >
-                <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${ai ? "bg-gradient-to-br from-pra-primary/12 to-pra-cyan/12 text-pra-primary" : "bg-pra-success/10 text-pra-success"}`}>
+                <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${primary ? "bg-gradient-to-br from-pra-primary/20 to-pra-cyan/15 text-pra-primary" : ai ? "bg-gradient-to-br from-pra-primary/12 to-pra-cyan/12 text-pra-primary" : "bg-pra-success/10 text-pra-success"}`}>
                   <Icon className="h-5 w-5" />
                 </div>
-                <span className="text-sm font-medium">{label}</span>
+                <span className={`text-sm font-medium ${primary ? "text-pra-navy dark:text-pra-primary" : ""}`}>{label}</span>
               </Link>
             ))}
           </div>
